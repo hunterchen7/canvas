@@ -167,7 +167,7 @@ interface SectionCoordinates {
 ### 1. Install the package
 
 ```bash
-npm install @canvas/core
+npm install @hunterchen/canvas
 ```
 
 ### 2. Install peer dependencies
@@ -187,8 +187,8 @@ import type { Config } from "tailwindcss";
 const config: Config = {
   content: [
     "./src/**/*.{ts,tsx}",
-    // Include @canvas/core components
-    "./node_modules/@canvas/core/src/**/*.{ts,tsx}",
+    // Include @hunterchen/canvas components
+    "./node_modules/@hunterchen/canvas/src/**/*.{ts,tsx}",
     // Or if using a monorepo with file: linking:
     // "../canvas/src/**/*.{ts,tsx}",
   ],

@@ -1,13 +1,11 @@
 # Canvas Demo - Setup Instructions
 
-This project contains the interactive canvas component cloned from the hackwestern project.
-
-## Files to Copy from hackwestern
+This project contains the interactive canvas component cloned from the [Hack Western 12 Website]('https://github.com/hackwestern/hackwestern')
 
 ### 1. Core Canvas Components
 Copy all files from `hackwestern/src/components/canvas/` to `canvas/src/components/canvas/`:
 - `canvas.tsx` - Main canvas component with pan/zoom functionality
-- `wrapper.tsx` - Animated wrapper for canvas initialization  
+- `wrapper.tsx` - Animated wrapper for canvas initialization  ß
 - `component.tsx` - Canvas component renderer with visibility optimization
 - `draggable.tsx` - Draggable elements (images and generic)
 - `toolbar.tsx` - Coordinate/zoom display toolbar
@@ -31,7 +29,6 @@ Copy from `hackwestern/src/lib/`:
 Copy from `hackwestern/src/hooks/`:
 - `useWindowDimensions.ts` - Window size tracking
 - `usePerformanceMode.ts` - Performance optimization
-- `use-toast.ts` - Toast notification hook
 
 ### 5. Utils
 Copy from `hackwestern/src/utils/`:
@@ -92,7 +89,7 @@ npm install @radix-ui/react-toast
 
 1. Install Tailwind:
 ```bash
-npm install -D tailwindcss postcss autoprefixer
+npm install -D tailwindcss autoprefixer
 npx tailwindcss init -p
 ```
 
@@ -240,7 +237,7 @@ canvas/
 
 ## Notes
 
-- The canvas uses framer-motion for smooth animations
+- The canvas uses framer-motion for animations
 - Performance mode automatically adjusts based on device capabilities
 - All coordinates and configurations are in `constants/canvas.ts`
 - The canvas size is 6000x4000px with configurable sections

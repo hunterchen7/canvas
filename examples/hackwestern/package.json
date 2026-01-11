@@ -1,0 +1,49 @@
+{
+    "name": "hackwestern",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "license": "MIT",
+    "scripts": {
+        "build": "next build",
+        "dev": "next dev --turbopack",
+        "lint": "next lint",
+        "start": "next start"
+    },
+    "dependencies": {
+        "@hunterchen/canvas": "file:../..",
+        "@radix-ui/react-label": "^2.0.2",
+        "@radix-ui/react-slot": "^1.2.3",
+        "@radix-ui/react-toast": "^1.2.1",
+        "class-variance-authority": "^0.7.1",
+        "clsx": "^2.1.1",
+        "framer-motion": "^12.10.5",
+        "lucide-react": "^0.483.0",
+        "next": "15.5.9",
+        "react": "^19.2.3",
+        "react-dom": "^19.2.3",
+        "tailwind-merge": "^2.3.0",
+        "tailwindcss-animate": "^1.0.7"
+    },
+    "devDependencies": {
+        "@types/node": "^25.0.6",
+        "@types/react": "19.0.12",
+        "@types/react-dom": "19.0.4",
+        "@typescript-eslint/eslint-plugin": "^7.1.1",
+        "@typescript-eslint/parser": "^7.1.1",
+        "babel-plugin-react-compiler": "^19.1.0-rc.2",
+        "eslint": "^8.57.0",
+        "eslint-config-next": "15.2.3",
+        "prettier": "^3.2.5",
+        "prettier-plugin-tailwindcss": "^0.5.11",
+        "tailwindcss": "^3.4.1",
+        "tsx": "^4.19.3",
+        "typescript": "^5.8.2",
+        "unimported": "^1.31.0"
+    },
+    "packageManager": "npm@10.2.3",
+    "overrides": {
+        "@types/react": "19.0.12",
+        "@types/react-dom": "19.0.4"
+    }
+}

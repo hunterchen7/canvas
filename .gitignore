@@ -33,4 +33,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-/packages/example-hackwestern/.next
+/examples/hackwestern/.next
+/examples/hackwestern/node_modules
+/dist
+/node_modules
