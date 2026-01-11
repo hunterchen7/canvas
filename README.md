@@ -13,7 +13,6 @@ Copy all files from `hackwestern/src/components/canvas/` to `canvas/src/componen
 - `navbar/single-button.tsx` - Individual nav button component
 - `offest.tsx` - Offset positioning component
 - `reset.tsx` - Reset view button
-- `cursor.tsx` - Custom cursor component
 
 ### 2. Context & State Management
 Copy from `hackwestern/src/contexts/`:
