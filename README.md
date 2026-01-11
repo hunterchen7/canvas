@@ -1,6 +1,6 @@
 # Canvas Demo - Setup Instructions
 
-This project contains the interactive canvas component cloned from the [Hack Western 12 Website]('https://github.com/hackwestern/hackwestern')
+This project contains the interactive canvas component cloned from the [Hack Western 12 Website](https://github.com/hackwestern/hackwestern) (I built this so I didn't steal anything)
 
 ### 1. Core Canvas Components
 Copy all files from `hackwestern/src/components/canvas/` to `canvas/src/components/canvas/`:
