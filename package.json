@@ -4,6 +4,10 @@
   "description": "A React-based canvas library for creating pannable, zoomable, and interactive canvas experiences.",
   "license": "MIT",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hunterchen7/canvas.git"
+  },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
