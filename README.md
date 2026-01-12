@@ -1,242 +1,228 @@
-# Canvas Demo - Setup Instructions
+# @hunterchen/canvas
 
-This project contains the interactive canvas component cloned from the [Hack Western 12 Website](https://github.com/hackwestern/hackwestern) (I built this so I didn't steal anything)
+A React-based canvas library for creating pannable, zoomable, and interactive canvas experiences. Originally developed for the [Hack Western 12 Website](https://github.com/hackwestern/hackwestern).
 
-### 1. Core Canvas Components
-Copy all files from `hackwestern/src/components/canvas/` to `canvas/src/components/canvas/`:
-- `canvas.tsx` - Main canvas component with pan/zoom functionality
-- `wrapper.tsx` - Animated wrapper for canvas initialization  ß
-- `component.tsx` - Canvas component renderer with visibility optimization
-- `draggable.tsx` - Draggable elements (images and generic)
-- `toolbar.tsx` - Coordinate/zoom display toolbar
-- `navbar/index.tsx` - Navigation buttons
-- `navbar/single-button.tsx` - Individual nav button component
-- `offest.tsx` - Offset positioning component
-- `reset.tsx` - Reset view button
+## Installation
 
-### 2. Context & State Management
-Copy from `hackwestern/src/contexts/`:
-- `CanvasContext.tsx` - Canvas state context provider
+Install the package via npm:
 
-### 3. Utility Libraries
-Copy from `hackwestern/src/lib/`:
-- `canvas.ts` - Canvas utility functions (pan, zoom, coordinates)
-- `utils.ts` - General utility functions (cn, etc.)
-- `copy.ts` - Clipboard copy utility
-
-### 4. Custom Hooks
-Copy from `hackwestern/src/hooks/`:
-- `useWindowDimensions.ts` - Window size tracking
-- `usePerformanceMode.ts` - Performance optimization
-
-### 5. Utils
-Copy from `hackwestern/src/utils/`:
-- `performance.ts` - Performance detection utilities
-
-### 6. Constants
-Copy from `hackwestern/src/constants/`:
-- `canvas.ts` - Canvas section coordinates and enums
-
-### 7. Assets (Public folder)
-Copy from `hackwestern/public/` to `canvas/public/`:
-- `horse.svg` - Logo
-- `customcursor.svg` - Custom cursor
-- `dragme.svg` - Drag indicator
-- `hackwesterntitle.svg` - Title graphic
-
-### 8. Styles
-Copy from `hackwestern/src/`:
-- Create `globals.css` with necessary CSS variables and styles
-
-## Installation Steps
-
-1. Navigate to the canvas folder:
 ```bash
-cd /Users/hunterchen/Documents/GitHub/canvas
+npm install @hunterchen/canvas
 ```
 
-2. Install dependencies:
+### Required Peer Dependencies
+
+This library requires the following peer dependencies (these are **not** installed automatically):
+
 ```bash
-npm install
+npm install react react-dom framer-motion
 ```
 
-3. Copy all files listed above from hackwestern to canvas, maintaining the directory structure
+### Important: Import Styles
 
-4. Update import paths in all copied files:
-   - Change `~/` to `@/`
-   - Update any absolute imports to relative imports as needed
+**You must import the compiled CSS file in your application's entry point.** The library uses pre-compiled Tailwind CSS, so you don't need to install or configure Tailwind yourself.
 
-## Required Dependencies
+> **Note:** The library uses the `canvas-` prefix for all custom CSS classes and variables to minimize conflicts with your project. Custom colors like `canvas-heavy`, `canvas-medium`, `canvas-offwhite`, fonts like `canvas-figtree`, and utilities like `canvas-backface-hidden` are scoped to avoid naming collisions. You can safely use Tailwind CSS in your own project alongside this library.
 
-Already included in package.json:
-- `next` - Next.js framework
-- `react` & `react-dom` - React library
-- `framer-motion` - Animation library
-- `lucide-react` - Icons
+In your main application file (e.g., `App.tsx`, `_app.tsx`, `main.tsx`, or `index.tsx`):
 
-Additional dependencies you may need to install:
-```bash
-npm install @radix-ui/react-slot class-variance-authority clsx tailwindcss-merge
-```
-
-For toast functionality:
-```bash
-npm install @radix-ui/react-toast
-```
-
-## Tailwind CSS Setup
-
-1. Install Tailwind:
-```bash
-npm install -D tailwindcss autoprefixer
-npx tailwindcss init -p
-```
-
-2. Update `tailwind.config.js`:
-```javascript
-/** @type {import('tailwindcss').Config} */
-module.exports = {
-  content: [
-    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
-  theme: {
-    extend: {
-      colors: {
-        beige: "var(--beige)",
-        coral: "var(--coral)",
-        lilac: "var(--lilac)",
-        salmon: "var(--salmon)",
-        heavy: "var(--heavy)",
-        emphasis: "var(--emphasis)",
-        medium: "var(--medium)",
-        light: "var(--light)",
-        offwhite: "var(--offwhite)",
-        highlight: "var(--highlight)",
-      },
-      fontFamily: {
-        'mono': ['JetBrains Mono', 'monospace'],
-        'sans': ['Figtree', 'sans-serif'],
-      },
-    },
-  },
-  plugins: [],
-}
-```
-
-3. Create `src/styles/globals.css`:
-```css
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-:root {
-  --beige: #f7f1e5;
-  --coral: #ffb5a7;
-  --lilac: #d9c8e6;
-  --salmon: #ffa585;
-  --heavy: #3c204c;
-  --emphasis: #513b7a;
-  --medium: #776780;
-  --light: #c3b8cb;
-  --offwhite: #fdfcfd;
-  --highlight: #f5f2f7;
-}
-
-body {
-  margin: 0;
-  padding: 0;
-  font-family: 'Figtree', sans-serif;
-}
-
-.bg-hw-radial-gradient {
-  /* Add any custom backgrounds */
-}
-
-.bg-noise {
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='4' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-}
-```
-
-4. Import globals.css in `src/pages/_app.tsx`:
 ```typescript
-import '@/styles/globals.css'
-import type { AppProps } from 'next/app'
+import '@hunterchen/canvas/styles.css';
+```
+
+For Next.js:
+```typescript
+// pages/_app.tsx
+import '@hunterchen/canvas/styles.css';
+import type { AppProps } from 'next/app';
 
 export default function App({ Component, pageProps }: AppProps) {
-  return <Component {...pageProps} />
+  return <Component {...pageProps} />;
 }
 ```
 
-## Running the Project
+For Vite/React:
+```typescript
+// main.tsx or App.tsx
+import '@hunterchen/canvas/styles.css';
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
 
-1. Start the development server:
-```bash
-npm run dev
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
 ```
 
-2. Open [http://localhost:3000](http://localhost:3000) in your browser
+## Quick Start
+
+```tsx
+import { Canvas, CanvasProvider } from '@hunterchen/canvas';
+
+function App() {
+  return (
+    <CanvasProvider>
+      <Canvas>
+        {/* Your canvas content here */}
+      </Canvas>
+    </CanvasProvider>
+  );
+}
+```
+
+## Usage Examples
+
+### Basic Canvas with Draggable Elements
+
+```tsx
+import {
+  Canvas,
+  CanvasProvider,
+  Draggable,
+  CanvasToolbar,
+  CanvasNavbar
+} from '@hunterchen/canvas';
+
+function MyCanvas() {
+  return (
+    <CanvasProvider>
+      <Canvas>
+        <CanvasToolbar />
+        <CanvasNavbar />
+        <Draggable initialX={100} initialY={100}>
+          <div>Drag me!</div>
+        </Draggable>
+      </Canvas>
+    </CanvasProvider>
+  );
+}
+```
+
+## Development
+
+To build the library from source:
+
+```bash
+# Install dependencies
+npm install
+
+# Build the library
+npm run build
+
+# Run type checking
+npm run type-check
+```
 
 ## Key Features
 
 - **Pan & Zoom**: Click and drag to pan, pinch/scroll to zoom
-- **Draggable Elements**: Drag the logo and other elements around
+- **Draggable Elements**: Built-in support for draggable components
 - **Performance Optimized**: Adaptive rendering based on device capabilities
 - **Responsive**: Works on desktop and mobile (desktop recommended)
+- **Pre-compiled CSS**: No Tailwind configuration needed in your project
+- **TypeScript Support**: Full type definitions included
+
+## Available Exports
+
+### Components
+- `Canvas` - Main canvas component with pan/zoom functionality
+- `CanvasWrapper` - Animated wrapper for canvas initialization
+- `CanvasComponent` - Canvas component renderer with visibility optimization
+- `Draggable`, `DraggableImage` - Draggable elements
+- `CanvasToolbar` - Coordinate/zoom display toolbar
+- `CanvasNavbar` - Navigation buttons
+
+### Contexts
+- `CanvasProvider` - Canvas state context provider
+- `useCanvasContext` - Hook to access canvas context
+- `PerformanceProvider` - Performance optimization context
+- `usePerformanceMode`, `usePerformance` - Performance-related hooks
+
+### Hooks
+- `useWindowDimensions` - Window size tracking
+- `usePerformanceModeLegacy` - Legacy performance optimization
+
+### Utilities
+- Canvas utility functions (pan, zoom, coordinates)
+- Performance detection utilities
+- Constants and types
+
+## API Reference
+
+### Canvas Props
+
+The `Canvas` component accepts standard React props and renders an interactive canvas with pan/zoom capabilities.
+
+### Draggable Props
+
+```tsx
+interface DraggableProps {
+  initialX?: number;
+  initialY?: number;
+  children: React.ReactNode;
+}
+```
+
+### CanvasContext
+
+Access canvas state using `useCanvasContext()`:
+```tsx
+const { x, y, scale } = useCanvasContext();
+```
+
+## Library Structure
+
+```
+@hunterchen/canvas/
+├── dist/
+│   ├── styles.css          # Pre-compiled Tailwind CSS (import this!)
+│   ├── index.js            # Main entry point
+│   ├── index.d.ts          # TypeScript definitions
+│   ├── components/         # Canvas components
+│   ├── contexts/           # React contexts
+│   ├── hooks/              # Custom hooks
+│   └── lib/                # Utility functions
+└── src/
+    ├── components/
+    ├── contexts/
+    ├── hooks/
+    ├── lib/
+    └── styles.css          # Source CSS file
+```
 
 ## Troubleshooting
 
-If you encounter errors:
+### Styles Not Working
 
-1. **Missing modules**: Install any missing dependencies with `npm install <package>`
-2. **Import errors**: Update import paths to use `@/` alias
-3. **Type errors**: Ensure TypeScript is properly configured
-4. **Style issues**: Verify Tailwind CSS is configured and CSS variables are defined
-
-## File Structure
-
-```
-canvas/
-├── public/
-│   ├── horse.svg
-│   ├── customcursor.svg
-│   ├── dragme.svg
-│   └── hackwesterntitle.svg
-├── src/
-│   ├── components/
-│   │   └── canvas/
-│   │       ├── canvas.tsx
-│   │       ├── wrapper.tsx
-│   │       ├── component.tsx
-│   │       ├── draggable.tsx
-│   │       ├── toolbar.tsx
-│   │       └── navbar/
-│   ├── contexts/
-│   │   └── CanvasContext.tsx
-│   ├── hooks/
-│   │   ├── useWindowDimensions.ts
-│   │   ├── usePerformanceMode.ts
-│   │   └── use-toast.ts
-│   ├── lib/
-│   │   ├── canvas.ts
-│   │   ├── utils.ts
-│   │   └── copy.ts
-│   ├── constants/
-│   │   └── canvas.ts
-│   ├── pages/
-│   │   ├── _app.tsx
-│   │   └── index.tsx
-│   └── styles/
-│       └── globals.css
-├── package.json
-├── tsconfig.json
-├── next.config.js
-└── tailwind.config.js
+Make sure you've imported the CSS file:
+```typescript
+import '@hunterchen/canvas/styles.css';
 ```
 
-## Notes
+### TypeScript Errors
 
-- The canvas uses framer-motion for animations
-- Performance mode automatically adjusts based on device capabilities
-- All coordinates and configurations are in `constants/canvas.ts`
-- The canvas size is 6000x4000px with configurable sections
+Ensure you have the required peer dependencies installed:
+```bash
+npm install react react-dom framer-motion
+```
+
+### Missing Types
+
+The library includes full TypeScript definitions. If you're having issues, make sure your `tsconfig.json` includes:
+```json
+{
+  "compilerOptions": {
+    "moduleResolution": "node"
+  }
+}
+```
+
+## License
+
+MIT
+
+## Contributing
+
+This library was extracted from the [Hack Western 12 Website](https://github.com/hackwestern/hackwestern). Contributions are welcome!

@@ -3,6 +3,7 @@ import { JetBrains_Mono, Figtree } from "next/font/google";
 import localFont from "next/font/local";
 
 import "../styles/globals.css";
+import '@hunterchen/canvas/styles.css';
 import { PerformanceProvider } from "@hunterchen/canvas";
 import { Toaster } from "~/components/ui/toaster";
 
