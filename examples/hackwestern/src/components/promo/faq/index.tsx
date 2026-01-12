@@ -26,66 +26,73 @@ function FAQ() {
           </div>
 
           {/* next 3 cards */}
-          <FAQCard
-            title={PROMO_FAQ[2].question}
-            desc={PROMO_FAQ[2].answer}
-            rotation="-4deg"
-            className="ml-4"
-          />
-          <FAQCard title={PROMO_FAQ[3].question} desc={PROMO_FAQ[3].answer} />
-          <FAQCard
-            title={PROMO_FAQ[4].question}
-            desc={PROMO_FAQ[4].answer}
-            rotation="-2deg"
-          />
+          <div className="flex flex-col gap-12 ml-4 pl-4">
+            <FAQCard
+              title={PROMO_FAQ[2].question}
+              desc={PROMO_FAQ[2].answer}
+              rotation="-4deg"
+              className="ml-4"
+            />
+            <FAQCard title={PROMO_FAQ[3].question} desc={PROMO_FAQ[3].answer} />
+            <FAQCard
+              title={PROMO_FAQ[4].question}
+              desc={PROMO_FAQ[4].answer}
+              rotation="-2deg"
+            />
+          </div>
+
 
           {/* middle cards and title */}
-          <FAQCard
-            title={PROMO_FAQ[5].question}
-            desc={PROMO_FAQ[5].answer}
-            rotation="3deg"
-            className="ml-8 mt-8"
-          />
-          <div className="row-span-1 mb-20 flex w-96 flex-col items-center justify-center">
-            <div className="font-jetbrainsmono -mt-4 mb-6 text-lg text-medium">
-              FAQ
+          <div className="flex flex-col items-center gap-14">
+            <FAQCard
+              title={PROMO_FAQ[5].question}
+              desc={PROMO_FAQ[5].answer}
+              rotation="3deg"
+              className="ml-8 mt-8"
+            />
+            <div className="row-span-1 mb-20 flex w-96 flex-col items-center justify-center">
+              <div className="font-jetbrainsmono -mt-4 mb-6 text-lg text-medium">
+                FAQ
+              </div>
+              <h2 className="mb-4 text-center font-dico text-2xl font-medium ">
+                Frequently Asked Questions
+              </h2>
+              <div className="w-1/2 text-center font-figtree text-sm text-medium">
+                Can&apos;t find an answer? Reach out to us at{" "}
+                <a
+                  href="mailto:hello@hackwestern.com"
+                  className="text-blue-600 transition-all hover:text-blue-700"
+                >
+                  hello@hackwestern.com
+                </a>
+              </div>
             </div>
-            <h2 className="mb-4 text-center font-dico text-2xl font-medium ">
-              Frequently Asked Questions
-            </h2>
-            <div className="w-1/2 text-center font-figtree text-sm text-medium">
-              Can&apos;t find an answer? Reach out to us at{" "}
-              <a
-                href="mailto:hello@hackwestern.com"
-                className="text-blue-600 transition-all hover:text-blue-700"
-              >
-                hello@hackwestern.com
-              </a>
-            </div>
+            <FAQCard
+              title={PROMO_FAQ[6].question}
+              desc={PROMO_FAQ[6].answer}
+              rotation="-5deg"
+              className="-mt-16 ml-8"
+            />
           </div>
-          <FAQCard
-            title={PROMO_FAQ[6].question}
-            desc={PROMO_FAQ[6].answer}
-            rotation="-5deg"
-            className="-mt-16 ml-8"
-          />
 
           {/* right 3 cards */}
-          <FAQCard
-            title={PROMO_FAQ[7].question}
-            desc={PROMO_FAQ[7].answer}
-            rotation="-4deg"
-          />
-          <FAQCard
-            title={PROMO_FAQ[8].question}
-            desc={PROMO_FAQ[8].answer}
-            rotation="-2deg"
-          />
-          <FAQCard
-            title={PROMO_FAQ[9].question}
-            desc={PROMO_FAQ[9].answer}
-            rotation="3deg"
-          />
+          <div className="flex flex-col gap-12 mr-4 pt-8">
+            <FAQCard
+              title={PROMO_FAQ[7].question}
+              desc={PROMO_FAQ[7].answer}
+              rotation="-4deg"
+            />
+            <FAQCard
+              title={PROMO_FAQ[8].question}
+              desc={PROMO_FAQ[8].answer}
+              rotation="-2deg"
+            />
+            <FAQCard
+              title={PROMO_FAQ[9].question}
+              desc={PROMO_FAQ[9].answer}
+              rotation="3deg"
+            />
+          </div>
 
           {/* last 2 cards */}
           <div className="row-span-3 my-auto grid grid-rows-2 gap-10">

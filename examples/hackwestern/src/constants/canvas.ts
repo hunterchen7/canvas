@@ -1,79 +1,89 @@
-export enum CanvasSection {
-  About = "about",
-  Projects = "projects",
-  Home = "home",
-  FAQ = "faq",
-  Sponsors = "sponsors",
-  Team = "team",
-}
+import type { NavItem, SectionCoordinates } from "@hunterchen/canvas";
 
-export interface SectionCoordinates {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
-
-export const coordinates: Record<CanvasSection, SectionCoordinates> = {
-  [CanvasSection.About]: {
+/**
+ * Navigation items configuration for the canvas navbar.
+ * Each item defines a section with its label, icon, coordinates, and whether it's the home section.
+ */
+export const navItems: NavItem[] = [
+  {
+    id: "home",
+    label: "Home",
+    icon: "Home",
+    x: 2867,
+    y: 1200,
+    width: 264,
+    height: 800,
+    isHome: true,
+  },
+  {
+    id: "about",
+    label: "About",
+    icon: "Info",
     x: 1400,
     y: 400,
     width: 1013,
     height: 800,
   },
-  [CanvasSection.Projects]: {
+  {
+    id: "projects",
+    label: "Projects",
+    icon: "LayoutDashboard",
     x: 3663,
     y: 400,
     width: 1200,
     height: 895,
   },
-  [CanvasSection.Home]: {
-    x: 2867,
-    y: 1200,
-    width: 264,
-    height: 800,
-  },
-  [CanvasSection.Sponsors]: {
+  {
+    id: "sponsors",
+    label: "Sponsors",
+    icon: "Handshake",
     x: 760,
     y: 1700,
     width: 1240,
     height: 900,
   },
-  [CanvasSection.FAQ]: {
+  {
+    id: "faq",
+    label: "FAQ",
+    icon: "HelpCircle",
     x: 2070,
     y: 2600,
     width: 1768,
     height: 917,
   },
-
-  [CanvasSection.Team]: {
+  {
+    id: "team",
+    label: "Team",
+    icon: "Users",
     x: 4050,
     y: 1660,
     width: 1080,
     height: 917,
   },
+];
+
+/**
+ * Helper to get a specific section's coordinates by id.
+ */
+export const getCoordinates = (id: string): SectionCoordinates => {
+  const item = navItems.find((item) => item.id === id);
+  if (!item) throw new Error(`Section "${id}" not found in navItems`);
+  return { x: item.x, y: item.y, width: item.width, height: item.height };
 };
 
-// Reverse lookup using strict reference or value match.
-export const coordinatesToSection = (
-  coords: SectionCoordinates | undefined,
-): CanvasSection | null => {
-  if (!coords) return null;
-  // Try identity first
-  for (const key of Object.keys(coordinates) as CanvasSection[]) {
-    if (coordinates[key] === coords) return key;
-  }
-  // Fallback value match (in case a cloned object is passed)
-  for (const key of Object.keys(coordinates) as CanvasSection[]) {
-    const c = coordinates[key];
-    if (
-      c.x === coords.x &&
-      c.y === coords.y &&
-      c.width === coords.width &&
-      c.height === coords.height
-    ) {
-      return key;
-    }
-  }
-  return null;
+/**
+ * Coordinates object derived from navItems for convenient access.
+ */
+export const coordinates = Object.fromEntries(
+  navItems.map((item) => [
+    item.id,
+    { x: item.x, y: item.y, width: item.width, height: item.height },
+  ])
+) as {
+  home: SectionCoordinates;
+  about: SectionCoordinates;
+  projects: SectionCoordinates;
+  sponsors: SectionCoordinates;
+  faq: SectionCoordinates;
+  team: SectionCoordinates;
 };

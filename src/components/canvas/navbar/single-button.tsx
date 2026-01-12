@@ -2,11 +2,10 @@ import { useState, useEffect } from "react";
 import * as LucideIcons from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
-type IconName = keyof typeof LucideIcons;
-
 interface SingleButtonProps {
   label: string;
-  icon?: IconName;
+  /** Lucide icon name as a string (e.g., "Home", "Info", "Users") */
+  icon?: string;
   customIcon?: React.ComponentType<{ className?: string }>;
   onClick?: () => void;
   isPushed: boolean;
@@ -28,7 +27,9 @@ export default function SingleButton({
   const [isHovered, setIsHovered] = useState(false);
   const [showTag, setShowTag] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
-  const Icon = icon ? (LucideIcons[icon] as LucideIcons.LucideIcon) : null;
+  const Icon = icon && icon in LucideIcons
+    ? (LucideIcons[icon as keyof typeof LucideIcons] as LucideIcons.LucideIcon)
+    : null;
   const CustomIcon = customIcon;
   const TagDelay = 100;
 

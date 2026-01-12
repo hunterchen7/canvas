@@ -1,17 +1,16 @@
 import Head from "next/head";
 import { Footer } from "../components/footer";
 import Hero from "../components/promo/hero";
-import { Canvas, CanvasSection } from "@hunterchen/canvas";
+import { Canvas, growTransition } from "@hunterchen/canvas";
 import Sponsors from "../components/promo/sponsors";
 import About from "../components/promo/about";
 import Projects from "../components/promo/projects";
 import FAQ from "../components/promo/faq";
 import Team from "../components/promo/team";
-import { coordinates } from "../constants/canvas";
+import { coordinates, navItems } from "../constants/canvas";
 import MLHTrustBadge from "../components/promo/mlh-trust.badge";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { growTransition } from "@hunterchen/canvas";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { Button } from "~/components/ui/button";
@@ -40,9 +39,7 @@ export default function Home() {
       >
         <Canvas
           homeCoordinates={coordinates.home}
-          navbarCoordinates={coordinates}
-          navbarSections={Object.values(CanvasSection)}
-          navbarHomeSection={CanvasSection.Home}
+          navItems={navItems}
         >
           <Hero />
           <Sponsors />

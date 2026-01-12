@@ -1,9 +1,7 @@
 import { motion, useMotionValueEvent } from "framer-motion";
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import SingleButton from "./single-button";
-// TODO: These should be passed as props or provided via context from the app
-// For now, apps will need to re-export from this library
-import { CanvasSection } from "../../../types";
+import type { NavItem } from "../../../types";
 import { useCanvasContext } from "../../../contexts/CanvasContext";
 import useWindowDimensions from "../../../hooks/useWindowDimensions";
 import { usePerformanceMode } from "../../../hooks/usePerformanceMode";
@@ -23,18 +21,14 @@ interface NavbarProps {
     zoom?: number,
   ) => void;
   onReset: () => void;
-  // App must provide section coordinates mapping
-  coordinates: Record<string, { x: number; y: number; width: number; height: number }>;
-  sections: CanvasSection[];
-  homeSection: CanvasSection;
+  /** Array of navigation items defining sections, their icons, and coordinates */
+  items: NavItem[];
 }
 
 export default function Navbar({
   panToOffset,
   onReset,
-  coordinates,
-  sections,
-  homeSection,
+  items,
 }: NavbarProps) {
   const { x, y, scale, animationStage, setNextTargetSection } =
     useCanvasContext();
@@ -55,6 +49,9 @@ export default function Navbar({
 
   // Derive debounce duration from performance mode
   const debounceMs = NAVBAR_DEBOUNCE_MS[mode] ?? 0;
+
+  // Find the home section from items
+  const homeItem = useMemo(() => items.find((item) => item.isHome), [items]);
 
   // Leading-edge debounce handler
   const handleDebouncedClick = useCallback(
@@ -100,25 +97,22 @@ export default function Navbar({
   useMotionValueEvent(scale, "change", updateExpandedButton);
 
   const handlePan = useCallback(
-    function handlePan(section: CanvasSection) {
-      setExpandedButton(section);
+    function handlePan(item: NavItem) {
+      setExpandedButton(item.id);
       activePans.current++;
 
       // Predictive pre-render hint: mark the target section so its CanvasComponent can
       // render even before it comes fully into view.
-      setNextTargetSection(section);
+      setNextTargetSection(item.id);
 
-      if (section === homeSection) {
+      if (item.isHome) {
         onReset();
         return;
       }
 
-      const sectionCoords = coordinates[section];
-      if (!sectionCoords) return;
-
       const panCoords = getSectionPanCoordinates({
         windowDimensions: { width, height },
-        coords: sectionCoords,
+        coords: { x: item.x, y: item.y, width: item.width, height: item.height },
         targetZoom: defaultZoom,
         negative: true,
       });
@@ -134,16 +128,18 @@ export default function Navbar({
     [panToOffset, onReset, width, height, defaultZoom, setNextTargetSection],
   );
 
-  // Clean up timers on unmount
+  // Clean up timers on unmount and pan to home on animation complete
   useEffect(() => {
     if (animationStage < 2) return;
-    handlePan(CanvasSection.Home);
+    if (homeItem) {
+      handlePan(homeItem);
+    }
     return () => {
       if (panTimeout.current) clearTimeout(panTimeout.current);
       if (debounceCooldownTimeout.current)
         clearTimeout(debounceCooldownTimeout.current);
     };
-  }, [handlePan, animationStage]);
+  }, [handlePan, animationStage, homeItem]);
 
   return (
     <div
@@ -163,48 +159,17 @@ export default function Navbar({
       <div className="px-4 md:px-8">
         <motion.div className="flex select-none items-center justify-center gap-1 rounded-[10px] border-[1px] border-border bg-canvas-offwhite p-1 shadow-[0_6px_12px_rgba(0,0,0,0.10)]">
           <div className="flex items-center gap-1">
-            <SingleButton
-              label="Home"
-              icon="Home"
-              onClick={() => handlePan(CanvasSection.Home)}
-              isPushed={expandedButton === CanvasSection.Home}
-              onDebouncedClick={handleDebouncedClick}
-            />
-            <SingleButton
-              label="About"
-              icon="Info"
-              onClick={() => handlePan(CanvasSection.About)}
-              isPushed={expandedButton === CanvasSection.About}
-              onDebouncedClick={handleDebouncedClick}
-            />
-            <SingleButton
-              label="Projects"
-              icon="LayoutDashboard"
-              onClick={() => handlePan(CanvasSection.Projects)}
-              isPushed={expandedButton === CanvasSection.Projects}
-              onDebouncedClick={handleDebouncedClick}
-            />
-            <SingleButton
-              label="Sponsors"
-              icon="Handshake"
-              onClick={() => handlePan(CanvasSection.Sponsors)}
-              isPushed={expandedButton === CanvasSection.Sponsors}
-              onDebouncedClick={handleDebouncedClick}
-            />
-            <SingleButton
-              label="FAQ"
-              icon="HelpCircle"
-              onClick={() => handlePan(CanvasSection.FAQ)}
-              isPushed={expandedButton === CanvasSection.FAQ}
-              onDebouncedClick={handleDebouncedClick}
-            />
-            <SingleButton
-              label="Team"
-              icon="Users"
-              onClick={() => handlePan(CanvasSection.Team)}
-              isPushed={expandedButton === CanvasSection.Team}
-              onDebouncedClick={handleDebouncedClick}
-            />
+            {items.map((item) => (
+              <SingleButton
+                key={item.id}
+                label={item.label}
+                icon={item.icon}
+                customIcon={item.customIcon}
+                onClick={() => handlePan(item)}
+                isPushed={expandedButton === item.id}
+                onDebouncedClick={handleDebouncedClick}
+              />
+            ))}
           </div>
         </motion.div>
       </div>
