@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --canvas-beige: #f7f1e5;
+    --canvas-coral: #ffb5a7;
+    --canvas-lilac: #d9c8e6;
+    --canvas-salmon: #ffa585;
+    --canvas-heavy: #3c204c;
+    --canvas-emphasis: #513b7a;
+    --canvas-active: #8f57ad;
+    --canvas-tinted: #c9a7db;
+    --canvas-medium: #776780;
+    --canvas-light: #c3b8cb;
+    --canvas-faint-lilac: #f5f2f7;
+    --canvas-offwhite: #fdfcfd;
+    --canvas-highlight: #f5f2f7;
+    --canvas-border-light: 0 0% 89%;
+  }
+}

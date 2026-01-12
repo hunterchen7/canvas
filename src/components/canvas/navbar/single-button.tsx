@@ -90,7 +90,7 @@ export default function SingleButton({
   return (
     <motion.button
       aria-label={label}
-      className={`relative flex items-center rounded-md p-2 text-medium transition-colors duration-200 ${isPushed ? "bg-[#EEE2FB]" : isHovered ? "bg-highlight" : ""
+      className={`relative flex items-center rounded-md p-2 text-canvas-medium transition-colors duration-200 ${isPushed ? "bg-[#EEE2FB]" : isHovered ? "bg-canvas-highlight" : ""
         }`}
       onClick={handleClick}
       onMouseEnter={() => setIsHovered(true)}
@@ -107,11 +107,11 @@ export default function SingleButton({
           <div>
             {Icon ? (
               <Icon
-                className={`h-5 w-5 flex-shrink-0 ${isPushed ? "text-emphasis" : "text-medium"}`}
+                className={`h-5 w-5 flex-shrink-0 ${isPushed ? "text-canvas-emphasis" : "text-canvas-medium"}`}
               />
             ) : CustomIcon ? (
               <CustomIcon
-                className={`h-5 w-5 flex-shrink-0 ${isPushed ? "text-white" : "text-medium"
+                className={`h-5 w-5 flex-shrink-0 ${isPushed ? "text-white" : "text-canvas-medium"
                   }`}
               />
             ) : null}
@@ -124,7 +124,7 @@ export default function SingleButton({
               duration: 0.1,
               ease: "easeInOut",
             }}
-            className="overflow-hidden whitespace-nowrap font-figtree text-sm font-medium text-emphasis"
+            className="overflow-hidden whitespace-nowrap font-canvas-figtree text-sm font-medium text-canvas-emphasis"
           >
             {displayLabel}
           </motion.span>
@@ -133,12 +133,12 @@ export default function SingleButton({
         <div>
           {Icon ? (
             <Icon
-              className={`h-5 w-5 flex-shrink-0 ${isPushed ? "text-white" : "text-medium"
+              className={`h-5 w-5 flex-shrink-0 ${isPushed ? "text-white" : "text-canvas-medium"
                 }`}
             />
           ) : CustomIcon ? (
             <CustomIcon
-              className={`h-5 w-5 flex-shrink-0 ${isPushed ? "text-white" : "text-medium"
+              className={`h-5 w-5 flex-shrink-0 ${isPushed ? "text-white" : "text-canvas-medium"
                 }`}
             />
           ) : null}
@@ -155,7 +155,7 @@ export default function SingleButton({
                 className="pointer-events-none absolute -top-10 left-1/2 z-50"
               >
                 <div className="rounded-sm bg-gradient-to-t from-black/10 to-transparent px-[1px] pb-[2.5px] pt-[1px]">
-                  <div className="whitespace-nowrap rounded-sm bg-offwhite px-2 py-1 font-figtree text-sm text-medium">
+                  <div className="whitespace-nowrap rounded-sm bg-canvas-offwhite px-2 py-1 font-canvas-figtree text-sm text-canvas-medium">
                     {displayLabel}
                   </div>
                 </div>

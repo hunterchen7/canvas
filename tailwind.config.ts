@@ -5,9 +5,6 @@ import { type PluginAPI } from "tailwindcss/types/config";
 const config = {
   darkMode: ["class"],
   content: [
-    "./pages/**/*.{ts,tsx}",
-    "./components/**/*.{ts,tsx}",
-    "./app/**/*.{ts,tsx}",
     "./src/**/*.{ts,tsx}",
   ],
   prefix: "",
@@ -33,20 +30,20 @@ const config = {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         githubbg: "#1b1f23",
-        beige: "var(--beige)",
-        coral: "var(--coral)",
-        lilac: "var(--lilac)",
-        salmon: "var(--salmon)",
-        heavy: "var(--heavy)",
-        emphasis: "var(--emphasis)",
-        active: "var(--active)",
-        tinted: "var(--tinted)",
-        medium: "var(--medium)",
-        light: "var(--light)",
-        "faint-lilac": "var(--faint-lilac)",
-        offwhite: "var(--offwhite)",
-        highlight: "var(--highlight)",
-        "border-light": "hsl(var(--border-light))",
+        "canvas-beige": "var(--canvas-beige)",
+        "canvas-coral": "var(--canvas-coral)",
+        "canvas-lilac": "var(--canvas-lilac)",
+        "canvas-salmon": "var(--canvas-salmon)",
+        "canvas-heavy": "var(--canvas-heavy)",
+        "canvas-emphasis": "var(--canvas-emphasis)",
+        "canvas-active": "var(--canvas-active)",
+        "canvas-tinted": "var(--canvas-tinted)",
+        "canvas-medium": "var(--canvas-medium)",
+        "canvas-light": "var(--canvas-light)",
+        "canvas-faint-lilac": "var(--canvas-faint-lilac)",
+        "canvas-offwhite": "var(--canvas-offwhite)",
+        "canvas-highlight": "var(--canvas-highlight)",
+        "canvas-border-light": "hsl(var(--canvas-border-light))",
         primary: {
           "50": "hsl(var(--primary-50))",
           "100": "hsl(var(--primary-100))",
@@ -112,7 +109,7 @@ const config = {
       },
       backgroundImage: {
         "hw-radial-gradient":
-          "`\n            radial-gradient(\n              circle 150vh at 100vh 150vh,\n              var(--coral) 0%,\n              var(--salmon) 40%,\n              var(--lilac) 65%,\n              var(--beige) 90%\n            )\n          `",
+          "`\n            radial-gradient(\n              circle 150vh at 100vh 150vh,\n              var(--canvas-coral) 0%,\n              var(--canvas-salmon) 40%,\n              var(--canvas-lilac) 65%,\n              var(--canvas-beige) 90%\n            )\n          `",
         "button-primary": "linear-gradient(#D19AEE 0%, #8F57AD 100%)",
         "button-primary-hover":
           "linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1)), linear-gradient(#D19AEE 0%, #8F57AD 100%)",
@@ -129,9 +126,9 @@ const config = {
         "button-secondary": "0px 2px 4px 0px rgba(60, 32, 76, 0.20)",
       },
       fontFamily: {
-        figtree: ["var(--font-figtree)"],
-        dico: ["var(--font-dico)"],
-        "jetbrains-mono": ["var(--font-jetbrainsmono)"],
+        "canvas-figtree": ["var(--font-figtree)"],
+        "canvas-dico": ["var(--font-dico)"],
+        "canvas-jetbrains-mono": ["var(--font-jetbrainsmono)"],
       },
       fontSize: {
         "main-display": "4rem",
@@ -179,8 +176,8 @@ const config = {
     require("tailwindcss-animate"),
     plugin(function (this: void, api: PluginAPI) {
       api.addUtilities({
-        ".backface-hidden": { backfaceVisibility: "hidden" },
-        ".preserve-3d": { transformStyle: "preserve-3d" },
+        ".canvas-backface-hidden": { backfaceVisibility: "hidden" },
+        ".canvas-preserve-3d": { transformStyle: "preserve-3d" },
       });
     }),
   ],

@@ -48,7 +48,7 @@ const DefaultIntroContent = () => (
       height={64}
       className="mb-4"
     />
-    <div className="font-jetbrains-mono font-semibold text-[#543C5AB2]">
+    <div className="font-canvas-jetbrains-mono font-semibold text-[#543C5AB2]">
       HACK WESTERN 12
     </div>
   </div>
@@ -61,7 +61,7 @@ export const CanvasWrapper = ({
   skipIntro = false,
   introContent,
   loadingText = "LOADING CANVAS",
-  introBackgroundGradient = "linear-gradient(to top, #FEB6AF 0%, var(--salmon) 15%, var(--beige) 50%)",
+  introBackgroundGradient = "linear-gradient(to top, #FEB6AF 0%, var(--canvas-salmon) 15%, var(--canvas-beige) 50%)",
   canvasBoxGradient = "radial-gradient(130.38% 95% at 50.03% 97.25%, #EFB8A0 0%, #EAD2DF 48.09%, #EFE3E1 100%)",
   growTransition = GROW_TRANSITION,
   blurTransition = BLUR_TRANSITION,
@@ -210,7 +210,7 @@ export const CanvasWrapper = ({
         </>
       )}
       {stage1NotFinished && loadingText && (
-        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 text-center font-jetbrains-mono font-semibold text-[#543C5AB2]">
+        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 text-center font-canvas-jetbrains-mono font-semibold text-[#543C5AB2]">
           {loadingText}{dots}
         </div>
       )}
