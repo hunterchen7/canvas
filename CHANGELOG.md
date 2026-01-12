@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/hunterchen7/canvas/compare/canvas-v0.2.0...canvas-v0.2.1) (2026-01-12)
+
+
+### Bug Fixes
+
+* add repo url to `package.json` ([#9](https://github.com/hunterchen7/canvas/issues/9)) ([687731a](https://github.com/hunterchen7/canvas/commit/687731ae0779004e61f97e91240d70ee126a7709))
+
 ## [0.2.0](https://github.com/hunterchen7/canvas/compare/canvas-v0.1.3...canvas-v0.2.0) (2026-01-12)
 
 
