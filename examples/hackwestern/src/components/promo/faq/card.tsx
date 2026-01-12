@@ -7,7 +7,7 @@ const Lines = React.memo(function Lines() {
   const { width } = useWindowDimensions();
 
   return (
-    <div className="absolute z-0 sm:relative">
+    <div className="absolute inset-0 z-0">
       {width > 640 ? (
         <div className="absolute left-0 right-0 mt-16 space-y-[19px] px-2 py-2">
           {Array.from({ length: 9 }).map((_, i) => (
