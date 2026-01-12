@@ -59,18 +59,78 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 ## Quick Start
 
 ```tsx
-import { Canvas, CanvasProvider } from '@hunterchen/canvas';
+import { Canvas, CanvasComponent } from '@hunterchen/canvas';
+
+const homeCoordinates = { x: 0, y: 0, width: 1920, height: 1080 };
 
 function App() {
   return (
-    <CanvasProvider>
-      <Canvas>
-        {/* Your canvas content here */}
-      </Canvas>
-    </CanvasProvider>
+    <Canvas homeCoordinates={homeCoordinates}>
+      <CanvasComponent offset={homeCoordinates}>
+        {/* Your section content here */}
+      </CanvasComponent>
+    </Canvas>
   );
 }
 ```
+
+The `Canvas` component requires `homeCoordinates` to define the initial viewport position. Use `CanvasComponent` to wrap your content sections and position them at specific coordinates on the canvas.
+
+## Configuration
+
+### Home Coordinates
+
+The `homeCoordinates` prop defines where the canvas initially centers when it loads. This is a required prop that specifies the starting section's position and dimensions:
+
+```tsx
+const homeCoordinates: SectionCoordinates = {
+  x: 2867,      // X position in canvas space
+  y: 1200,      // Y position in canvas space
+  width: 264,   // Section width
+  height: 800   // Section height
+};
+
+<Canvas homeCoordinates={homeCoordinates}>
+  {/* ... */}
+</Canvas>
+```
+
+### Navigation Items
+
+The `navItems` prop is optional and defines sections that appear in the canvas navbar. Each navigation item specifies a section with its coordinates, label, icon, and whether it's the home section:
+
+```tsx
+import type { NavItem } from '@hunterchen/canvas';
+
+const navItems: NavItem[] = [
+  {
+    id: "home",
+    label: "Home",
+    icon: "Home",           // Lucide icon name
+    x: 2867,
+    y: 1200,
+    width: 264,
+    height: 800,
+    isHome: true            // Marks this as the home section
+  },
+  {
+    id: "about",
+    label: "About",
+    icon: "Info",
+    x: 1400,
+    y: 400,
+    width: 1013,
+    height: 800
+  },
+  // ... more sections
+];
+
+<Canvas homeCoordinates={homeCoordinates} navItems={navItems}>
+  {/* ... */}
+</Canvas>
+```
+
+When `navItems` is provided, the canvas will render a navbar with buttons to navigate between sections. The navbar uses Lucide icons, so make sure the icon names match available Lucide icons.
 
 ## Usage Examples
 
