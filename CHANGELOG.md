@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/hunterchen7/canvas/compare/canvas-v0.2.1...canvas-v0.3.0) (2026-01-12)
+
+
+### Features
+
+* generic navbar ([#11](https://github.com/hunterchen7/canvas/issues/11)) ([5c85950](https://github.com/hunterchen7/canvas/commit/5c85950dae9ec03135e10065de6ef826241a6fb2))
+
 ## [0.2.1](https://github.com/hunterchen7/canvas/compare/canvas-v0.2.0...canvas-v0.2.1) (2026-01-12)
 
 
