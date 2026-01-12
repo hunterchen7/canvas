@@ -164,7 +164,6 @@ export default function Navbar({
                 key={item.id}
                 label={item.label}
                 icon={item.icon}
-                customIcon={item.customIcon}
                 onClick={() => handlePan(item)}
                 isPushed={expandedButton === item.id}
                 onDebouncedClick={handleDebouncedClick}

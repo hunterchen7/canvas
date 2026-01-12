@@ -106,7 +106,7 @@ const navItems: NavItem[] = [
   {
     id: "home",
     label: "Home",
-    icon: "Home",           // Lucide icon name
+    icon: "Home",           // Lucide icon name or custom component
     x: 2867,
     y: 1200,
     width: 264,
@@ -180,7 +180,6 @@ npm run type-check
 - **Pan & Zoom**: Click and drag to pan, pinch/scroll to zoom
 - **Draggable Elements**: Built-in support for draggable components
 - **Performance Optimized**: Adaptive rendering based on device capabilities
-- **Responsive**: Works on desktop and mobile (desktop recommended)
 - **Pre-compiled CSS**: No Tailwind configuration needed in your project
 - **TypeScript Support**: Full type definitions included
 

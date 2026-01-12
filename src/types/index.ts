@@ -25,10 +25,8 @@ export interface NavItem {
   id: string;
   /** Display label shown in the navbar */
   label: string;
-  /** Lucide icon name (e.g., "Home", "Info", "Users") */
-  icon?: string;
-  /** Custom icon component (alternative to Lucide icon) */
-  customIcon?: React.ComponentType<{ className?: string }>;
+  /** Lucide icon name or a custom icon component */
+  icon: string | React.ComponentType<{ className?: string }>;
   /** X coordinate on the canvas */
   x: number;
   /** Y coordinate on the canvas */
