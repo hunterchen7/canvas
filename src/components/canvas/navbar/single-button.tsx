@@ -2,39 +2,37 @@ import { useState, useEffect } from "react";
 import * as LucideIcons from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
-type IconName = keyof typeof LucideIcons;
-
 interface SingleButtonProps {
   label: string;
-  icon?: IconName;
-  customIcon?: React.ComponentType<{ className?: string }>;
+  /** Lucide icon name or a custom icon component */
+  icon: string | React.ComponentType<{ className?: string }>;
   onClick?: () => void;
   isPushed: boolean;
   link?: string;
-  emailAddress?: string;
   onDebouncedClick?: (callback: () => void) => void;
 }
 
 export default function SingleButton({
   label,
   icon,
-  customIcon,
   onClick,
   isPushed,
   link,
-  emailAddress,
   onDebouncedClick,
 }: SingleButtonProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [showTag, setShowTag] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
-  const Icon = icon ? (LucideIcons[icon] as LucideIcons.LucideIcon) : null;
-  const CustomIcon = customIcon;
+  const isLucideIconName = typeof icon === "string";
+  const IconComponent = isLucideIconName
+    ? (LucideIcons[icon as keyof typeof LucideIcons] as LucideIcons.LucideIcon | undefined)
+    : icon;
   const TagDelay = 100;
 
-  // Ensure either icon or customIcon is provided
-  if (!Icon && !CustomIcon) {
-    throw new Error("Either 'icon' or 'customIcon' prop must be provided");
+  if (!IconComponent) {
+    throw new Error(
+      "A valid 'icon' prop is required (Lucide icon name or custom icon component).",
+    );
   }
 
   useEffect(() => {
@@ -105,16 +103,10 @@ export default function SingleButton({
       {isPushed ? (
         <div className="flex items-center gap-2">
           <div>
-            {Icon ? (
-              <Icon
-                className={`h-5 w-5 flex-shrink-0 ${isPushed ? "text-canvas-emphasis" : "text-canvas-medium"}`}
-              />
-            ) : CustomIcon ? (
-              <CustomIcon
-                className={`h-5 w-5 flex-shrink-0 ${isPushed ? "text-white" : "text-canvas-medium"
-                  }`}
-              />
-            ) : null}
+            <IconComponent
+              className={`h-5 w-5 flex-shrink-0 ${isPushed ? (isLucideIconName ? "text-canvas-emphasis" : "text-white") : "text-canvas-medium"
+                }`}
+            />
           </div>
           <motion.span
             initial={{ opacity: 0, width: 0 }}
@@ -131,17 +123,10 @@ export default function SingleButton({
         </div>
       ) : (
         <div>
-          {Icon ? (
-            <Icon
-              className={`h-5 w-5 flex-shrink-0 ${isPushed ? "text-white" : "text-canvas-medium"
-                }`}
-            />
-          ) : CustomIcon ? (
-            <CustomIcon
-              className={`h-5 w-5 flex-shrink-0 ${isPushed ? "text-white" : "text-canvas-medium"
-                }`}
-            />
-          ) : null}
+          <IconComponent
+            className={`h-5 w-5 flex-shrink-0 ${isPushed ? (isLucideIconName ? "text-canvas-emphasis" : "text-white") : "text-canvas-medium"
+              }`}
+          />
           <AnimatePresence>
             {showTag && !isPushed && (
               <motion.div

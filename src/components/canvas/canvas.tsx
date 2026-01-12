@@ -39,7 +39,7 @@ import {
 import useWindowDimensions from "../../hooks/useWindowDimensions";
 import Navbar from "./navbar";
 import Toolbar from "./toolbar";
-import { CanvasSection, type SectionCoordinates } from "../../types";
+import type { CanvasSection, NavItem, SectionCoordinates } from "../../types";
 import { CanvasWrapper } from "./wrapper";
 import { usePerformanceMode } from "../../hooks/usePerformanceMode";
 import type { ReactNode } from "react";
@@ -49,9 +49,8 @@ interface Props {
   children: React.ReactNode;
 
   // Navbar data (optional). If omitted, navbar is hidden.
-  navbarCoordinates?: Record<CanvasSection, SectionCoordinates>;
-  navbarSections?: CanvasSection[];
-  navbarHomeSection?: CanvasSection;
+  /** Array of navigation items for the navbar. If omitted, navbar is hidden. */
+  navItems?: NavItem[];
 
   // ============== Intro Animation Customization ==============
   /** Disable intro animation entirely */
@@ -83,9 +82,7 @@ const stopAllMotion = (
 const Canvas: FC<Props> = ({
   children,
   homeCoordinates,
-  navbarCoordinates,
-  navbarSections,
-  navbarHomeSection,
+  navItems,
   skipIntro = false,
   introContent,
   loadingText,
@@ -98,9 +95,7 @@ const Canvas: FC<Props> = ({
 
   const { mode } = usePerformanceMode();
 
-  const navSections = navbarSections ?? Object.values(CanvasSection);
-  const navHomeSection = navbarHomeSection ?? CanvasSection.Home;
-  const hasNavbarData = Boolean(navbarCoordinates);
+  const hasNavbar = Boolean(navItems && navItems.length > 0);
 
   const sceneWidth = canvasWidth;
   const sceneHeight = canvasHeight;
@@ -616,13 +611,11 @@ const Canvas: FC<Props> = ({
         {animationStage >= 2 && (
           <>
             <Toolbar homeCoordinates={offsetHomeCoordinates} />
-            {hasNavbarData && navbarCoordinates ? (
+            {hasNavbar && navItems ? (
               <Navbar
                 panToOffset={handlePanToOffset}
                 onReset={onResetViewAndItems}
-                coordinates={navbarCoordinates}
-                sections={navSections as CanvasSection[]}
-                homeSection={navHomeSection}
+                items={navItems}
               />
             ) : null}
           </>

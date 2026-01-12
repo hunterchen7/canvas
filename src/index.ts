@@ -22,5 +22,4 @@ export * from './lib/constants';
 export * from './utils/performance';
 
 // Types
-export type { SectionCoordinates } from './types';
-export { CanvasSection } from './types';
+export type { SectionCoordinates, NavItem, CanvasSection } from './types';
