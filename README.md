@@ -179,7 +179,7 @@ npm run type-check
 
 - **Pan & Zoom**: Click and drag to pan, pinch/scroll to zoom
 - **Draggable Elements**: Built-in support for draggable components
-- **Performance Optimized**: Adaptive rendering based on device capabilities
+- **Performance Optimized (more to do)**: Adaptive rendering based on device capabilities
 - **Pre-compiled CSS**: No Tailwind configuration needed in your project
 - **TypeScript Support**: Full type definitions included
 
