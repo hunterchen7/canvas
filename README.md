@@ -1,6 +1,6 @@
 # @hunterchen/canvas
 
-A React-based canvas library for creating pannable, zoomable, and interactive canvas experiences. Originally developed for the [Hack Western 12 Website](https://github.com/hackwestern/hackwestern).
+A React-based canvas library for creating pannable, zoomable, and interactive canvas experiences. Originally developed (by me) for the [Hack Western 12 Website](https://github.com/hackwestern/hackwestern/tree/2025).
 
 ## Installation
 
@@ -12,7 +12,7 @@ npm install @hunterchen/canvas
 
 ### Required Peer Dependencies
 
-This library requires the following peer dependencies (these are **not** installed automatically):
+This library requires the following peer dependencies:
 
 ```bash
 npm install react react-dom framer-motion
