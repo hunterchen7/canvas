@@ -1,10 +1,25 @@
 // Components
-export { default as Canvas, gradientBgImage } from './components/canvas/canvas';
+export { default as Canvas } from './components/canvas/canvas';
 export { CanvasComponent } from './components/canvas/component';
 export { Draggable, DraggableImage } from './components/canvas/draggable';
 export { CanvasWrapper, growTransition } from './components/canvas/wrapper';
 export { default as CanvasToolbar } from './components/canvas/toolbar';
 export { default as CanvasNavbar } from './components/canvas/navbar';
+
+// Background Components
+export {
+    DefaultCanvasBackground,
+    DefaultWrapperBackground,
+    DefaultIntroContent,
+    DEFAULT_CANVAS_GRADIENT,
+    DEFAULT_INTRO_GRADIENT,
+    DEFAULT_CANVAS_BOX_GRADIENT,
+} from './components/canvas/backgrounds';
+export type {
+    DefaultCanvasBackgroundProps,
+    DefaultWrapperBackgroundProps,
+    DefaultIntroContentProps,
+} from './components/canvas/backgrounds';
 
 // Contexts
 export { CanvasContext, CanvasProvider, useCanvasContext } from './contexts/CanvasContext';
@@ -19,6 +34,7 @@ export { usePerformanceMode as usePerformanceModeLegacy } from './hooks/usePerfo
 // Utilities
 export * from './lib/canvas';
 export * from './lib/constants';
+export * from './lib/utils';
 export * from './utils/performance';
 
 // Types
