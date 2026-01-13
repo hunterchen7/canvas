@@ -1,7 +1,7 @@
 import { type FC, useEffect, useState } from "react";
 import type { SectionCoordinates } from "../../types";
 import { useCanvasContext } from "../../contexts/CanvasContext";
-import Image from "next/image";
+import { motion } from "framer-motion";
 import useWindowDimensions from "../../hooks/useWindowDimensions";
 import { usePerformanceMode } from "../../hooks/usePerformanceMode";
 import {
@@ -210,7 +210,7 @@ export const CanvasComponent: FC<CanvasProps> = ({
       }}
     >
       {shouldShowFallback ? (
-        <Image
+        <motion.img
           src={imageFallback}
           alt="Canvas Fallback"
           width={offset?.width ?? 1920}

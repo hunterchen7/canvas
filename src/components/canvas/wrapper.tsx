@@ -1,6 +1,5 @@
 import { motion, type MotionValue, type Transition, useMotionValue } from "framer-motion";
 import { useState, useEffect, useRef, type ReactNode } from "react";
-import Image from "next/image";
 import {
   MAX_DIM_RATIO,
   GROW_TRANSITION,
@@ -41,7 +40,7 @@ interface CanvasWrapperProps {
  */
 const DefaultIntroContent = () => (
   <div className="absolute left-1/2 top-24 flex -translate-x-1/2 flex-col items-center text-center">
-    <Image
+    <motion.img
       src="/horse.svg"
       alt="Hack Western Logo"
       width={64}
