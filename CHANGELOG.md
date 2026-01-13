@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/hunterchen7/canvas/compare/canvas-v0.3.1...canvas-v0.4.0) (2026-01-13)
+
+
+### Features
+
+* allow customizable backgrounds ([#18](https://github.com/hunterchen7/canvas/issues/18)) ([9614433](https://github.com/hunterchen7/canvas/commit/9614433ec8349d048e3f1f3e3c1fbd5bddfbadca))
+
 ## [0.3.1](https://github.com/hunterchen7/canvas/compare/canvas-v0.3.0...canvas-v0.3.1) (2026-01-13)
 
 
