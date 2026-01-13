@@ -132,6 +132,170 @@ const navItems: NavItem[] = [
 
 When `navItems` is provided, the canvas will render a navbar with buttons to navigate between sections. The navbar uses Lucide icons, so make sure the icon names match available Lucide icons.
 
+## Customization
+
+### Background Customization
+
+The canvas comes with neutral gray default backgrounds. You can fully customize the canvas background, intro/wrapper background, and intro content.
+
+#### Canvas Background
+
+The canvas background consists of a gradient, dot pattern, and noise filter. Customize it by passing a `canvasBackground` prop:
+
+```tsx
+import { Canvas, DefaultCanvasBackground } from '@hunterchen/canvas';
+
+// Option 1: Use the default component with custom props
+<Canvas
+  homeCoordinates={homeCoordinates}
+  canvasBackground={
+    <DefaultCanvasBackground
+      gradientStyle="radial-gradient(circle, #ff6b6b 0%, #4ecdc4 100%)"
+      dotColor="#333333"
+      dotOpacity={0.5}
+      showFilter={false}
+    />
+  }
+>
+  {/* ... */}
+</Canvas>
+
+// Option 2: Pass your own custom background component
+<Canvas
+  homeCoordinates={homeCoordinates}
+  canvasBackground={<MyCustomBackground />}
+>
+  {/* ... */}
+</Canvas>
+```
+
+**DefaultCanvasBackground props:**
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `gradientStyle` | `string` | neutral gray gradient | CSS gradient string |
+| `showDots` | `boolean` | `true` | Show dot pattern overlay |
+| `dotColor` | `string` | `#888888` | Dot pattern color |
+| `dotSize` | `number` | `1.5` | Dot size in pixels |
+| `dotSpacing` | `number` | `22` | Dot spacing in pixels |
+| `dotOpacity` | `number` | `0.35` | Dot pattern opacity (0-1) |
+| `showFilter` | `boolean` | `true` | Show noise filter |
+| `filterOpacity` | `number` | `0.6` | Noise filter opacity (0-1) |
+
+#### Intro/Wrapper Background
+
+Customize the background shown during the intro animation:
+
+```tsx
+import { Canvas, DefaultWrapperBackground } from '@hunterchen/canvas';
+
+// Option 1: Simple gradient string
+<Canvas
+  homeCoordinates={homeCoordinates}
+  introBackgroundGradient="linear-gradient(to bottom, #667eea 0%, #764ba2 100%)"
+>
+  {/* ... */}
+</Canvas>
+
+// Option 2: Custom wrapper background component
+<Canvas
+  homeCoordinates={homeCoordinates}
+  wrapperBackground={
+    <DefaultWrapperBackground
+      gradient="linear-gradient(to top, #FEB6AF 0%, #EAD2DF 50%)"
+    />
+  }
+>
+  {/* ... */}
+</Canvas>
+```
+
+#### Intro Content
+
+Customize the logo and title shown during loading:
+
+```tsx
+import { Canvas, DefaultIntroContent } from '@hunterchen/canvas';
+
+<Canvas
+  homeCoordinates={homeCoordinates}
+  introContent={
+    <DefaultIntroContent
+      logoSrc="/my-logo.svg"
+      logoAlt="My App Logo"
+      logoWidth={80}
+      logoHeight={80}
+      title="MY APP"
+      titleClassName="text-blue-600"
+    />
+  }
+  loadingText="Loading..."
+>
+  {/* ... */}
+</Canvas>
+```
+
+#### Complete Theming Example (Hack Western Style)
+
+Here's a complete example showing how to apply a custom theme:
+
+```tsx
+import {
+  Canvas,
+  DefaultCanvasBackground,
+  DefaultIntroContent,
+  DefaultWrapperBackground,
+  canvasWidth,
+  canvasHeight,
+} from '@hunterchen/canvas';
+
+// Define your theme colors
+const CANVAS_GRADIENT = `radial-gradient(ellipse ${canvasWidth}px ${canvasHeight}px at ${canvasWidth / 2}px ${canvasHeight}px, var(--coral) 0%, var(--salmon) 41%, var(--lilac) 59%, var(--beige) 90%)`;
+const INTRO_GRADIENT = "linear-gradient(to top, #FEB6AF 0%, #EAD2DF 15%, #EFE3E1 50%)";
+const BOX_GRADIENT = "radial-gradient(130.38% 95% at 50.03% 97.25%, #EFB8A0 0%, #EAD2DF 48.09%, #EFE3E1 100%)";
+
+function App() {
+  return (
+    <Canvas
+      homeCoordinates={homeCoordinates}
+      navItems={navItems}
+      introBackgroundGradient={INTRO_GRADIENT}
+      canvasBoxGradient={BOX_GRADIENT}
+      introContent={
+        <DefaultIntroContent
+          logoSrc="/logo.svg"
+          logoAlt="Logo"
+          title="MY BRAND"
+        />
+      }
+      loadingText="LOADING..."
+      canvasBackground={
+        <DefaultCanvasBackground
+          gradientStyle={CANVAS_GRADIENT}
+          dotColor="#776780"
+        />
+      }
+      wrapperBackground={
+        <DefaultWrapperBackground gradient={INTRO_GRADIENT} />
+      }
+    >
+      {/* Your canvas content */}
+    </Canvas>
+  );
+}
+```
+
+### Exported Constants
+
+The library exports default gradient values you can use as a starting point:
+
+```tsx
+import {
+  DEFAULT_CANVAS_GRADIENT,    // Default canvas background gradient
+  DEFAULT_INTRO_GRADIENT,     // Default intro background gradient
+  DEFAULT_CANVAS_BOX_GRADIENT // Default blur mask gradient
+} from '@hunterchen/canvas';
+```
+
 ## Usage Examples
 
 ### Basic Canvas with Draggable Elements
@@ -193,6 +357,15 @@ npm run type-check
 - `CanvasToolbar` - Coordinate/zoom display toolbar
 - `CanvasNavbar` - Navigation buttons
 
+### Background Components
+- `DefaultCanvasBackground` - Customizable canvas background with gradient, dots, and filter
+- `DefaultWrapperBackground` - Customizable intro/wrapper background
+- `DefaultIntroContent` - Customizable intro logo and title
+- `DefaultCanvasBlurMask` - Reference component for blur mask styling
+- `DEFAULT_CANVAS_GRADIENT` - Default canvas gradient constant
+- `DEFAULT_INTRO_GRADIENT` - Default intro gradient constant
+- `DEFAULT_CANVAS_BOX_GRADIENT` - Default blur mask gradient constant
+
 ### Contexts
 - `CanvasProvider` - Canvas state context provider
 - `useCanvasContext` - Hook to access canvas context
@@ -204,6 +377,7 @@ npm run type-check
 - `usePerformanceModeLegacy` - Legacy performance optimization
 
 ### Utilities
+- `cn` - Tailwind class merging utility (uses `clsx` + `tailwind-merge`)
 - Canvas utility functions (pan, zoom, coordinates)
 - Performance detection utilities
 - Constants and types
