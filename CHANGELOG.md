@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/hunterchen7/canvas/compare/canvas-v0.3.0...canvas-v0.3.1) (2026-01-13)
+
+
+### Miscellaneous Chores
+
+* remove `next.js` as dependency ([#13](https://github.com/hunterchen7/canvas/issues/13)) ([a2a727c](https://github.com/hunterchen7/canvas/commit/a2a727c9d9c9800794411ef7b0864292297725a0))
+
 ## [0.3.0](https://github.com/hunterchen7/canvas/compare/canvas-v0.2.1...canvas-v0.3.0) (2026-01-12)
 
 
