@@ -361,7 +361,6 @@ npm run type-check
 - `DefaultCanvasBackground` - Customizable canvas background with gradient, dots, and filter
 - `DefaultWrapperBackground` - Customizable intro/wrapper background
 - `DefaultIntroContent` - Customizable intro logo and title
-- `DefaultCanvasBlurMask` - Reference component for blur mask styling
 - `DEFAULT_CANVAS_GRADIENT` - Default canvas gradient constant
 - `DEFAULT_INTRO_GRADIENT` - Default intro gradient constant
 - `DEFAULT_CANVAS_BOX_GRADIENT` - Default blur mask gradient constant

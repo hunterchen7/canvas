@@ -197,28 +197,6 @@ export const DefaultIntroContent: React.FC<DefaultIntroContentProps> = ({
   );
 };
 
-export interface CanvasBlurMaskProps {
-  /** Gradient for the blur mask box */
-  gradient?: string;
-  /** Additional className */
-  className?: string;
-  /** Additional inline styles */
-  style?: React.CSSProperties;
-}
-
-/**
- * The blur mask box that fades out during the intro animation.
- */
-export const DefaultCanvasBlurMask: React.FC<CanvasBlurMaskProps> = ({
-  gradient = "radial-gradient(130.38% 95% at 50.03% 97.25%, #d4d4d4 0%, #e5e5e5 48.09%, #f5f5f5 100%)",
-  className,
-  style,
-}) => {
-  // This component is meant to be used as a reference/customization point.
-  // The actual blur mask is rendered in wrapper.tsx with animation props.
-  return null;
-};
-
 // Default gradient values for export (neutral grays)
 export const DEFAULT_INTRO_GRADIENT =
   "linear-gradient(to top, #d4d4d4 0%, #e5e5e5 50%, #f5f5f5 100%)";

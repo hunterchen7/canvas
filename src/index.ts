@@ -11,7 +11,6 @@ export {
     DefaultCanvasBackground,
     DefaultWrapperBackground,
     DefaultIntroContent,
-    DefaultCanvasBlurMask,
     DEFAULT_CANVAS_GRADIENT,
     DEFAULT_INTRO_GRADIENT,
     DEFAULT_CANVAS_BOX_GRADIENT,
@@ -20,7 +19,6 @@ export type {
     DefaultCanvasBackgroundProps,
     DefaultWrapperBackgroundProps,
     DefaultIntroContentProps,
-    CanvasBlurMaskProps,
 } from './components/canvas/backgrounds';
 
 // Contexts
