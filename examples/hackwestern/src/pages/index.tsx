@@ -1,7 +1,15 @@
 import Head from "next/head";
 import { Footer } from "../components/footer";
 import Hero from "../components/promo/hero";
-import { Canvas, growTransition } from "@hunterchen/canvas";
+import {
+  Canvas,
+  growTransition,
+  DefaultCanvasBackground,
+  DefaultIntroContent,
+  DefaultWrapperBackground,
+  canvasWidth,
+  canvasHeight,
+} from "@hunterchen/canvas";
 import Sponsors from "../components/promo/sponsors";
 import About from "../components/promo/about";
 import Projects from "../components/promo/projects";
@@ -14,6 +22,11 @@ import { motion } from "framer-motion";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { Button } from "~/components/ui/button";
+
+// Hack Western themed background configuration
+const HACK_WESTERN_CANVAS_GRADIENT = `radial-gradient(ellipse ${canvasWidth}px ${canvasHeight}px at ${canvasWidth / 2}px ${canvasHeight}px, var(--coral) 0%, var(--salmon) 41%, var(--lilac) 59%, var(--beige) 90%)`;
+const HACK_WESTERN_INTRO_GRADIENT = "linear-gradient(to top, #FEB6AF 0%, var(--canvas-salmon) 15%, var(--canvas-beige) 50%)";
+const HACK_WESTERN_BOX_GRADIENT = "radial-gradient(130.38% 95% at 50.03% 97.25%, #EFB8A0 0%, #EAD2DF 48.09%, #EFE3E1 100%)";
 
 export default function Home() {
   const router = useRouter();
@@ -40,6 +53,25 @@ export default function Home() {
         <Canvas
           homeCoordinates={coordinates.home}
           navItems={navItems}
+          introBackgroundGradient={HACK_WESTERN_INTRO_GRADIENT}
+          canvasBoxGradient={HACK_WESTERN_BOX_GRADIENT}
+          introContent={
+            <DefaultIntroContent
+              logoSrc="/horse.svg"
+              logoAlt="Hack Western Logo"
+              title="HACK WESTERN 12"
+            />
+          }
+          loadingText="LOADING CANVAS"
+          canvasBackground={
+            <DefaultCanvasBackground
+              gradientStyle={HACK_WESTERN_CANVAS_GRADIENT}
+              dotColor="#776780"
+            />
+          }
+          wrapperBackground={
+            <DefaultWrapperBackground gradient={HACK_WESTERN_INTRO_GRADIENT} />
+          }
         >
           <Hero />
           <Sponsors />

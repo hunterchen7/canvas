@@ -24,8 +24,10 @@ interface CanvasWrapperProps {
   introContent?: ReactNode;
   /** Custom loading text (default: "LOADING CANVAS") */
   loadingText?: string;
-  /** Background gradient for intro screen */
+  /** Background gradient for intro screen (CSS gradient string) */
   introBackgroundGradient?: string;
+  /** Custom wrapper background component (overrides introBackgroundGradient if provided) */
+  wrapperBackground?: ReactNode;
   /** Canvas box gradient for blur mask */
   canvasBoxGradient?: string;
   /** Grow animation transition config */
@@ -60,8 +62,9 @@ export const CanvasWrapper = ({
   skipIntro = false,
   introContent,
   loadingText = "LOADING CANVAS",
-  introBackgroundGradient = "linear-gradient(to top, #FEB6AF 0%, var(--canvas-salmon) 15%, var(--canvas-beige) 50%)",
-  canvasBoxGradient = "radial-gradient(130.38% 95% at 50.03% 97.25%, #EFB8A0 0%, #EAD2DF 48.09%, #EFE3E1 100%)",
+  introBackgroundGradient = "linear-gradient(to top, #d4d4d4 0%, #e5e5e5 50%, #f5f5f5 100%)",
+  wrapperBackground,
+  canvasBoxGradient = "radial-gradient(130.38% 95% at 50.03% 97.25%, #d4d4d4 0%, #e5e5e5 48.09%, #f5f5f5 100%)",
   growTransition = GROW_TRANSITION,
   blurTransition = BLUR_TRANSITION,
 }: CanvasWrapperProps) => {
@@ -141,13 +144,17 @@ export const CanvasWrapper = ({
     <motion.div
       className="fixed inset-0 overflow-hidden"
       style={{
-        backgroundImage: stage1NotFinished ? introBackgroundGradient : undefined,
+        // Only use gradient style if no custom wrapperBackground is provided
+        backgroundImage: stage1NotFinished && !wrapperBackground ? introBackgroundGradient : undefined,
         touchAction: "none",
         userSelect: "none",
         pointerEvents: "none",
       }}
       onContextMenu={(e) => e.preventDefault()}
     >
+      {/* Custom wrapper background (renders behind everything) */}
+      {stage1NotFinished && wrapperBackground}
+
       {stage1NotFinished && (
         <>
           {/* Render custom intro content or default */}
@@ -209,7 +216,7 @@ export const CanvasWrapper = ({
         </>
       )}
       {stage1NotFinished && loadingText && (
-        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 text-center font-canvas-jetbrains-mono font-semibold text-[#543C5AB2]">
+        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 text-center font-mono font-semibold text-neutral-500">
           {loadingText}{dots}
         </div>
       )}

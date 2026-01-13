@@ -6,6 +6,23 @@ export { CanvasWrapper, growTransition } from './components/canvas/wrapper';
 export { default as CanvasToolbar } from './components/canvas/toolbar';
 export { default as CanvasNavbar } from './components/canvas/navbar';
 
+// Background Components
+export {
+  DefaultCanvasBackground,
+  DefaultWrapperBackground,
+  DefaultIntroContent,
+  DefaultCanvasBlurMask,
+  DEFAULT_CANVAS_GRADIENT,
+  DEFAULT_INTRO_GRADIENT,
+  DEFAULT_CANVAS_BOX_GRADIENT,
+} from './components/canvas/backgrounds';
+export type {
+  DefaultCanvasBackgroundProps,
+  DefaultWrapperBackgroundProps,
+  DefaultIntroContentProps,
+  CanvasBlurMaskProps,
+} from './components/canvas/backgrounds';
+
 // Contexts
 export { CanvasContext, CanvasProvider, useCanvasContext } from './contexts/CanvasContext';
 export type { CanvasContextState } from './contexts/CanvasContext';
@@ -19,6 +36,7 @@ export { usePerformanceMode as usePerformanceModeLegacy } from './hooks/usePerfo
 // Utilities
 export * from './lib/canvas';
 export * from './lib/constants';
+export * from './lib/utils';
 export * from './utils/performance';
 
 // Types

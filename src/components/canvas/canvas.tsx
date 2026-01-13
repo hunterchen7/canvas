@@ -43,6 +43,7 @@ import type { CanvasSection, NavItem, SectionCoordinates } from "../../types";
 import { CanvasWrapper } from "./wrapper";
 import { usePerformanceMode } from "../../hooks/usePerformanceMode";
 import type { ReactNode } from "react";
+import { DefaultCanvasBackground } from "./backgrounds";
 
 interface Props {
   homeCoordinates: SectionCoordinates;
@@ -67,6 +68,12 @@ interface Props {
   growTransition?: Transition;
   /** Custom blur transition */
   blurTransition?: Transition;
+
+  // ============== Background Customization ==============
+  /** Custom canvas background. If not provided, uses DefaultCanvasBackground. */
+  canvasBackground?: ReactNode;
+  /** Custom wrapper/intro background. If not provided, uses introBackgroundGradient. */
+  wrapperBackground?: ReactNode;
 }
 
 const stopAllMotion = (
@@ -90,6 +97,8 @@ const Canvas: FC<Props> = ({
   canvasBoxGradient,
   growTransition,
   blurTransition,
+  canvasBackground,
+  wrapperBackground,
 }) => {
   const { height: windowHeight, width: windowWidth } = useWindowDimensions();
 
@@ -593,6 +602,7 @@ const Canvas: FC<Props> = ({
       introContent={introContent}
       loadingText={loadingText}
       introBackgroundGradient={introBackgroundGradient}
+      wrapperBackground={wrapperBackground}
       canvasBoxGradient={canvasBoxGradient}
       growTransition={growTransition}
       blurTransition={blurTransition}
@@ -652,23 +662,24 @@ const Canvas: FC<Props> = ({
                   : "auto",
             }}
           >
-            <Gradient />
-            {animationStage >= 1 &&
-              (mode === "high" ? (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5, ease: "easeIn" }}
-                >
-                  <Filter />
-                  <Dots />
-                </motion.div>
-              ) : (
-                <>
-                  <Filter />
-                  <Dots />
-                </>
-              ))}
+            {/* Canvas Background - customizable or default */}
+            {canvasBackground !== undefined ? (
+              canvasBackground
+            ) : (
+              <>
+                {animationStage >= 1 && mode === "high" ? (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5, ease: "easeIn" }}
+                  >
+                    <DefaultCanvasBackground />
+                  </motion.div>
+                ) : (
+                  <DefaultCanvasBackground />
+                )}
+              </>
+            )}
             {children}
           </motion.div>
         </div>
@@ -677,29 +688,7 @@ const Canvas: FC<Props> = ({
   );
 };
 
+/** @deprecated Use createCanvasGradient from backgrounds.tsx instead */
 export const gradientBgImage = `radial-gradient(ellipse ${canvasWidth}px ${canvasHeight}px at ${canvasWidth / 2}px ${canvasHeight}px, var(--coral) 0%, var(--salmon) 41%, var(--lilac) 59%, var(--beige) 90%)`;
-
-const Gradient = React.memo(function Gradient() {
-  return (
-    <div
-      className="pointer-events-none absolute inset-0 h-full w-full opacity-100"
-      style={{
-        backgroundImage: gradientBgImage,
-      }}
-    />
-  );
-});
-
-const Dots = React.memo(function Dots() {
-  return (
-    <div className="pointer-events-none absolute inset-0 h-full w-full bg-[radial-gradient(#776780_1.5px,transparent_1px)] opacity-35 [background-size:22px_22px] " />
-  );
-});
-
-const Filter = React.memo(function Filter() {
-  return (
-    <div className="contrast-60 md:bg-noise pointer-events-none absolute inset-0 hidden h-full w-full bg-none opacity-60 filter md:inline" />
-  );
-});
 
 export default Canvas;
