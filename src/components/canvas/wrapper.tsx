@@ -36,25 +36,6 @@ interface CanvasWrapperProps {
   blurTransition?: Transition;
 }
 
-/**
- * Default intro content (Hack Western branding)
- * Positioned in the upper third of the screen
- */
-const DefaultIntroContent = () => (
-  <div className="absolute left-1/2 top-24 flex -translate-x-1/2 flex-col items-center text-center">
-    <motion.img
-      src="/horse.svg"
-      alt="Hack Western Logo"
-      width={64}
-      height={64}
-      className="mb-4"
-    />
-    <div className="font-canvas-jetbrains-mono font-semibold text-[#543C5AB2]">
-      HACK WESTERN 12
-    </div>
-  </div>
-);
-
 export const CanvasWrapper = ({
   children,
   introProgress,
@@ -157,8 +138,7 @@ export const CanvasWrapper = ({
 
       {stage1NotFinished && (
         <>
-          {/* Render custom intro content or default */}
-          {introContent !== undefined ? introContent : <DefaultIntroContent />}
+          {introContent}
         </>
       )}
 
