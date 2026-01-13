@@ -688,7 +688,4 @@ const Canvas: FC<Props> = ({
   );
 };
 
-/** @deprecated Use createCanvasGradient from backgrounds.tsx instead */
-export const gradientBgImage = `radial-gradient(ellipse ${canvasWidth}px ${canvasHeight}px at ${canvasWidth / 2}px ${canvasHeight}px, var(--coral) 0%, var(--salmon) 41%, var(--lilac) 59%, var(--beige) 90%)`;
-
 export default Canvas;

@@ -1,5 +1,5 @@
 // Components
-export { default as Canvas, gradientBgImage } from './components/canvas/canvas';
+export { default as Canvas } from './components/canvas/canvas';
 export { CanvasComponent } from './components/canvas/component';
 export { Draggable, DraggableImage } from './components/canvas/draggable';
 export { CanvasWrapper, growTransition } from './components/canvas/wrapper';
@@ -8,19 +8,19 @@ export { default as CanvasNavbar } from './components/canvas/navbar';
 
 // Background Components
 export {
-  DefaultCanvasBackground,
-  DefaultWrapperBackground,
-  DefaultIntroContent,
-  DefaultCanvasBlurMask,
-  DEFAULT_CANVAS_GRADIENT,
-  DEFAULT_INTRO_GRADIENT,
-  DEFAULT_CANVAS_BOX_GRADIENT,
+    DefaultCanvasBackground,
+    DefaultWrapperBackground,
+    DefaultIntroContent,
+    DefaultCanvasBlurMask,
+    DEFAULT_CANVAS_GRADIENT,
+    DEFAULT_INTRO_GRADIENT,
+    DEFAULT_CANVAS_BOX_GRADIENT,
 } from './components/canvas/backgrounds';
 export type {
-  DefaultCanvasBackgroundProps,
-  DefaultWrapperBackgroundProps,
-  DefaultIntroContentProps,
-  CanvasBlurMaskProps,
+    DefaultCanvasBackgroundProps,
+    DefaultWrapperBackgroundProps,
+    DefaultIntroContentProps,
+    CanvasBlurMaskProps,
 } from './components/canvas/backgrounds';
 
 // Contexts
