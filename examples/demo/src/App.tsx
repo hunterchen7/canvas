@@ -2,14 +2,12 @@ import { useState } from "react";
 import {
   Canvas,
   CanvasComponent,
-  Draggable,
   DraggableImage,
   type NavItem,
   type SectionCoordinates,
 } from "@hunterchen/canvas";
 import {
   Home,
-  Sparkles,
   Puzzle,
   RotateCcw,
   Github,
@@ -18,16 +16,18 @@ import {
 } from "lucide-react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { examples, baseProvinces } from "./constants";
+import { generateProvinceLayout } from "./utils";
 
 // Section coordinates
-const coordinates = {
+export const coordinates = {
   home: { x: 2600, y: 500, width: 1200, height: 800 },
   features: { x: 1000, y: 2100, width: 1200, height: 950 },
   playground: { x: 4200, y: 2100, width: 1200, height: 800 },
 } satisfies Record<string, SectionCoordinates>;
 
 // Navigation items
-const navItems: NavItem[] = [
+export const navItems: NavItem[] = [
   {
     id: "home",
     label: "Home",
@@ -123,52 +123,6 @@ function HomeSection() {
 }
 
 function FeaturesSection() {
-  const examples = [
-    {
-      title: "Navigation Items",
-      code: `const navItems: NavItem[] = [
-  {
-    id: "home",
-    label: "Home",
-    icon: "Home",
-    x: 2600,
-    y: 1700,
-    width: 1200,
-    height: 800,
-    isHome: true
-  },
-  {
-    id: "about",
-    label: "About",
-    icon: "Info",
-    x: 800,
-    y: 400,
-    width: 1200,
-    height: 800
-  }
-];
-
-<Canvas 
-  homeCoordinates={homeCoordinates} 
-  navItems={navItems}
-/>`,
-    },
-    {
-      title: "Draggable Elements",
-      code: `import { Draggable } from '@hunterchen/canvas';
-
-function MyComponent() {
-  return (
-    <Draggable initialPos={{ x: 50, y: 50 }}>
-      <div className="card">
-        Drag me around!
-      </div>
-    </Draggable>
-  );
-}`,
-    },
-  ];
-
   return (
     <div
       className="flex h-full w-full flex-col rounded-2xl border border-neutral-300 bg-white/80 p-8 shadow-lg backdrop-blur-sm overflow-auto"
@@ -217,203 +171,7 @@ function MyComponent() {
   );
 }
 
-// Smart layout algorithm that places provinces without overlap
-// Tall provinces are spread out, small ones fill gaps
-function generateProvinceLayout(
-  provinces: { name: string; w: number; h: number }[],
-  containerWidth: number,
-  containerHeight: number
-) {
-  const padding = 10;
-  const gap = 8; // Minimum gap between provinces
-
-  // Sort by height descending - place tallest first
-  const sorted = provinces
-    .map((p, originalIndex) => ({ ...p, originalIndex }))
-    .sort((a, b) => b.h - a.h);
-
-  const positions: {
-    x: number;
-    y: number;
-    w: number;
-    h: number;
-    originalIndex: number;
-  }[] = [];
-
-  // Check if a new rect overlaps with any existing rect
-  const overlaps = (x: number, y: number, w: number, h: number) => {
-    for (const pos of positions) {
-      if (
-        x < pos.x + pos.w + gap &&
-        x + w + gap > pos.x &&
-        y < pos.y + pos.h + gap &&
-        y + h + gap > pos.y
-      ) {
-        return true;
-      }
-    }
-    return false;
-  };
-
-  // Create a grid of candidate positions
-  const gridStepX = 30;
-  const gridStepY = 25;
-
-  for (const prov of sorted) {
-    let placed = false;
-
-    // Try to find a non-overlapping position
-    // Scan left-to-right, top-to-bottom
-    for (
-      let y = padding;
-      y <= containerHeight - prov.h - padding && !placed;
-      y += gridStepY
-    ) {
-      for (
-        let x = padding;
-        x <= containerWidth - prov.w - padding && !placed;
-        x += gridStepX
-      ) {
-        if (!overlaps(x, y, prov.w, prov.h)) {
-          positions.push({
-            x,
-            y,
-            w: prov.w,
-            h: prov.h,
-            originalIndex: prov.originalIndex,
-          });
-          placed = true;
-        }
-      }
-    }
-
-    // Fallback: if no position found, place at a random valid spot anyway
-    if (!placed) {
-      const x = Math.max(
-        padding,
-        Math.min(
-          containerWidth - prov.w - padding,
-          Math.random() * containerWidth
-        )
-      );
-      const y = Math.max(
-        padding,
-        Math.min(
-          containerHeight - prov.h - padding,
-          Math.random() * containerHeight
-        )
-      );
-      positions.push({
-        x,
-        y,
-        w: prov.w,
-        h: prov.h,
-        originalIndex: prov.originalIndex,
-      });
-    }
-  }
-
-  // Return positions in original order
-  const result: { x: number; y: number }[] = new Array(provinces.length);
-  for (const pos of positions) {
-    result[pos.originalIndex] = { x: pos.x, y: pos.y };
-  }
-  return result;
-}
-
 function PlaygroundSection() {
-  // Canadian provinces and territories - scattered for puzzle assembly
-  // Sizes are proportional based on actual SVG viewBox dimensions
-  // Scale factor to fit nicely in the puzzle area
-  const scale = 0.01;
-
-  const baseProvinces = [
-    // Western - dimensions from viewBox (width x height), magic numbers originate from the orignal SVGs
-    {
-      name: "British Columbia",
-      src: "/provinces/bc.svg",
-      w: Math.round(11991 * scale),
-      h: Math.round(19712 * scale),
-    },
-    {
-      name: "Alberta",
-      src: "/provinces/ab.svg",
-      w: Math.round(9108 * scale),
-      h: Math.round(14724 * scale),
-    },
-    {
-      name: "Saskatchewan",
-      src: "/provinces/sk.svg",
-      w: Math.round(8362 * scale),
-      h: Math.round(14043 * scale),
-    },
-    {
-      name: "Manitoba",
-      src: "/provinces/mb.svg",
-      w: Math.round(9453 * scale),
-      h: Math.round(13477 * scale),
-    },
-
-    // Central
-    {
-      name: "Ontario",
-      src: "/provinces/on.svg",
-      w: Math.round(17976 * scale),
-      h: Math.round(17692 * scale),
-    },
-    {
-      name: "Quebec",
-      src: "/provinces/qc.svg",
-      w: Math.round(18073 * scale),
-      h: Math.round(20233 * scale),
-    },
-    // Atlantic
-    {
-      name: "New Brunswick",
-      src: "/provinces/nb.svg",
-      w: Math.round(4698 * scale),
-      h: Math.round(4885 * scale),
-    },
-    {
-      name: "Nova Scotia",
-      src: "/provinces/ns.svg",
-      w: Math.round(5515 * scale),
-      h: Math.round(6471 * scale),
-    },
-    {
-      name: "PEI",
-      src: "/provinces/pe.svg",
-      w: Math.round(1977 * scale),
-      h: Math.round(1046 * scale),
-    },
-    {
-      name: "Newfoundland",
-      src: "/provinces/nl.svg",
-      w: Math.round(15945 * scale),
-      h: Math.round(12001 * scale),
-    },
-
-    // Territories
-    {
-      name: "Yukon",
-      src: "/provinces/yt.svg",
-      w: Math.round(8908 * scale),
-      h: Math.round(14282 * scale),
-    },
-    {
-      name: "NWT",
-      src: "/provinces/nt.svg",
-      w: Math.round(15401 * scale),
-      h: Math.round(23033 * scale),
-    },
-    {
-      name: "Nunavut",
-      src: "/provinces/nu.svg",
-      w: Math.round(29287 * scale),
-      h: Math.round(37253 * scale),
-    },
-  ];
-
   // Generate smart non-overlapping layout based on province sizes
   const positions = generateProvinceLayout(baseProvinces, 1100, 800);
 
