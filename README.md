@@ -1,4 +1,4 @@
-[![npm downloads](https://img.shields.io/npm/dm/@hunterchen/canvas.svg)](https://www.npmjs.com/package/@hunterchen/canvas)
+[![npm downloads](https://img.shields.io/npm/dt/@hunterchen/canvas.svg)](https://www.npmjs.com/package/@hunterchen/canvas)
 
 
 # @hunterchen/canvas
