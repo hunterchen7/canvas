@@ -1,3 +1,6 @@
+[![npm downloads](https://img.shields.io/npm/dm/@hunterchen/canvas.svg)](https://www.npmjs.com/package/@hunterchen/canvas)
+
+
 # @hunterchen/canvas
 
 A React-based canvas library for creating pannable, zoomable, and interactive canvas experiences. Originally developed (by me) for the [Hack Western 12 Website](https://github.com/hackwestern/hackwestern/tree/2025).
