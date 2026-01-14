@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.4.1](https://github.com/hunterchen7/canvas/compare/canvas-v0.4.0...canvas-v0.4.1) (2026-01-14)
+
+
+### Bug Fixes
+
+* npm downloads badge to show total downloads ([#23](https://github.com/hunterchen7/canvas/issues/23)) ([b49c7f7](https://github.com/hunterchen7/canvas/commit/b49c7f7f33454bd08d4356c8a7cef49be678e12d))
+
+
+### Miscellaneous Chores
+
+* Add npm downloads badge to README ([#21](https://github.com/hunterchen7/canvas/issues/21)) ([71c44e2](https://github.com/hunterchen7/canvas/commit/71c44e2d79b46a6098a9a96b8ad46e60e24c0a6b))
+
 ## [0.4.0](https://github.com/hunterchen7/canvas/compare/canvas-v0.3.1...canvas-v0.4.0) (2026-01-13)
 
 
