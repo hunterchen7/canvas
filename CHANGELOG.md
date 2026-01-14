@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/hunterchen7/canvas/compare/canvas-v0.4.1...canvas-v0.5.0) (2026-01-14)
+
+
+### Features
+
+* example demo ([#24](https://github.com/hunterchen7/canvas/issues/24)) ([2acdef6](https://github.com/hunterchen7/canvas/commit/2acdef69509177c5c41aec5e6655bccabfec14a9))
+
 ## [0.4.1](https://github.com/hunterchen7/canvas/compare/canvas-v0.4.0...canvas-v0.4.1) (2026-01-14)
 
 
