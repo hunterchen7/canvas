@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Canvas,
   CanvasComponent,
@@ -10,27 +11,37 @@ import {
   Home,
   Sparkles,
   Puzzle,
-  Users,
-  BarChart3,
-  GripVertical,
+  RotateCcw,
+  Github,
+  PackageOpen,
+  Code,
 } from "lucide-react";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 // Section coordinates
 const coordinates = {
-  home: { x: 2600, y: 1700, width: 800, height: 600 },
-  features: { x: 800, y: 400, width: 800, height: 600 },
-  playground: { x: 4400, y: 400, width: 800, height: 600 },
-  team: { x: 800, y: 2800, width: 800, height: 600 },
-  stats: { x: 4400, y: 2800, width: 800, height: 600 },
+  home: { x: 2600, y: 500, width: 1200, height: 800 },
+  features: { x: 1000, y: 2100, width: 1200, height: 950 },
+  playground: { x: 4200, y: 2100, width: 1200, height: 800 },
 } satisfies Record<string, SectionCoordinates>;
 
 // Navigation items
 const navItems: NavItem[] = [
-  { id: "home", label: "Home", icon: "Home", ...coordinates.home, isHome: true },
-  { id: "features", label: "Features", icon: "Sparkles", ...coordinates.features },
-  { id: "playground", label: "Playground", icon: "Puzzle", ...coordinates.playground },
-  { id: "team", label: "Team", icon: "Users", ...coordinates.team },
-  { id: "stats", label: "Stats", icon: "BarChart3", ...coordinates.stats },
+  {
+    id: "home",
+    label: "Home",
+    icon: "Home",
+    ...coordinates.home,
+    isHome: true,
+  },
+  { id: "features", label: "Examples", icon: "Code", ...coordinates.features },
+  {
+    id: "playground",
+    label: "Playground",
+    icon: "Puzzle",
+    ...coordinates.playground,
+  },
 ];
 
 function App() {
@@ -39,6 +50,7 @@ function App() {
       <Canvas
         homeCoordinates={coordinates.home}
         navItems={navItems}
+        skipIntro={true}
       >
         {/* Home Section - Center */}
         <CanvasComponent offset={coordinates.home}>
@@ -54,16 +66,6 @@ function App() {
         <CanvasComponent offset={coordinates.playground}>
           <PlaygroundSection />
         </CanvasComponent>
-
-        {/* Team Section - Bottom Left (with draggables) */}
-        <CanvasComponent offset={coordinates.team}>
-          <TeamSection />
-        </CanvasComponent>
-
-        {/* Stats Section - Bottom Right */}
-        <CanvasComponent offset={coordinates.stats}>
-          <StatsSection />
-        </CanvasComponent>
       </Canvas>
     </div>
   );
@@ -73,85 +75,373 @@ function App() {
 
 function HomeSection() {
   return (
-    <div className="flex h-full w-full flex-col items-center justify-center rounded-2xl border border-neutral-300 bg-white/80 p-8 shadow-lg backdrop-blur-sm">
+    <div
+      className="flex h-full w-full flex-col items-center justify-center rounded-2xl border border-neutral-300 bg-white/80 p-8 shadow-lg backdrop-blur-sm cursor-auto"
+      onPointerDown={(e) => e.stopPropagation()}
+      onPointerMove={(e) => e.stopPropagation()}
+      style={{ userSelect: "text" }}
+    >
       <Home className="mb-4 h-12 w-12 text-neutral-600" />
       <h1 className="mb-2 text-3xl font-bold text-neutral-800">
         Welcome to Canvas
       </h1>
       <p className="mb-6 max-w-md text-center text-neutral-600">
-        An interactive, pannable, and zoomable canvas for building immersive
-        web experiences. Navigate using the buttons below or drag to explore.
+        An interactive, pannable, and zoomable canvas, originally built for the{" "}
+        <a
+          href="https://archive.hackwestern.com/2025"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-neutral-800"
+        >
+          Hack Western 12 website
+        </a>
+        . Navigate using the buttons below or by dragging the canvas. Also
+        includes a custom draggable image components, see the puzzle section!
       </p>
-      <div className="flex gap-2 text-sm text-neutral-500">
-        <span className="rounded-full bg-neutral-100 px-3 py-1">Pan</span>
-        <span className="rounded-full bg-neutral-100 px-3 py-1">Zoom</span>
-        <span className="rounded-full bg-neutral-100 px-3 py-1">Navigate</span>
+      <div className="mt-2 flex gap-3">
+        <a
+          href="https://github.com/hunterchen7/canvas"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 rounded-lg bg-neutral-800 px-4 py-2 text-sm text-white transition-colors hover:bg-neutral-700"
+        >
+          <Github className="h-4 w-4" />
+          GitHub
+        </a>
+        <a
+          href="https://www.npmjs.com/package/@hunterchen/canvas"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm text-white transition-colors hover:bg-red-500"
+        >
+          <PackageOpen className="h-4 w-4" />
+          npm
+        </a>
       </div>
     </div>
   );
 }
 
 function FeaturesSection() {
-  const features = [
-    { title: "Smooth Panning", description: "Click and drag to pan around the canvas" },
-    { title: "Pinch to Zoom", description: "Use scroll or pinch gestures to zoom" },
-    { title: "Section Navigation", description: "Jump between sections with the navbar" },
-    { title: "Draggable Elements", description: "Some elements can be freely moved" },
-    { title: "Performance Optimized", description: "Adaptive rendering for all devices" },
+  const examples = [
+    {
+      title: "Navigation Items",
+      code: `const navItems: NavItem[] = [
+  {
+    id: "home",
+    label: "Home",
+    icon: "Home",
+    x: 2600,
+    y: 1700,
+    width: 1200,
+    height: 800,
+    isHome: true
+  },
+  {
+    id: "about",
+    label: "About",
+    icon: "Info",
+    x: 800,
+    y: 400,
+    width: 1200,
+    height: 800
+  }
+];
+
+<Canvas 
+  homeCoordinates={homeCoordinates} 
+  navItems={navItems}
+/>`,
+    },
+    {
+      title: "Draggable Elements",
+      code: `import { Draggable } from '@hunterchen/canvas';
+
+function MyComponent() {
+  return (
+    <Draggable initialPos={{ x: 50, y: 50 }}>
+      <div className="card">
+        Drag me around!
+      </div>
+    </Draggable>
+  );
+}`,
+    },
   ];
 
   return (
-    <div className="flex h-full w-full flex-col rounded-2xl border border-neutral-300 bg-white/80 p-8 shadow-lg backdrop-blur-sm">
-      <div className="mb-6 flex items-center gap-3">
-        <Sparkles className="h-8 w-8 text-neutral-600" />
-        <h2 className="text-2xl font-bold text-neutral-800">Features</h2>
+    <div
+      className="flex h-full w-full flex-col rounded-2xl border border-neutral-300 bg-white/80 p-8 shadow-lg backdrop-blur-sm overflow-auto"
+      onPointerDown={(e) => e.stopPropagation()}
+      onPointerMove={(e) => e.stopPropagation()}
+      style={{ userSelect: "text" }}
+    >
+      <div className="mb-6 flex items-center w-full justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <Code className="h-8 w-8 text-neutral-600" />
+          <h2 className="text-2xl font-bold text-neutral-800">Code Examples</h2>
+        </div>
+        <a
+          href="https://github.com/hunterchen7/canvas/tree/main/examples"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 rounded-lg bg-neutral-800 px-4 py-2 text-sm text-white transition-colors hover:bg-neutral-700"
+        >
+          <Github className="h-4 w-4" />
+          Examples
+        </a>
       </div>
-      <ul className="space-y-4">
-        {features.map((feature, i) => (
-          <li key={i} className="flex items-start gap-3">
-            <div className="mt-1 h-2 w-2 rounded-full bg-neutral-400" />
-            <div>
-              <h3 className="font-semibold text-neutral-700">{feature.title}</h3>
-              <p className="text-sm text-neutral-500">{feature.description}</p>
+      <div className="space-y-6">
+        {examples.map((example, i) => (
+          <div key={i} className="space-y-2">
+            <h3 className="text-lg font-semibold text-neutral-700">
+              {example.title}
+            </h3>
+            <div className="overflow-x-auto rounded-lg">
+              <SyntaxHighlighter
+                language="typescript"
+                style={oneDark}
+                customStyle={{
+                  margin: 0,
+                  borderRadius: "0.5rem",
+                  fontSize: "0.75rem",
+                }}
+              >
+                {example.code}
+              </SyntaxHighlighter>
             </div>
-          </li>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }
 
+// Smart layout algorithm that places provinces without overlap
+// Tall provinces are spread out, small ones fill gaps
+function generateProvinceLayout(
+  provinces: { name: string; w: number; h: number }[],
+  containerWidth: number,
+  containerHeight: number
+) {
+  const padding = 10;
+  const gap = 8; // Minimum gap between provinces
+
+  // Sort by height descending - place tallest first
+  const sorted = provinces
+    .map((p, originalIndex) => ({ ...p, originalIndex }))
+    .sort((a, b) => b.h - a.h);
+
+  const positions: {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    originalIndex: number;
+  }[] = [];
+
+  // Check if a new rect overlaps with any existing rect
+  const overlaps = (x: number, y: number, w: number, h: number) => {
+    for (const pos of positions) {
+      if (
+        x < pos.x + pos.w + gap &&
+        x + w + gap > pos.x &&
+        y < pos.y + pos.h + gap &&
+        y + h + gap > pos.y
+      ) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  // Create a grid of candidate positions
+  const gridStepX = 30;
+  const gridStepY = 25;
+
+  for (const prov of sorted) {
+    let placed = false;
+
+    // Try to find a non-overlapping position
+    // Scan left-to-right, top-to-bottom
+    for (
+      let y = padding;
+      y <= containerHeight - prov.h - padding && !placed;
+      y += gridStepY
+    ) {
+      for (
+        let x = padding;
+        x <= containerWidth - prov.w - padding && !placed;
+        x += gridStepX
+      ) {
+        if (!overlaps(x, y, prov.w, prov.h)) {
+          positions.push({
+            x,
+            y,
+            w: prov.w,
+            h: prov.h,
+            originalIndex: prov.originalIndex,
+          });
+          placed = true;
+        }
+      }
+    }
+
+    // Fallback: if no position found, place at a random valid spot anyway
+    if (!placed) {
+      const x = Math.max(
+        padding,
+        Math.min(
+          containerWidth - prov.w - padding,
+          Math.random() * containerWidth
+        )
+      );
+      const y = Math.max(
+        padding,
+        Math.min(
+          containerHeight - prov.h - padding,
+          Math.random() * containerHeight
+        )
+      );
+      positions.push({
+        x,
+        y,
+        w: prov.w,
+        h: prov.h,
+        originalIndex: prov.originalIndex,
+      });
+    }
+  }
+
+  // Return positions in original order
+  const result: { x: number; y: number }[] = new Array(provinces.length);
+  for (const pos of positions) {
+    result[pos.originalIndex] = { x: pos.x, y: pos.y };
+  }
+  return result;
+}
+
 function PlaygroundSection() {
   // Canadian provinces and territories - scattered for puzzle assembly
-  // Using Wikimedia Commons SVG-based province outlines
-  const provinces = [
-    // Western
-    { name: "British Columbia", src: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/76/British_Columbia_in_Canada_2.svg/200px-British_Columbia_in_Canada_2.svg.png", x: 450, y: 320, w: 70, h: 80 },
-    { name: "Alberta", src: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Alberta_in_Canada_2.svg/200px-Alberta_in_Canada_2.svg.png", x: 120, y: 180, w: 60, h: 75 },
-    { name: "Saskatchewan", src: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Saskatchewan_in_Canada_2.svg/200px-Saskatchewan_in_Canada_2.svg.png", x: 580, y: 100, w: 55, h: 70 },
-    { name: "Manitoba", src: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Manitoba_in_Canada_2.svg/200px-Manitoba_in_Canada_2.svg.png", x: 300, y: 380, w: 55, h: 75 },
+  // Sizes are proportional based on actual SVG viewBox dimensions
+  // Scale factor to fit nicely in the puzzle area
+  const scale = 0.01;
+
+  const baseProvinces = [
+    // Western - dimensions from viewBox (width x height), magic numbers originate from the orignal SVGs
+    {
+      name: "British Columbia",
+      src: "/provinces/bc.svg",
+      w: Math.round(11991 * scale),
+      h: Math.round(19712 * scale),
+    },
+    {
+      name: "Alberta",
+      src: "/provinces/ab.svg",
+      w: Math.round(9108 * scale),
+      h: Math.round(14724 * scale),
+    },
+    {
+      name: "Saskatchewan",
+      src: "/provinces/sk.svg",
+      w: Math.round(8362 * scale),
+      h: Math.round(14043 * scale),
+    },
+    {
+      name: "Manitoba",
+      src: "/provinces/mb.svg",
+      w: Math.round(9453 * scale),
+      h: Math.round(13477 * scale),
+    },
 
     // Central
-    { name: "Ontario", src: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Ontario_in_Canada_2.svg/200px-Ontario_in_Canada_2.svg.png", x: 50, y: 350, w: 80, h: 70 },
-    { name: "Quebec", src: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/Quebec_in_Canada_2.svg/200px-Quebec_in_Canada_2.svg.png", x: 520, y: 230, w: 90, h: 90 },
-
+    {
+      name: "Ontario",
+      src: "/provinces/on.svg",
+      w: Math.round(17976 * scale),
+      h: Math.round(17692 * scale),
+    },
+    {
+      name: "Quebec",
+      src: "/provinces/qc.svg",
+      w: Math.round(18073 * scale),
+      h: Math.round(20233 * scale),
+    },
     // Atlantic
-    { name: "New Brunswick", src: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/New_Brunswick_in_Canada_2.svg/200px-New_Brunswick_in_Canada_2.svg.png", x: 200, y: 90, w: 40, h: 45 },
-    { name: "Nova Scotia", src: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Nova_Scotia_in_Canada_2.svg/200px-Nova_Scotia_in_Canada_2.svg.png", x: 650, y: 380, w: 45, h: 35 },
-    { name: "PEI", src: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Prince_Edward_Island_in_Canada_2.svg/200px-Prince_Edward_Island_in_Canada_2.svg.png", x: 380, y: 150, w: 30, h: 20 },
-    { name: "Newfoundland", src: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Newfoundland_and_Labrador_in_Canada_2.svg/200px-Newfoundland_and_Labrador_in_Canada_2.svg.png", x: 150, y: 280, w: 70, h: 80 },
+    {
+      name: "New Brunswick",
+      src: "/provinces/nb.svg",
+      w: Math.round(4698 * scale),
+      h: Math.round(4885 * scale),
+    },
+    {
+      name: "Nova Scotia",
+      src: "/provinces/ns.svg",
+      w: Math.round(5515 * scale),
+      h: Math.round(6471 * scale),
+    },
+    {
+      name: "PEI",
+      src: "/provinces/pe.svg",
+      w: Math.round(1977 * scale),
+      h: Math.round(1046 * scale),
+    },
+    {
+      name: "Newfoundland",
+      src: "/provinces/nl.svg",
+      w: Math.round(15945 * scale),
+      h: Math.round(12001 * scale),
+    },
 
     // Territories
-    { name: "Yukon", src: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Yukon_in_Canada_2.svg/200px-Yukon_in_Canada_2.svg.png", x: 630, y: 280, w: 50, h: 60 },
-    { name: "NWT", src: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Northwest_Territories_in_Canada_2.svg/200px-Northwest_Territories_in_Canada_2.svg.png", x: 280, y: 200, w: 80, h: 70 },
-    { name: "Nunavut", src: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Nunavut_in_Canada_2.svg/200px-Nunavut_in_Canada_2.svg.png", x: 450, y: 80, w: 100, h: 90 },
+    {
+      name: "Yukon",
+      src: "/provinces/yt.svg",
+      w: Math.round(8908 * scale),
+      h: Math.round(14282 * scale),
+    },
+    {
+      name: "NWT",
+      src: "/provinces/nt.svg",
+      w: Math.round(15401 * scale),
+      h: Math.round(23033 * scale),
+    },
+    {
+      name: "Nunavut",
+      src: "/provinces/nu.svg",
+      w: Math.round(29287 * scale),
+      h: Math.round(37253 * scale),
+    },
   ];
 
+  // Generate smart non-overlapping layout based on province sizes
+  const positions = generateProvinceLayout(baseProvinces, 1100, 800);
+
+  const provinces = baseProvinces.map((prov, i) => ({
+    ...prov,
+    x: positions[i].x,
+    y: positions[i].y,
+  }));
+
+  // Reset key - changing this forces all DraggableImages to remount
+  const [resetKey, setResetKey] = useState(0);
+
   return (
-    <div className="relative h-full w-full overflow-visible rounded-2xl border border-neutral-300 bg-white/80 p-8 shadow-lg backdrop-blur-sm">
-      <div className="mb-4 flex items-center gap-3">
-        <Puzzle className="h-8 w-8 text-neutral-600" />
-        <h2 className="text-2xl font-bold text-neutral-800">Canada Puzzle</h2>
+    <div className="relative h-full w-full overflow-visible rounded-2xl border border-neutral-300 bg-white/80 p-8 shadow-lg backdrop-blur-sm cursor-auto">
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Puzzle className="h-8 w-8 text-neutral-600" />
+          <h2 className="text-2xl font-bold text-neutral-800">
+            Draggable Images Demo
+          </h2>
+        </div>
+        <button
+          onClick={() => setResetKey((k) => k + 1)}
+          className="flex items-center gap-2 rounded-lg bg-neutral-100 px-3 py-1.5 text-sm text-neutral-600 transition-colors hover:bg-neutral-200"
+        >
+          <RotateCcw className="h-4 w-4" />
+          Reset
+        </button>
       </div>
       <p className="mb-2 text-sm text-neutral-500">
         Assemble Canada! Drag the provinces and territories into place.
@@ -163,7 +453,7 @@ function PlaygroundSection() {
       {/* Draggable province shapes */}
       {provinces.map((prov) => (
         <DraggableImage
-          key={prov.name}
+          key={`${prov.name}-${resetKey}`}
           src={prov.src}
           alt={prov.name}
           initialPos={{ x: prov.x, y: prov.y }}
@@ -171,79 +461,6 @@ function PlaygroundSection() {
           height={prov.h}
         />
       ))}
-    </div>
-  );
-}
-
-function TeamSection() {
-  const team = [
-    { name: "Alex Chen", role: "Designer", seed: "alex" },
-    { name: "Jordan Lee", role: "Developer", seed: "jordan" },
-    { name: "Sam Rivera", role: "PM", seed: "sam" },
-  ];
-
-  return (
-    <div className="flex h-full w-full flex-col rounded-2xl border border-neutral-300 bg-white/80 p-8 shadow-lg backdrop-blur-sm">
-      <div className="mb-6 flex items-center gap-3">
-        <Users className="h-8 w-8 text-neutral-600" />
-        <h2 className="text-2xl font-bold text-neutral-800">Team</h2>
-      </div>
-      <p className="mb-4 text-sm text-neutral-500">
-        Drag the team cards to rearrange them!
-      </p>
-      <div className="flex flex-1 gap-4">
-        {team.map((member) => (
-          <Draggable key={member.name}>
-            <div className="group flex cursor-grab flex-col items-center rounded-xl border border-neutral-200 bg-white p-4 shadow-md transition-shadow hover:shadow-lg active:cursor-grabbing">
-              <div className="absolute -right-1 -top-1 opacity-0 transition-opacity group-hover:opacity-100">
-                <GripVertical className="h-4 w-4 text-neutral-400" />
-              </div>
-              <img
-                src={`https://picsum.photos/seed/${member.seed}/100/100`}
-                alt={member.name}
-                className="mb-3 h-16 w-16 rounded-full object-cover"
-              />
-              <h3 className="font-semibold text-neutral-700">{member.name}</h3>
-              <p className="text-sm text-neutral-500">{member.role}</p>
-            </div>
-          </Draggable>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function StatsSection() {
-  const stats = [
-    { label: "Active Users", value: "12,345" },
-    { label: "Projects Created", value: "8,901" },
-    { label: "Total Interactions", value: "2.4M" },
-    { label: "Satisfaction Rate", value: "98%" },
-  ];
-
-  return (
-    <div className="flex h-full w-full flex-col rounded-2xl border border-neutral-300 bg-white/80 p-8 shadow-lg backdrop-blur-sm">
-      <div className="mb-6 flex items-center gap-3">
-        <BarChart3 className="h-8 w-8 text-neutral-600" />
-        <h2 className="text-2xl font-bold text-neutral-800">Stats</h2>
-      </div>
-      <div className="grid flex-1 grid-cols-2 gap-4">
-        {stats.map((stat) => (
-          <div
-            key={stat.label}
-            className="flex flex-col items-center justify-center rounded-xl border border-neutral-200 bg-neutral-50 p-4"
-          >
-            <span className="text-3xl font-bold text-neutral-800">
-              {stat.value}
-            </span>
-            <span className="text-sm text-neutral-500">{stat.label}</span>
-          </div>
-        ))}
-      </div>
-      <div className="mt-4 flex items-center justify-center gap-2 rounded-lg bg-neutral-100 p-3">
-        <div className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
-        <span className="text-sm text-neutral-600">Live data</span>
-      </div>
     </div>
   );
 }

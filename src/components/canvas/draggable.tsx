@@ -137,6 +137,7 @@ export interface DraggableImageProps extends DraggableProps {
   width?: string | number;
   height?: string | number;
   scale?: number;
+  hoverScale?: number;
 }
 
 function drawImageToCanvas(img: HTMLImageElement, canvas: HTMLCanvasElement) {
@@ -202,6 +203,7 @@ export function DraggableImage(props: DraggableImageProps) {
     animate,
     className,
     scale,
+    hoverScale,
     ...restProps
   } = props;
   const imgRef = useRef<HTMLImageElement>(null);
@@ -265,7 +267,7 @@ export function DraggableImage(props: DraggableImageProps) {
     updateCursor(isOpaque, false, imgRef.current);
   };
 
-  const hoverScale = isOpaque ? (scale ?? 1) * 1.05 : (scale ?? 1);
+  const hoverScaleValue = isOpaque ? (hoverScale ?? (scale ?? 1)) : (scale ?? 1);
 
   return (
     <Draggable
@@ -285,7 +287,7 @@ export function DraggableImage(props: DraggableImageProps) {
         height={height}
         animate={animate}
         draggable="false"
-        whileHover={{ scale: hoverScale }}
+        whileHover={{ scale: hoverScaleValue }}
         style={{
           scale: scale ?? 1,
           pointerEvents: isOpaque ? "auto" : "none",
