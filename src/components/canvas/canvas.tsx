@@ -54,6 +54,10 @@ interface Props {
   homeCoordinates: SectionCoordinates;
   children: React.ReactNode;
 
+  // Optional height and with params, if omitted sizing will be 6000x4000
+  canvasWidth?:number;
+  canvasHeight?:number;
+
   // Navbar data (optional). If omitted, navbar is hidden.
   /** Array of navigation items for the navbar. If omitted, navbar is hidden. */
   navItems?: NavItem[];
@@ -116,8 +120,8 @@ const Canvas: FC<Props> = ({
 
   const hasNavbar = Boolean(navItems && navItems.length > 0);
 
-  const sceneWidth = canvasWidth;
-  const sceneHeight = canvasHeight;
+  const sceneWidth = canvasWidth || windowWidth;
+  const sceneHeight = canvasHeight || windowHeight;
 
   const MIN_ZOOM = MIN_ZOOMS[getScreenSizeEnum(windowWidth)];
 
