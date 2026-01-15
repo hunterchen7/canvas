@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/hunterchen7/canvas/compare/canvas-v0.6.0...canvas-v0.7.0) (2026-01-15)
+
+
+### Features
+
+* Add customizable canvas size ([#26](https://github.com/hunterchen7/canvas/issues/26)) ([d959255](https://github.com/hunterchen7/canvas/commit/d9592557a3eab44cf686e70fb8b090b09e4d08b6))
+
 ## [0.6.0](https://github.com/hunterchen7/canvas/compare/canvas-v0.5.0...canvas-v0.6.0) (2026-01-15)
 
 
