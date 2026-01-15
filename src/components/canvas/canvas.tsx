@@ -39,7 +39,12 @@ import {
 import useWindowDimensions from "../../hooks/useWindowDimensions";
 import Navbar from "./navbar";
 import Toolbar from "./toolbar";
-import type { CanvasSection, NavItem, SectionCoordinates } from "../../types";
+import type {
+  CanvasSection,
+  NavItem,
+  SectionCoordinates,
+  ToolbarConfig,
+} from "../../types";
 import { CanvasWrapper } from "./wrapper";
 import { usePerformanceMode } from "../../hooks/usePerformanceMode";
 import type { ReactNode } from "react";
@@ -74,12 +79,16 @@ interface Props {
   canvasBackground?: ReactNode;
   /** Custom wrapper/intro background. If not provided, uses introBackgroundGradient. */
   wrapperBackground?: ReactNode;
+
+  // ============== Toolbar Customization ==============
+  /** Toolbar customization options */
+  toolbarConfig?: ToolbarConfig;
 }
 
 const stopAllMotion = (
   x: MotionValue<number>,
   y: MotionValue<number>,
-  scale: MotionValue<number>,
+  scale: MotionValue<number>
 ) => {
   x.stop();
   y.stop();
@@ -99,6 +108,7 @@ const Canvas: FC<Props> = ({
   blurTransition,
   canvasBackground,
   wrapperBackground,
+  toolbarConfig,
 }) => {
   const { height: windowHeight, width: windowWidth } = useWindowDimensions();
 
@@ -130,7 +140,7 @@ const Canvas: FC<Props> = ({
 
   const initialBoxWidth = useMemo(
     () => calcInitialBoxWidth(windowWidth, windowHeight),
-    [windowWidth, windowHeight],
+    [windowWidth, windowHeight]
   );
 
   // somewhere near the middle-ish
@@ -145,7 +155,7 @@ const Canvas: FC<Props> = ({
         coords: homeCoordinates,
         targetZoom: 1,
       }),
-    [homeCoordinates, windowWidth, windowHeight],
+    [homeCoordinates, windowWidth, windowHeight]
   );
 
   const onResetViewAndItems = useCallback(
@@ -157,7 +167,7 @@ const Canvas: FC<Props> = ({
         if (onComplete) onComplete();
       });
     },
-    [offsetHomeCoordinates, x, y, scale],
+    [offsetHomeCoordinates, x, y, scale]
   );
 
   // Shared intro progress (0->1) driven by CanvasWrapper
@@ -167,7 +177,7 @@ const Canvas: FC<Props> = ({
   const stage1Targets = useMemo(() => {
     const finalScale = Math.max(
       (windowWidth || 0) / canvasWidth,
-      (windowHeight || 0) / canvasHeight,
+      (windowHeight || 0) / canvasHeight
     );
     const endX = (windowWidth - canvasWidth * finalScale) / 2;
     const endY = (windowHeight - canvasHeight * finalScale) / 2;
@@ -178,7 +188,7 @@ const Canvas: FC<Props> = ({
   const derivedScale = useTransform(
     introProgress,
     [0, 1],
-    [initialBoxWidth, stage1Targets.finalScale],
+    [initialBoxWidth, stage1Targets.finalScale]
   );
   const derivedX = useTransform(introProgress, [0, 1], [0, stage1Targets.endX]);
   const derivedY = useTransform(introProgress, [0, 1], [0, stage1Targets.endY]);
@@ -240,11 +250,11 @@ const Canvas: FC<Props> = ({
         node.addEventListener("wheel", wheelWrapper, { passive: false });
       }
     },
-    [wheelWrapper],
+    [wheelWrapper]
   );
 
   const activePointersRef = useRef<Map<number, PointerEvent<HTMLDivElement>>>(
-    new Map(),
+    new Map()
   );
   const initialPinchStateRef = useRef<{
     distance: number;
@@ -258,7 +268,7 @@ const Canvas: FC<Props> = ({
       offset: Point,
       viewportRef: React.RefObject<HTMLDivElement | null>,
       onComplete?: () => void,
-      zoom?: number,
+      zoom?: number
     ): void => {
       if (!viewportRef.current) return;
       setIsSceneMoving(true);
@@ -281,13 +291,13 @@ const Canvas: FC<Props> = ({
         x,
         y,
         scale,
-        zoom,
+        zoom
       ).then(() => {
         setIsSceneMoving(false);
         if (onComplete) onComplete();
       });
     },
-    [sceneWidth, sceneHeight, x, y, scale],
+    [sceneWidth, sceneHeight, x, y, scale]
   );
 
   // Guarded stop that ignores attempts during intro animations
@@ -340,7 +350,7 @@ const Canvas: FC<Props> = ({
       viewportRef,
       animationStage,
       stopAllSceneMotion,
-    ],
+    ]
   );
 
   const handlePointerMove = useCallback(
@@ -366,11 +376,11 @@ const Canvas: FC<Props> = ({
 
         const newX = Math.min(
           Math.max(initialPanOffsetOnDrag.x + deltaX, minPanX),
-          maxPanX,
+          maxPanX
         );
         const newY = Math.min(
           Math.max(initialPanOffsetOnDrag.y + deltaY, minPanY),
-          maxPanY,
+          maxPanY
         );
         x.set(newX);
         y.set(newY);
@@ -399,7 +409,7 @@ const Canvas: FC<Props> = ({
           (window.innerWidth / canvasWidth) * ZOOM_BOUND, // Ensure zoom is at least the width of the canvas
           (window.innerHeight / canvasHeight) * ZOOM_BOUND, // Ensure zoom is at least the height of the canvas
           Math.min(newZoom, 10),
-          MIN_ZOOM, // Ensure zoom is not less than MIN_ZOOM
+          MIN_ZOOM // Ensure zoom is not less than MIN_ZOOM
         );
 
         const mx = currentMidpoint.x;
@@ -441,7 +451,7 @@ const Canvas: FC<Props> = ({
       MIN_ZOOM,
       animationStage,
       stopAllSceneMotion,
-    ],
+    ]
   );
 
   const handlePointerUpOrCancel = useCallback(
@@ -478,7 +488,7 @@ const Canvas: FC<Props> = ({
         setInitialPanOffsetOnDrag({ x: x.get(), y: y.get() });
       }
     },
-    [x, y, isPanning, animationStage, stopAllSceneMotion],
+    [x, y, isPanning, animationStage, stopAllSceneMotion]
   );
 
   const handleWheelZoom = useCallback(
@@ -504,11 +514,11 @@ const Canvas: FC<Props> = ({
         const nextZoom = Math.max(
           Math.min(
             currentZoom * (1 - event.deltaY * ZOOM_SENSITIVITY),
-            MAX_ZOOM,
+            MAX_ZOOM
           ),
           MIN_ZOOM,
           (window.innerWidth / canvasWidth) * ZOOM_BOUND, // Ensure zoom is at least the width of the canvas
-          (window.innerHeight / canvasHeight) * ZOOM_BOUND, // Ensure zoom is at least the height of the canvas
+          (window.innerHeight / canvasHeight) * ZOOM_BOUND // Ensure zoom is at least the height of the canvas
         );
 
         const rect = viewportRef.current?.getBoundingClientRect();
@@ -567,7 +577,7 @@ const Canvas: FC<Props> = ({
       windowHeight,
       animationStage,
       stopAllSceneMotion,
-    ],
+    ]
   );
 
   // Keep the wheel handler ref pointing to the latest implementation
@@ -579,7 +589,7 @@ const Canvas: FC<Props> = ({
     (
       offset: { x: number; y: number },
       onComplete?: () => void,
-      zoom?: number,
+      zoom?: number
     ) => {
       panToOffset(
         {
@@ -588,10 +598,10 @@ const Canvas: FC<Props> = ({
         },
         viewportRef,
         onComplete,
-        zoom,
+        zoom
       );
     },
-    [panToOffset, viewportRef],
+    [panToOffset, viewportRef]
   );
 
   return (
@@ -620,7 +630,12 @@ const Canvas: FC<Props> = ({
       >
         {animationStage >= 2 && (
           <>
-            <Toolbar homeCoordinates={offsetHomeCoordinates} />
+            {!toolbarConfig?.hidden && (
+              <Toolbar
+                homeCoordinates={offsetHomeCoordinates}
+                config={toolbarConfig}
+              />
+            )}
             {hasNavbar && navItems ? (
               <Navbar
                 panToOffset={handlePanToOffset}
