@@ -24,10 +24,10 @@ export enum ScreenSizeEnum {
 // ============================================================================
 
 /** Default canvas width in pixels */
-export const CANVAS_WIDTH = 6000;
+export const DEFAULT_CANVAS_WIDTH = 6000;
 
 /** Default canvas height in pixels */
-export const CANVAS_HEIGHT = 4000;
+export const DEFAULT_CANVAS_HEIGHT = 4000;
 
 // ============================================================================
 // INTRO ANIMATION

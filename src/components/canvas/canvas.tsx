@@ -35,6 +35,8 @@ import {
   STAGE2_TRANSITION,
   MOUSE_WHEEL_ZOOM_SENSITIVITY,
   TRACKPAD_ZOOM_SENSITIVITY,
+  DEFAULT_CANVAS_WIDTH,
+  DEFAULT_CANVAS_HEIGHT,
 } from "../../lib/constants";
 import useWindowDimensions from "../../hooks/useWindowDimensions";
 import Navbar from "./navbar";
@@ -53,6 +55,10 @@ import { DefaultCanvasBackground } from "./backgrounds";
 interface Props {
   homeCoordinates: SectionCoordinates;
   children: React.ReactNode;
+
+  // Optional height and with params, if omitted sizing will be 6000x4000
+  canvasWidth?:number;
+  canvasHeight?:number;
 
   // Navbar data (optional). If omitted, navbar is hidden.
   /** Array of navigation items for the navbar. If omitted, navbar is hidden. */
@@ -109,6 +115,8 @@ const Canvas: FC<Props> = ({
   canvasBackground,
   wrapperBackground,
   toolbarConfig,
+  canvasHeight,
+  canvasWidth,
 }) => {
   const { height: windowHeight, width: windowWidth } = useWindowDimensions();
 
@@ -116,8 +124,8 @@ const Canvas: FC<Props> = ({
 
   const hasNavbar = Boolean(navItems && navItems.length > 0);
 
-  const sceneWidth = canvasWidth;
-  const sceneHeight = canvasHeight;
+  const sceneWidth = canvasWidth ?? DEFAULT_CANVAS_WIDTH;
+  const sceneHeight = canvasHeight ?? DEFAULT_CANVAS_HEIGHT;
 
   const MIN_ZOOM = MIN_ZOOMS[getScreenSizeEnum(windowWidth)];
 
@@ -176,13 +184,13 @@ const Canvas: FC<Props> = ({
   // Precompute final stage1 scale and offsets (snapshot dimensions once on mount)
   const stage1Targets = useMemo(() => {
     const finalScale = Math.max(
-      (windowWidth || 0) / canvasWidth,
-      (windowHeight || 0) / canvasHeight
+      (windowWidth || 0) / sceneWidth,
+      (windowHeight || 0) / sceneHeight
     );
-    const endX = (windowWidth - canvasWidth * finalScale) / 2;
-    const endY = (windowHeight - canvasHeight * finalScale) / 2;
+    const endX = (windowWidth - sceneWidth * finalScale) / 2;
+    const endY = (windowHeight - sceneHeight * finalScale) / 2;
     return { finalScale, endX, endY };
-  }, [windowWidth, windowHeight]);
+  }, [windowWidth, windowHeight, sceneWidth, sceneHeight]);
 
   // Replace direct motion values with derived transforms during stage1
   const derivedScale = useTransform(
@@ -406,8 +414,8 @@ const Canvas: FC<Props> = ({
 
         let newZoom = initialZoom * (currentDistance / initialDistance);
         newZoom = Math.max(
-          (window.innerWidth / canvasWidth) * ZOOM_BOUND, // Ensure zoom is at least the width of the canvas
-          (window.innerHeight / canvasHeight) * ZOOM_BOUND, // Ensure zoom is at least the height of the canvas
+          (window.innerWidth / sceneWidth) * ZOOM_BOUND, // Ensure zoom is at least the width of the canvas
+          (window.innerHeight / sceneHeight) * ZOOM_BOUND, // Ensure zoom is at least the height of the canvas
           Math.min(newZoom, 10),
           MIN_ZOOM // Ensure zoom is not less than MIN_ZOOM
         );
@@ -517,8 +525,8 @@ const Canvas: FC<Props> = ({
             MAX_ZOOM
           ),
           MIN_ZOOM,
-          (window.innerWidth / canvasWidth) * ZOOM_BOUND, // Ensure zoom is at least the width of the canvas
-          (window.innerHeight / canvasHeight) * ZOOM_BOUND // Ensure zoom is at least the height of the canvas
+          (window.innerWidth / sceneWidth) * ZOOM_BOUND, // Ensure zoom is at least the width of the canvas
+          (window.innerHeight / sceneHeight) * ZOOM_BOUND // Ensure zoom is at least the height of the canvas
         );
 
         const rect = viewportRef.current?.getBoundingClientRect();
@@ -666,8 +674,8 @@ const Canvas: FC<Props> = ({
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3, ease: "easeIn" }}
             style={{
-              width: `${canvasWidth}px`,
-              height: `${canvasHeight}px`,
+              width: `${sceneWidth}px`,
+              height: `${sceneHeight}px`,
               x,
               y,
               scale,

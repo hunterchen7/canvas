@@ -1,16 +1,16 @@
 import { animate, type MotionValue, type Point } from "framer-motion";
 import { useMemo } from "react";
 import {
-  CANVAS_WIDTH,
-  CANVAS_HEIGHT,
+  DEFAULT_CANVAS_WIDTH,
+  DEFAULT_CANVAS_HEIGHT,
   MAX_DIM_RATIO,
   INTRO_ASPECT_RATIO,
   PAN_SPRING,
   ScreenSizeEnum,
 } from "./constants";
 
-export const canvasWidth = CANVAS_WIDTH;
-export const canvasHeight = CANVAS_HEIGHT;
+export const canvasWidth = DEFAULT_CANVAS_WIDTH;
+export const canvasHeight = DEFAULT_CANVAS_HEIGHT;
 
 // Re-export ScreenSizeEnum for backward compatibility
 export { ScreenSizeEnum } from "./constants";
