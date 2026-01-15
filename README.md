@@ -287,6 +287,93 @@ function App() {
 }
 ```
 
+### Toolbar Customization
+
+The toolbar displays the current canvas coordinates and zoom level. You can customize its position, appearance, and behavior using the `toolbarConfig` prop.
+
+```tsx
+<Canvas
+  homeCoordinates={homeCoordinates}
+  toolbarConfig={{
+    position: "top-right",
+    className: "font-sans",
+    style: { fontSize: "14px", color: "#525252" },
+  }}
+>
+  {/* ... */}
+</Canvas>
+```
+
+**ToolbarConfig options:**
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `hidden` | `boolean` | `false` | Hide the toolbar entirely |
+| `display` | `'coordinates' \| 'scale' \| 'both'` | `'both'` | What to display |
+| `position` | `'top-left' \| 'top-right' \| 'bottom-left' \| 'bottom-right'` | `'top-left'` | Preset position |
+| `disableAutoHide` | `boolean` | `false` | Disable auto-hide when at home position |
+| `className` | `string` | - | Additional CSS classes for the container |
+| `coordinatesClassName` | `string` | - | CSS classes for coordinates text |
+| `scaleClassName` | `string` | - | CSS classes for scale text |
+| `separatorClassName` | `string` | - | CSS classes for the separator |
+| `style` | `CSSProperties` | - | Inline styles for the container |
+| `coordinatesStyle` | `CSSProperties` | - | Inline styles for coordinates |
+| `scaleStyle` | `CSSProperties` | - | Inline styles for scale |
+| `separator` | `string` | `'\|'` | Custom separator character |
+| `separatorGap` | `number \| string` | - | Gap around the separator (e.g., `8` or `'0.5rem'`) |
+| `coordinatesFormat` | `(x: number, y: number) => string` | - | Custom coordinates formatter |
+| `scaleFormat` | `(scale: number) => string` | - | Custom scale formatter |
+
+#### Toolbar Examples
+
+```tsx
+// Show only scale, positioned bottom-right
+<Canvas
+  toolbarConfig={{
+    display: "scale",
+    position: "bottom-right",
+  }}
+/>
+
+// Custom styling with Tailwind
+<Canvas
+  toolbarConfig={{
+    position: "top-right",
+    className: "font-sans font-medium px-4",
+    separatorGap: 8,
+    style: {
+      color: "#525252",
+      backgroundColor: "#fafafa",
+      borderColor: "#d4d4d4",
+    },
+  }}
+/>
+
+// Custom formatters
+<Canvas
+  toolbarConfig={{
+    coordinatesFormat: (x, y) => `X: ${x} Y: ${y}`,
+    scaleFormat: (s) => `${(s * 100).toFixed(0)}%`,
+    separator: "•",
+    separatorGap: 12,
+  }}
+/>
+
+// Custom position using style
+<Canvas
+  toolbarConfig={{
+    style: {
+      top: "50%",
+      left: "20px",
+      transform: "translateY(-50%)",
+    },
+  }}
+/>
+
+// Hide toolbar
+<Canvas toolbarConfig={{ hidden: true }} />
+```
+
 ### Exported Constants
 
 The library exports default gradient values you can use as a starting point:
@@ -383,6 +470,13 @@ npm run type-check
 - Canvas utility functions (pan, zoom, coordinates)
 - Performance detection utilities
 - Constants and types
+
+### Types
+- `ToolbarConfig` - Toolbar customization options
+- `ToolbarPosition` - Preset toolbar positions
+- `ToolbarDisplayMode` - Toolbar display modes
+- `NavItem` - Navigation item configuration
+- `SectionCoordinates` - Section coordinate definition
 
 ## API Reference
 

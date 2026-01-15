@@ -51,6 +51,17 @@ function App() {
         homeCoordinates={coordinates.home}
         navItems={navItems}
         skipIntro={true}
+        toolbarConfig={{
+          position: "top-right",
+          className: "font-sans font-medium px-2.5",
+          separatorGap: 8,
+          style: {
+            fontSize: "14px",
+            color: "#525252",
+            backgroundColor: "#fafafa",
+            borderColor: "#d4d4d4",
+          },
+        }}
       >
         {/* Home Section - Center */}
         <CanvasComponent offset={coordinates.home}>
