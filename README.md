@@ -135,6 +135,30 @@ const navItems: NavItem[] = [
 
 When `navItems` is provided, the canvas will render a navbar with buttons to navigate between sections. The navbar uses Lucide icons, so make sure the icon names match available Lucide icons.
 
+### Canvas Dimensions
+
+By default, the canvas uses a size of 6000×4000 pixels. You can customize the canvas dimensions using the `canvasWidth` and `canvasHeight` props to create larger or smaller canvas spaces:
+
+```tsx
+<Canvas
+  homeCoordinates={homeCoordinates}
+  canvasWidth={8000}   // Custom width (default: 6000)
+  canvasHeight={6000}  // Custom height (default: 4000)
+>
+  {/* ... */}
+</Canvas>
+```
+
+**When to customize canvas dimensions:**
+- **Larger canvases** (e.g., 10000×8000): When you have many sections spread across a wide area, or want more space for users to explore
+- **Smaller canvases** (e.g., 4000×3000): For simpler layouts with fewer sections, reducing memory usage on lower-end devices
+- **Custom aspect ratios**: Match your content layout needs (e.g., ultra-wide canvases for timeline-style layouts)
+
+**Important considerations:**
+- Canvas coordinates in `homeCoordinates`, `navItems`, and `CanvasComponent` offsets should be within your custom canvas bounds
+- Larger canvases use more memory but provide more space for content
+- The canvas automatically handles zoom limits based on your custom dimensions
+
 ## Customization
 
 ### Background Customization
@@ -482,7 +506,25 @@ npm run type-check
 
 ### Canvas Props
 
-The `Canvas` component accepts standard React props and renders an interactive canvas with pan/zoom capabilities.
+The `Canvas` component accepts the following props:
+
+| Prop | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `homeCoordinates` | `SectionCoordinates` | Yes | - | Initial viewport position and home section |
+| `children` | `ReactNode` | Yes | - | Canvas content (typically `CanvasComponent` elements) |
+| `canvasWidth` | `number` | No | `6000` | Total canvas width in pixels |
+| `canvasHeight` | `number` | No | `4000` | Total canvas height in pixels |
+| `navItems` | `NavItem[]` | No | - | Navigation items for navbar |
+| `skipIntro` | `boolean` | No | `false` | Skip intro animation |
+| `introContent` | `ReactNode` | No | - | Custom intro content during loading |
+| `loadingText` | `string` | No | - | Custom loading text |
+| `introBackgroundGradient` | `string` | No | - | Background gradient for intro |
+| `canvasBoxGradient` | `string` | No | - | Canvas box gradient during intro |
+| `growTransition` | `Transition` | No | - | Custom grow transition (Framer Motion) |
+| `blurTransition` | `Transition` | No | - | Custom blur transition (Framer Motion) |
+| `canvasBackground` | `ReactNode` | No | `<DefaultCanvasBackground />` | Custom canvas background |
+| `wrapperBackground` | `ReactNode` | No | - | Custom wrapper/intro background |
+| `toolbarConfig` | `ToolbarConfig` | No | - | Toolbar customization options |
 
 ### Draggable Props
 
