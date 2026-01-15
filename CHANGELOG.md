@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/hunterchen7/canvas/compare/canvas-v0.5.0...canvas-v0.6.0) (2026-01-15)
+
+
+### Features
+
+* toolbar styling ([#29](https://github.com/hunterchen7/canvas/issues/29)) ([063f2e8](https://github.com/hunterchen7/canvas/commit/063f2e88d0dd33fa4e95e48a8f549ba1a25273a2))
+
 ## [0.5.0](https://github.com/hunterchen7/canvas/compare/canvas-v0.4.1...canvas-v0.5.0) (2026-01-14)
 
 
