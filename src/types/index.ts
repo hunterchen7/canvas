@@ -97,3 +97,94 @@ export interface ToolbarConfig {
   /** Format for scale. Default: '1.00x' */
   scaleFormat?: (scale: number) => string;
 }
+
+/**
+ * Preset positions for the navbar
+ */
+export type NavbarPosition = 'top' | 'bottom' | 'left' | 'right';
+
+/**
+ * Display modes for navbar items
+ */
+export type NavbarDisplayMode =
+  | 'icons'         // Icons only, label shows on expand (default)
+  | 'labels'        // Labels only, no icons
+  | 'icons-labels'  // Always show both icon and label
+  | 'compact';      // Icons only, no expansion - just highlight
+
+/**
+ * Tooltip configuration for navbar buttons
+ */
+export interface NavbarTooltipConfig {
+  /** Disable tooltips entirely. Default: false */
+  disabled?: boolean;
+  /** Additional className for tooltip */
+  className?: string;
+  /** Inline styles for tooltip */
+  style?: React.CSSProperties;
+  /** Delay before showing tooltip in ms. Default: 100 */
+  delay?: number;
+}
+
+/**
+ * Button styling configuration for navbar
+ */
+export interface NavbarButtonConfig {
+  /** Additional className for all buttons */
+  className?: string;
+  /** Inline styles for all buttons */
+  style?: React.CSSProperties;
+  /** Active/pushed state className */
+  activeClassName?: string;
+  /** Active state inline styles */
+  activeStyle?: React.CSSProperties;
+  /** Hover state className */
+  hoverClassName?: string;
+  /** Hover state inline styles */
+  hoverStyle?: React.CSSProperties;
+  /** Icon className */
+  iconClassName?: string;
+  /** Icon size in pixels. Default: 20 */
+  iconSize?: number;
+  /** Label className */
+  labelClassName?: string;
+  /** Label inline styles */
+  labelStyle?: React.CSSProperties;
+}
+
+/**
+ * Configuration options for the canvas navbar
+ */
+export interface NavbarConfig {
+  // === Visibility ===
+  /** Hide the navbar entirely. Default: false */
+  hidden?: boolean;
+
+  // === Display Mode ===
+  /** How to display items. Default: 'icons' */
+  display?: NavbarDisplayMode;
+
+  // === Positioning ===
+  /** Preset position. Default: 'bottom' */
+  position?: NavbarPosition;
+
+  // === Container Styling ===
+  /** Additional className for the navbar container */
+  className?: string;
+  /** Inline styles for the navbar container */
+  style?: React.CSSProperties;
+
+  // === Button Configuration ===
+  /** Button styling options */
+  buttonConfig?: NavbarButtonConfig;
+
+  // === Tooltip Configuration ===
+  /** Tooltip options */
+  tooltipConfig?: NavbarTooltipConfig;
+
+  // === Spacing ===
+  /** Gap between buttons in pixels. Default: 4 */
+  gap?: number;
+  /** Padding inside the navbar in pixels. Default: 4 */
+  padding?: number;
+}

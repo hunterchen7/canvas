@@ -23,9 +23,9 @@ import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { Button } from "~/components/ui/button";
 
-// Hack Western themed background configuration
+// Hack Western themed background configuration (coral/lilac warm palette)
 const HACK_WESTERN_CANVAS_GRADIENT = `radial-gradient(ellipse ${canvasWidth}px ${canvasHeight}px at ${canvasWidth / 2}px ${canvasHeight}px, var(--coral) 0%, var(--salmon) 41%, var(--lilac) 59%, var(--beige) 90%)`;
-const HACK_WESTERN_INTRO_GRADIENT = "linear-gradient(to top, #FEB6AF 0%, var(--canvas-salmon) 15%, var(--canvas-beige) 50%)";
+const HACK_WESTERN_INTRO_GRADIENT = "linear-gradient(to top, #FEB6AF 0%, var(--salmon) 15%, var(--beige) 50%)";
 const HACK_WESTERN_BOX_GRADIENT = "radial-gradient(130.38% 95% at 50.03% 97.25%, #EFB8A0 0%, #EAD2DF 48.09%, #EFE3E1 100%)";
 
 export default function Home() {
@@ -60,6 +60,7 @@ export default function Home() {
               logoSrc="/horse.svg"
               logoAlt="Hack Western Logo"
               title="HACK WESTERN 12"
+              titleClassName="text-[#513b7a]"
             />
           }
           loadingText="LOADING CANVAS"
@@ -72,6 +73,25 @@ export default function Home() {
           wrapperBackground={
             <DefaultWrapperBackground gradient={HACK_WESTERN_INTRO_GRADIENT} />
           }
+          toolbarConfig={{
+            style: {
+              fontSize: "13px",
+              color: "#776780",
+              backgroundColor: "#fdfcfd",
+              borderColor: "#c3b8cb",
+            },
+            separatorClassName: "text-[#c3b8cb]",
+            separatorGap: 6,
+          }}
+          navbarConfig={{
+            className: "border-[#e1c8fa] bg-[#fdfcfd]",
+            buttonConfig: {
+              activeClassName: "bg-[#eee2fb]",
+              hoverClassName: "bg-[#f5f2f7]",
+              labelClassName: "text-[#776780]",
+              iconClassName: "text-[#776780]",
+            },
+          }}
         >
           <Hero />
           <Sponsors />

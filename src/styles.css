@@ -4,19 +4,20 @@
 
 @layer base {
   :root {
-    --canvas-beige: #f7f1e5;
-    --canvas-coral: #ffb5a7;
-    --canvas-lilac: #d9c8e6;
-    --canvas-salmon: #ffa585;
-    --canvas-heavy: #3c204c;
-    --canvas-emphasis: #513b7a;
-    --canvas-active: #8f57ad;
-    --canvas-tinted: #c9a7db;
-    --canvas-medium: #776780;
-    --canvas-light: #c3b8cb;
-    --canvas-faint-lilac: #f5f2f7;
-    --canvas-offwhite: #fdfcfd;
-    --canvas-highlight: #f5f2f7;
+    /* Neutral gray palette (default) */
+    --canvas-beige: #f5f5f5;
+    --canvas-coral: #d4d4d4;
+    --canvas-lilac: #e5e5e5;
+    --canvas-salmon: #a3a3a3;
+    --canvas-heavy: #171717;
+    --canvas-emphasis: #262626;
+    --canvas-active: #525252;
+    --canvas-tinted: #a3a3a3;
+    --canvas-medium: #737373;
+    --canvas-light: #a3a3a3;
+    --canvas-faint-lilac: #fafafa;
+    --canvas-offwhite: #ffffff;
+    --canvas-highlight: #f5f5f5;
     --canvas-border-light: 0 0% 89%;
   }
 }
