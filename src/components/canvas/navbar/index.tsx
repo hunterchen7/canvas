@@ -194,7 +194,7 @@ export default function Navbar({
     };
   }, [handlePan, animationStage, homeItem]);
 
-  // Compute container styles
+  // Compute container styles (positioning only)
   const containerStyle: React.CSSProperties = {
     position: "fixed",
     zIndex: 1000,
@@ -203,14 +203,14 @@ export default function Navbar({
     justifyContent: "center",
     alignItems: "center",
     ...positionStyles[position],
-    ...style,
   };
 
-  // Compute inner container styles
+  // Compute inner container styles (visual styling)
   const innerStyle: React.CSSProperties = {
     ...(gap !== undefined && { gap: `${gap}px` }),
     ...(padding !== undefined && { padding: `${padding}px` }),
     ...(isVertical && { flexDirection: "column" }),
+    ...style,
   };
 
   return (
@@ -222,7 +222,9 @@ export default function Navbar({
       <div className={isVertical ? "py-4 md:py-8" : "px-4 md:px-8"}>
         <motion.div
           className={cn(
-            "flex select-none items-center justify-center gap-1 rounded-[10px] border-[1px] border-neutral-200 bg-white p-1 shadow-[0_6px_12px_rgba(0,0,0,0.08)]",
+            "flex select-none items-center justify-center gap-1 rounded-[10px] border p-1 shadow-[0_6px_12px_rgba(0,0,0,0.08)]",
+            !style?.backgroundColor && "bg-white",
+            !style?.borderColor && "border-neutral-200",
             isVertical && "flex-col",
             className,
           )}

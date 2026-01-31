@@ -131,11 +131,12 @@ export default function SingleButton({
   const displayLabel = copiedEmail ? "Email copied!" : label;
 
   // Compute button classes
-  const baseButtonClass = "relative flex items-center rounded-md p-2 text-neutral-500 transition-colors duration-200";
+  const baseButtonClass = "relative flex items-center rounded-md p-2 text-neutral-500 transition-colors duration-200 focus:outline-none";
+  // Only apply default classes if no custom style is provided
   const stateClass = isPushed
-    ? (activeClassName || "bg-neutral-200")
+    ? (activeClassName || (!activeStyle && "bg-neutral-200"))
     : isHovered
-      ? (hoverClassName || "bg-neutral-100")
+      ? (hoverClassName || (!hoverStyle && "bg-neutral-100"))
       : "";
 
   // Compute button styles
@@ -148,9 +149,13 @@ export default function SingleButton({
   // Compute icon classes and styles
   const iconSizeStyle = { width: iconSize, height: iconSize };
   const baseIconClass = "flex-shrink-0";
-  const iconColorClass = isPushed
-    ? "text-neutral-700"
-    : "text-neutral-500";
+  // Only apply default icon colors if no custom button color style is provided
+  const hasCustomColor = buttonStyle?.color;
+  const iconColorClass = hasCustomColor
+    ? ""
+    : isPushed
+      ? "text-neutral-700"
+      : "text-neutral-500";
 
   // Compute label classes
   const baseLabelClass = "whitespace-nowrap font-canvas-figtree text-sm font-medium text-neutral-700";
@@ -219,14 +224,16 @@ export default function SingleButton({
           }}
           className={cn("pointer-events-none absolute z-50", tooltipPositionClass)}
         >
-          <div
-            className={cn(
-              "rounded-sm bg-gradient-to-t from-black/10 to-transparent px-[1px] pb-[2.5px] pt-[1px]",
-              tooltipClassName,
-            )}
-            style={tooltipStyle}
-          >
-            <div className="whitespace-nowrap rounded-sm bg-neutral-50 px-2 py-1 font-canvas-figtree text-sm text-neutral-600">
+          <div className="rounded-sm bg-gradient-to-t from-black/10 to-transparent px-[1px] pb-[2.5px] pt-[1px]">
+            <div
+              className={cn(
+                "whitespace-nowrap rounded-sm px-2 py-1 font-canvas-figtree text-sm",
+                !tooltipStyle?.backgroundColor && "bg-neutral-50",
+                !tooltipStyle?.color && "text-neutral-600",
+                tooltipClassName,
+              )}
+              style={tooltipStyle}
+            >
               {displayLabel}
             </div>
           </div>
