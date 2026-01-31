@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.8.0](https://github.com/hunterchen7/canvas/compare/canvas-v0.7.0...canvas-v0.8.0) (2026-01-31)
+
+
+### Features
+
+* customizable navbar styling ([#34](https://github.com/hunterchen7/canvas/issues/34)) ([3b978ba](https://github.com/hunterchen7/canvas/commit/3b978ba8b35e3df7feff8d3e4dbe69a44b1faa26))
+
+
+### Documentation
+
+* add claude.md for AI assistant guidelines ([#32](https://github.com/hunterchen7/canvas/issues/32)) ([3f42e85](https://github.com/hunterchen7/canvas/commit/3f42e85428f77a01f88ca942f7454c9308ea1d97))
+
 ## [0.7.0](https://github.com/hunterchen7/canvas/compare/canvas-v0.6.0...canvas-v0.7.0) (2026-01-15)
 
 
