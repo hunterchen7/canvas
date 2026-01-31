@@ -56,4 +56,9 @@ export type {
   ToolbarConfig,
   ToolbarPosition,
   ToolbarDisplayMode,
+  NavbarConfig,
+  NavbarPosition,
+  NavbarDisplayMode,
+  NavbarButtonConfig,
+  NavbarTooltipConfig,
 } from "./types";

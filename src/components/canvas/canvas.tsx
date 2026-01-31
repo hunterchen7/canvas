@@ -44,6 +44,7 @@ import Toolbar from "./toolbar";
 import type {
   CanvasSection,
   NavItem,
+  NavbarConfig,
   SectionCoordinates,
   ToolbarConfig,
 } from "../../types";
@@ -89,6 +90,10 @@ interface Props {
   // ============== Toolbar Customization ==============
   /** Toolbar customization options */
   toolbarConfig?: ToolbarConfig;
+
+  // ============== Navbar Customization ==============
+  /** Navbar customization options */
+  navbarConfig?: NavbarConfig;
 }
 
 const stopAllMotion = (
@@ -115,6 +120,7 @@ const Canvas: FC<Props> = ({
   canvasBackground,
   wrapperBackground,
   toolbarConfig,
+  navbarConfig,
   canvasHeight,
   canvasWidth,
 }) => {
@@ -644,13 +650,14 @@ const Canvas: FC<Props> = ({
                 config={toolbarConfig}
               />
             )}
-            {hasNavbar && navItems ? (
+            {hasNavbar && navItems && !navbarConfig?.hidden && (
               <Navbar
                 panToOffset={handlePanToOffset}
                 onReset={onResetViewAndItems}
                 items={navItems}
+                config={navbarConfig}
               />
-            ) : null}
+            )}
           </>
         )}
         <div

@@ -43,6 +43,7 @@ const config = {
         "canvas-faint-lilac": "var(--canvas-faint-lilac)",
         "canvas-offwhite": "var(--canvas-offwhite)",
         "canvas-highlight": "var(--canvas-highlight)",
+        "canvas-pushed": "var(--canvas-pushed)",
         "canvas-border-light": "hsl(var(--canvas-border-light))",
         primary: {
           "50": "hsl(var(--primary-50))",

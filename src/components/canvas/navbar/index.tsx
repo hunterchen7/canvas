@@ -1,7 +1,7 @@
 import { motion, useMotionValueEvent } from "framer-motion";
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import SingleButton from "./single-button";
-import type { NavItem } from "../../../types";
+import type { NavItem, NavbarConfig, NavbarPosition } from "../../../types";
 import { useCanvasContext } from "../../../contexts/CanvasContext";
 import useWindowDimensions from "../../../hooks/useWindowDimensions";
 import { usePerformanceMode } from "../../../hooks/usePerformanceMode";
@@ -13,6 +13,7 @@ import {
   RESPONSIVE_ZOOM_MAP,
   NAVBAR_DEBOUNCE_MS,
 } from "../../../lib/constants";
+import { cn } from "../../../lib/utils";
 
 interface NavbarProps {
   panToOffset: (
@@ -23,12 +24,50 @@ interface NavbarProps {
   onReset: () => void;
   /** Array of navigation items defining sections, their icons, and coordinates */
   items: NavItem[];
+  /** Navbar configuration options */
+  config?: NavbarConfig;
 }
+
+const positionStyles: Record<NavbarPosition, React.CSSProperties> = {
+  top: {
+    top: "1rem",
+    bottom: "auto",
+    left: "50%",
+    transform: "translateX(-50%)",
+  },
+  bottom: {
+    bottom: "1rem",
+    top: "auto",
+    left: "50%",
+    transform: "translateX(-50%)",
+  },
+  left: {
+    left: "1rem",
+    right: "auto",
+    top: "50%",
+    transform: "translateY(-50%)",
+  },
+  right: {
+    right: "1rem",
+    left: "auto",
+    top: "50%",
+    transform: "translateY(-50%)",
+  },
+};
+
+// Responsive position adjustments (mobile vs desktop)
+const responsivePositionClasses: Record<NavbarPosition, string> = {
+  top: "top-12 md:top-4",
+  bottom: "bottom-12 md:bottom-4",
+  left: "left-4",
+  right: "right-4",
+};
 
 export default function Navbar({
   panToOffset,
   onReset,
   items,
+  config = {},
 }: NavbarProps) {
   const { x, y, scale, animationStage, setNextTargetSection } =
     useCanvasContext();
@@ -49,6 +88,20 @@ export default function Navbar({
 
   // Derive debounce duration from performance mode
   const debounceMs = NAVBAR_DEBOUNCE_MS[mode] ?? 0;
+
+  // Extract config values
+  const {
+    display = "icons",
+    position = "bottom",
+    className,
+    style,
+    buttonConfig,
+    tooltipConfig,
+    gap,
+    padding,
+  } = config;
+
+  const isVertical = position === "left" || position === "right";
 
   // Find the home section from items
   const homeItem = useMemo(() => items.find((item) => item.isHome), [items]);
@@ -141,24 +194,43 @@ export default function Navbar({
     };
   }, [handlePan, animationStage, homeItem]);
 
+  // Compute container styles (positioning only)
+  const containerStyle: React.CSSProperties = {
+    position: "fixed",
+    zIndex: 1000,
+    pointerEvents: "auto",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    ...positionStyles[position],
+  };
+
+  // Compute inner container styles (visual styling)
+  const innerStyle: React.CSSProperties = {
+    ...(gap !== undefined && { gap: `${gap}px` }),
+    ...(padding !== undefined && { padding: `${padding}px` }),
+    ...(isVertical && { flexDirection: "column" }),
+    ...style,
+  };
+
   return (
     <div
-      className="bottom-12 md:bottom-4"
-      style={{
-        position: "fixed",
-        left: "50%",
-        transform: "translateX(-50%)",
-        zIndex: 1000,
-        pointerEvents: "auto",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
+      className={responsivePositionClasses[position]}
+      style={containerStyle}
     >
       {/* padding to prevent edge bug */}
-      <div className="px-4 md:px-8">
-        <motion.div className="flex select-none items-center justify-center gap-1 rounded-[10px] border-[1px] border-border bg-canvas-offwhite p-1 shadow-[0_6px_12px_rgba(0,0,0,0.10)]">
-          <div className="flex items-center gap-1">
+      <div className={isVertical ? "py-4 md:py-8" : "px-4 md:px-8"}>
+        <motion.div
+          className={cn(
+            "flex select-none items-center justify-center gap-1 rounded-[10px] border p-1 shadow-[0_6px_12px_rgba(0,0,0,0.08)]",
+            !style?.backgroundColor && "bg-white",
+            !style?.borderColor && "border-neutral-200",
+            isVertical && "flex-col",
+            className,
+          )}
+          style={innerStyle}
+        >
+          <div className={cn("flex items-center gap-1", isVertical && "flex-col")}>
             {items.map((item) => (
               <SingleButton
                 key={item.id}
@@ -167,6 +239,10 @@ export default function Navbar({
                 onClick={() => handlePan(item)}
                 isPushed={expandedButton === item.id}
                 onDebouncedClick={handleDebouncedClick}
+                displayMode={display}
+                buttonConfig={buttonConfig}
+                tooltipConfig={tooltipConfig}
+                isVertical={isVertical}
               />
             ))}
           </div>

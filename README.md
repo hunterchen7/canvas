@@ -133,7 +133,35 @@ const navItems: NavItem[] = [
 </Canvas>
 ```
 
-When `navItems` is provided, the canvas will render a navbar with buttons to navigate between sections. The navbar uses Lucide icons, so make sure the icon names match available Lucide icons.
+When `navItems` is provided, the canvas will render a navbar with buttons to navigate between sections.
+
+#### Using Icons
+
+The `icon` property accepts either a Lucide icon name (string) or a custom React component:
+
+```tsx
+import { Heart } from 'lucide-react';
+
+// Using Lucide icon names (strings)
+const navItems: NavItem[] = [
+  { id: "home", label: "Home", icon: "Home", ...coordinates.home, isHome: true },
+  { id: "about", label: "About", icon: "Info", ...coordinates.about },
+];
+
+// Using custom icon components
+const CustomIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <circle cx="12" cy="12" r="10" />
+  </svg>
+);
+
+const navItems: NavItem[] = [
+  { id: "home", label: "Home", icon: Heart, ...coordinates.home, isHome: true },
+  { id: "custom", label: "Custom", icon: CustomIcon, ...coordinates.custom },
+];
+```
+
+For Lucide icons, use the PascalCase icon name as a string (e.g., `"Home"`, `"Settings"`, `"ChevronRight"`). See the [Lucide icons list](https://lucide.dev/icons) for available icons.
 
 ### Canvas Dimensions
 
@@ -263,7 +291,7 @@ import { Canvas, DefaultIntroContent } from '@hunterchen/canvas';
 
 #### Complete Theming Example (Hack Western Style)
 
-Here's a complete example showing how to apply a custom theme:
+Here's a complete example showing how to apply a custom theme with warm coral/lilac colors (used by [Hack Western](https://hackwestern.com)):
 
 ```tsx
 import {
@@ -275,10 +303,10 @@ import {
   canvasHeight,
 } from '@hunterchen/canvas';
 
-// Define your theme colors
-const CANVAS_GRADIENT = `radial-gradient(ellipse ${canvasWidth}px ${canvasHeight}px at ${canvasWidth / 2}px ${canvasHeight}px, var(--coral) 0%, var(--salmon) 41%, var(--lilac) 59%, var(--beige) 90%)`;
-const INTRO_GRADIENT = "linear-gradient(to top, #FEB6AF 0%, #EAD2DF 15%, #EFE3E1 50%)";
-const BOX_GRADIENT = "radial-gradient(130.38% 95% at 50.03% 97.25%, #EFB8A0 0%, #EAD2DF 48.09%, #EFE3E1 100%)";
+// Hack Western theme colors (coral/lilac warm palette)
+const CANVAS_GRADIENT = `radial-gradient(ellipse ${canvasWidth}px ${canvasHeight}px at ${canvasWidth / 2}px ${canvasHeight}px, #f7f1e5 0%, #d9c8e6 41%, #ffb5a7 59%, #f7f1e5 90%)`;
+const INTRO_GRADIENT = "linear-gradient(to top, #ffb5a7 0%, #d9c8e6 50%, #f7f1e5 100%)";
+const BOX_GRADIENT = "radial-gradient(130.38% 95% at 50.03% 97.25%, #ffb5a7 0%, #d9c8e6 48.09%, #f7f1e5 100%)";
 
 function App() {
   return (
@@ -291,23 +319,55 @@ function App() {
         <DefaultIntroContent
           logoSrc="/logo.svg"
           logoAlt="Logo"
-          title="MY BRAND"
+          title="HACK WESTERN"
+          titleClassName="text-[#513b7a]"
         />
       }
       loadingText="LOADING..."
       canvasBackground={
         <DefaultCanvasBackground
           gradientStyle={CANVAS_GRADIENT}
-          dotColor="#776780"
+          dotColor="#c9a7db"
         />
       }
       wrapperBackground={
         <DefaultWrapperBackground gradient={INTRO_GRADIENT} />
       }
+      navbarConfig={{
+        buttonConfig: {
+          activeClassName: "bg-[#f5f2f7]",
+          hoverClassName: "bg-[#f5f2f7]",
+        },
+      }}
     >
       {/* Your canvas content */}
     </Canvas>
   );
+}
+```
+
+#### Customizing CSS Variables
+
+The library uses CSS variables for theming. You can override them in your CSS to customize colors globally:
+
+```css
+:root {
+  /* Text colors */
+  --canvas-heavy: #3c204c;      /* Darkest text */
+  --canvas-emphasis: #513b7a;   /* Emphasized text */
+  --canvas-active: #8f57ad;     /* Active/selected state */
+  --canvas-medium: #776780;     /* Medium text */
+  --canvas-light: #c3b8cb;      /* Light text */
+
+  /* Background colors */
+  --canvas-beige: #f7f1e5;      /* Warm beige */
+  --canvas-coral: #ffb5a7;      /* Coral accent */
+  --canvas-lilac: #d9c8e6;      /* Lilac accent */
+  --canvas-salmon: #ffa585;     /* Salmon accent */
+  --canvas-tinted: #c9a7db;     /* Tinted purple */
+  --canvas-faint-lilac: #f5f2f7; /* Very light lilac */
+  --canvas-offwhite: #fdfcfd;   /* Off-white */
+  --canvas-highlight: #f5f2f7;  /* Highlight/hover */
 }
 ```
 
@@ -396,6 +456,113 @@ The toolbar displays the current canvas coordinates and zoom level. You can cust
 
 // Hide toolbar
 <Canvas toolbarConfig={{ hidden: true }} />
+```
+
+### Navbar Customization
+
+The navbar provides navigation buttons to jump between canvas sections. You can customize its position, display mode, button styling, and tooltips using the `navbarConfig` prop.
+
+```tsx
+<Canvas
+  homeCoordinates={homeCoordinates}
+  navItems={navItems}
+  navbarConfig={{
+    position: "top",
+    display: "icons-labels",
+  }}
+>
+  {/* ... */}
+</Canvas>
+```
+
+**NavbarConfig options:**
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `hidden` | `boolean` | `false` | Hide the navbar entirely |
+| `display` | `'icons' \| 'labels' \| 'icons-labels' \| 'compact'` | `'icons'` | Display mode for items |
+| `position` | `'top' \| 'bottom' \| 'left' \| 'right'` | `'bottom'` | Navbar position |
+| `className` | `string` | - | Additional CSS classes for container |
+| `style` | `CSSProperties` | - | Inline styles for container |
+| `buttonConfig` | `NavbarButtonConfig` | - | Button styling options (see below) |
+| `tooltipConfig` | `NavbarTooltipConfig` | - | Tooltip options (see below) |
+| `gap` | `number` | `4` | Gap between buttons in pixels |
+| `padding` | `number` | `4` | Padding inside navbar in pixels |
+
+**NavbarButtonConfig options:**
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `className` | `string` | Additional classes for all buttons |
+| `style` | `CSSProperties` | Inline styles for all buttons |
+| `activeClassName` | `string` | Classes for active/pushed state |
+| `activeStyle` | `CSSProperties` | Styles for active state |
+| `hoverClassName` | `string` | Classes for hover state |
+| `hoverStyle` | `CSSProperties` | Styles for hover state |
+| `iconClassName` | `string` | Classes for icons |
+| `iconSize` | `number` | Icon size in pixels (default: 20) |
+| `labelClassName` | `string` | Classes for labels |
+| `labelStyle` | `CSSProperties` | Styles for labels |
+
+**NavbarTooltipConfig options:**
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `disabled` | `boolean` | `false` | Disable tooltips entirely |
+| `className` | `string` | - | Additional classes for tooltip |
+| `style` | `CSSProperties` | - | Inline styles for tooltip |
+| `delay` | `number` | `100` | Delay before showing tooltip (ms) |
+
+#### Display Modes
+
+- **`icons`** (default): Shows icons only, expands to show label when active, tooltip on hover
+- **`labels`**: Shows labels only, no icons
+- **`icons-labels`**: Always shows both icon and label for all items
+- **`compact`**: Icons only, no expansion on active, just highlights
+
+#### Navbar Examples
+
+```tsx
+// Position at top
+<Canvas navbarConfig={{ position: "top" }} />
+
+// Labels only (no icons)
+<Canvas navbarConfig={{ display: "labels" }} />
+
+// Always show icons + labels
+<Canvas navbarConfig={{ display: "icons-labels" }} />
+
+// Compact mode (icons only, no expansion)
+<Canvas navbarConfig={{ display: "compact" }} />
+
+// Custom container styling
+<Canvas
+  navbarConfig={{
+    className: "bg-black/80 backdrop-blur-md",
+    style: { borderRadius: "20px" },
+  }}
+/>
+
+// Custom button styling
+<Canvas
+  navbarConfig={{
+    buttonConfig: {
+      activeClassName: "bg-blue-500",
+      activeStyle: { color: "white" },
+      hoverClassName: "bg-gray-100",
+      iconSize: 24,
+    },
+  }}
+/>
+
+// Disable tooltips
+<Canvas navbarConfig={{ tooltipConfig: { disabled: true } }} />
+
+// Vertical sidebar layout
+<Canvas navbarConfig={{ position: "left" }} />
+
+// Hide navbar entirely
+<Canvas navbarConfig={{ hidden: true }} />
 ```
 
 ### Exported Constants
@@ -499,6 +666,11 @@ npm run type-check
 - `ToolbarConfig` - Toolbar customization options
 - `ToolbarPosition` - Preset toolbar positions
 - `ToolbarDisplayMode` - Toolbar display modes
+- `NavbarConfig` - Navbar customization options
+- `NavbarPosition` - Preset navbar positions
+- `NavbarDisplayMode` - Navbar display modes
+- `NavbarButtonConfig` - Navbar button styling options
+- `NavbarTooltipConfig` - Navbar tooltip options
 - `NavItem` - Navigation item configuration
 - `SectionCoordinates` - Section coordinate definition
 
@@ -525,6 +697,22 @@ The `Canvas` component accepts the following props:
 | `canvasBackground` | `ReactNode` | No | `<DefaultCanvasBackground />` | Custom canvas background |
 | `wrapperBackground` | `ReactNode` | No | - | Custom wrapper/intro background |
 | `toolbarConfig` | `ToolbarConfig` | No | - | Toolbar customization options |
+| `navbarConfig` | `NavbarConfig` | No | - | Navbar customization options |
+
+### NavItem Props
+
+Each item in the `navItems` array has the following properties:
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `id` | `string` | Yes | Unique identifier for this section |
+| `label` | `string` | Yes | Display label shown in the navbar |
+| `icon` | `string \| React.ComponentType` | Yes | Lucide icon name or custom component |
+| `x` | `number` | Yes | X coordinate on the canvas |
+| `y` | `number` | Yes | Y coordinate on the canvas |
+| `width` | `number` | Yes | Section viewport width |
+| `height` | `number` | Yes | Section viewport height |
+| `isHome` | `boolean` | No | If true, clicking triggers reset/home behavior |
 
 ### Draggable Props
 

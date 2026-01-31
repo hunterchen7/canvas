@@ -32,8 +32,8 @@ export interface DefaultCanvasBackgroundProps {
   children?: ReactNode;
 }
 
-/** The default canvas gradient (neutral gray) */
-export const DEFAULT_CANVAS_GRADIENT = `radial-gradient(ellipse ${canvasWidth}px ${canvasHeight}px at ${canvasWidth / 2}px ${canvasHeight}px, #e5e5e5 0%, #d4d4d4 41%, #a3a3a3 59%, #f5f5f5 90%)`;
+/** The default canvas gradient (neutral light gray) */
+export const DEFAULT_CANVAS_GRADIENT = `radial-gradient(ellipse ${canvasWidth}px ${canvasHeight}px at ${canvasWidth / 2}px ${canvasHeight}px, #fafafa 0%, #f5f5f5 41%, #e5e5e5 59%, #fafafa 90%)`;
 
 /**
  * Default canvas background with gradient, dots, and noise filter.
@@ -42,7 +42,7 @@ export const DEFAULT_CANVAS_GRADIENT = `radial-gradient(ellipse ${canvasWidth}px
 export const DefaultCanvasBackground: React.FC<DefaultCanvasBackgroundProps> = ({
   gradientStyle,
   showDots = true,
-  dotColor = "#888888",
+  dotColor = "#a3a3a3",
   dotSize = 1.5,
   dotSpacing = 22,
   dotOpacity = 0.35,
@@ -117,7 +117,7 @@ export interface DefaultWrapperBackgroundProps {
  * Default wrapper/intro background gradient.
  */
 export const DefaultWrapperBackground: React.FC<DefaultWrapperBackgroundProps> = ({
-  gradient = "linear-gradient(to top, #d4d4d4 0%, #e5e5e5 50%, #f5f5f5 100%)",
+  gradient = "linear-gradient(to top, #f5f5f5 0%, #fafafa 50%, #ffffff 100%)",
   className,
   style,
 }) => {
@@ -197,9 +197,9 @@ export const DefaultIntroContent: React.FC<DefaultIntroContentProps> = ({
   );
 };
 
-// Default gradient values for export (neutral grays)
+// Default gradient values for export (neutral light grays)
 export const DEFAULT_INTRO_GRADIENT =
-  "linear-gradient(to top, #d4d4d4 0%, #e5e5e5 50%, #f5f5f5 100%)";
+  "linear-gradient(to top, #f5f5f5 0%, #fafafa 50%, #ffffff 100%)";
 
 export const DEFAULT_CANVAS_BOX_GRADIENT =
-  "radial-gradient(130.38% 95% at 50.03% 97.25%, #d4d4d4 0%, #e5e5e5 48.09%, #f5f5f5 100%)";
+  "radial-gradient(130.38% 95% at 50.03% 97.25%, #f5f5f5 0%, #fafafa 48.09%, #ffffff 100%)";
