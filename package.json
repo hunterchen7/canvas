@@ -17,30 +17,15 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "import": "./dist/index.js"
     },
-    "./styles.css": "./dist/styles.css",
-    "./components": {
-      "types": "./dist/components/index.d.ts",
-      "default": "./dist/components/index.js"
-    },
-    "./contexts": {
-      "types": "./dist/contexts/index.d.ts",
-      "default": "./dist/contexts/index.js"
-    },
-    "./hooks": {
-      "types": "./dist/hooks/index.d.ts",
-      "default": "./dist/hooks/index.js"
-    },
-    "./lib": {
-      "types": "./dist/lib/index.d.ts",
-      "default": "./dist/lib/index.js"
-    }
+    "./styles.css": "./dist/styles.css"
   },
   "scripts": {
-    "build": "npm run clean && npm run build:css && npm run build:ts",
+    "build": "npm run clean && npm run build:css && npm run build:js && npm run build:types",
     "build:css": "tailwindcss -i ./src/styles.css -o ./dist/styles.css --minify",
-    "build:ts": "tsc",
+    "build:js": "rolldown -c",
+    "build:types": "tsc --emitDeclarationOnly",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf dist"
   },
@@ -61,6 +46,7 @@
     "framer-motion": "^12.26.2",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
+    "rolldown": "^1.0.0-rc.2",
     "tailwindcss": "^3.4.19",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.8.2"
