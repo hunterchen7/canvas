@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.0](https://github.com/hunterchen7/canvas/compare/canvas-v0.8.0...canvas-v0.9.0) (2026-02-03)
+
+
+### Features
+
+* add rolldown bundler for library builds ([#35](https://github.com/hunterchen7/canvas/issues/35)) ([b88611d](https://github.com/hunterchen7/canvas/commit/b88611d0df261ae837c1979874705bf094343dbf))
+
 ## [0.8.0](https://github.com/hunterchen7/canvas/compare/canvas-v0.7.0...canvas-v0.8.0) (2026-01-31)
 
 
