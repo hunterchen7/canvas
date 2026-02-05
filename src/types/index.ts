@@ -3,6 +3,8 @@
  * Apps should extend these types with their specific enums and constants
  */
 
+import type { Transition } from "framer-motion";
+
 export interface SectionCoordinates {
   x: number;
   y: number;
@@ -151,6 +153,28 @@ export interface NavbarButtonConfig {
   /** Label inline styles */
   labelStyle?: React.CSSProperties;
 }
+
+/**
+ * Animation timing configuration for intro animations.
+ * Re-exports Framer Motion's Transition type for full flexibility.
+ *
+ * @example
+ * // Simple duration-based transition
+ * const timing: AnimationTimingConfig = {
+ *   duration: 1.5,
+ *   delay: 0.5,
+ *   ease: "easeInOut"
+ * };
+ *
+ * @example
+ * // Custom bezier curve
+ * const timing: AnimationTimingConfig = {
+ *   duration: 0.96,
+ *   delay: 3.14,
+ *   ease: [0.35, 0.1, 0.8, 1]
+ * };
+ */
+export type AnimationTimingConfig = Transition;
 
 /**
  * Configuration options for the canvas navbar

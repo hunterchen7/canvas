@@ -80,6 +80,8 @@ interface Props {
   growTransition?: Transition;
   /** Custom blur transition */
   blurTransition?: Transition;
+  /** Custom pan-to-home transition (stage 2) */
+  panTransition?: Transition;
 
   // ============== Background Customization ==============
   /** Custom canvas background. If not provided, uses DefaultCanvasBackground. */
@@ -117,6 +119,7 @@ const Canvas: FC<Props> = ({
   canvasBoxGradient,
   growTransition,
   blurTransition,
+  panTransition,
   canvasBackground,
   wrapperBackground,
   toolbarConfig,
@@ -225,14 +228,23 @@ const Canvas: FC<Props> = ({
     };
   }, [derivedScale, derivedX, derivedY, animationStage, scale, x, y]);
 
+  // Merge custom panTransition with defaults
+  const effectivePanTransition: Transition = useMemo(() => {
+    if (!panTransition) return STAGE2_TRANSITION;
+    return {
+      ...STAGE2_TRANSITION,
+      ...panTransition,
+    };
+  }, [panTransition]);
+
   // Kick off stage2 (pan to home) when grow completes (introProgress hits 1)
   const startStage2 = useCallback(() => {
     setAnimationStage(1);
 
     Promise.all([
-      animate(x, offsetHomeCoordinates.x, STAGE2_TRANSITION),
-      animate(y, offsetHomeCoordinates.y, STAGE2_TRANSITION),
-      animate(scale, 1, STAGE2_TRANSITION),
+      animate(x, offsetHomeCoordinates.x, effectivePanTransition),
+      animate(y, offsetHomeCoordinates.y, effectivePanTransition),
+      animate(scale, 1, effectivePanTransition),
     ])
       .then(() => {
         setAnimationStage(2);
@@ -241,7 +253,7 @@ const Canvas: FC<Props> = ({
       .catch(() => {
         isIntroAnimatingRef.current = false;
       });
-  }, [offsetHomeCoordinates, x, y, scale]);
+  }, [offsetHomeCoordinates, x, y, scale, effectivePanTransition]);
 
   const viewportRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<HTMLDivElement>(null);
