@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.0](https://github.com/hunterchen7/canvas/compare/canvas-v0.9.0...canvas-v0.10.0) (2026-02-05)
+
+
+### Features
+
+* add panTransition prop for customizable pan-to-home animation timing ([#37](https://github.com/hunterchen7/canvas/issues/37)) ([24d33cd](https://github.com/hunterchen7/canvas/commit/24d33cd8a6fed4118e50347dbfe2a93476014104))
+
 ## [0.9.0](https://github.com/hunterchen7/canvas/compare/canvas-v0.8.0...canvas-v0.9.0) (2026-02-03)
 
 
