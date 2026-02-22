@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.1](https://github.com/hunterchen7/canvas/compare/canvas-v0.10.0...canvas-v0.10.1) (2026-02-22)
+
+
+### Bug Fixes
+
+* skip all animations when skipIntro is true ([#39](https://github.com/hunterchen7/canvas/issues/39)) ([406cd91](https://github.com/hunterchen7/canvas/commit/406cd912f89543a368da090cde3d42772c43e615))
+
 ## [0.10.0](https://github.com/hunterchen7/canvas/compare/canvas-v0.9.0...canvas-v0.10.0) (2026-02-05)
 
 
