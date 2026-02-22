@@ -33,6 +33,7 @@ import {
 } from "../../lib/canvas";
 import {
   STAGE2_TRANSITION,
+  FADE_TRANSITION,
   MOUSE_WHEEL_ZOOM_SENSITIVITY,
   TRACKPAD_ZOOM_SENSITIVITY,
   DEFAULT_CANVAS_WIDTH,
@@ -82,6 +83,8 @@ interface Props {
   blurTransition?: Transition;
   /** Custom pan-to-home transition (stage 2) */
   panTransition?: Transition;
+  /** Custom fade-in transition for the canvas scene */
+  fadeTransition?: Transition;
 
   // ============== Background Customization ==============
   /** Custom canvas background. If not provided, uses DefaultCanvasBackground. */
@@ -120,6 +123,7 @@ const Canvas: FC<Props> = ({
   growTransition,
   blurTransition,
   panTransition,
+  fadeTransition,
   canvasBackground,
   wrapperBackground,
   toolbarConfig,
@@ -149,21 +153,18 @@ const Canvas: FC<Props> = ({
   });
   const [isResetting, setIsResetting] = useState<boolean>(false);
   const [maxZIndex, setMaxZIndex] = useState<number>(50);
-  const [animationStage, setAnimationStage] = useState<number>(0); // 0: initial, 1: finish grow, 2: pan to home
+  const [animationStage, setAnimationStage] = useState<number>(
+    skipIntro ? 2 : 0
+  ); // 0: initial, 1: finish grow, 2: pan to home
   const [nextTargetSection, setNextTargetSection] =
     useState<CanvasSection | null>(null);
   // Track if the intro (stage1 + stage2) is still running, to avoid accidental cancellation
-  const isIntroAnimatingRef = useRef(true);
+  const isIntroAnimatingRef = useRef(!skipIntro);
 
   const initialBoxWidth = useMemo(
     () => calcInitialBoxWidth(windowWidth, windowHeight),
     [windowWidth, windowHeight]
   );
-
-  // somewhere near the middle-ish
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const scale = useMotionValue(initialBoxWidth);
 
   const offsetHomeCoordinates = useMemo(
     () =>
@@ -174,6 +175,11 @@ const Canvas: FC<Props> = ({
       }),
     [homeCoordinates, windowWidth, windowHeight]
   );
+
+  // When skipIntro, initialize at home position; otherwise start at origin for intro animation
+  const x = useMotionValue(skipIntro ? offsetHomeCoordinates.x : 0);
+  const y = useMotionValue(skipIntro ? offsetHomeCoordinates.y : 0);
+  const scale = useMotionValue(skipIntro ? 1 : initialBoxWidth);
 
   const onResetViewAndItems = useCallback(
     (onComplete?: () => void): void => {
@@ -239,6 +245,15 @@ const Canvas: FC<Props> = ({
 
   // Kick off stage2 (pan to home) when grow completes (introProgress hits 1)
   const startStage2 = useCallback(() => {
+    if (skipIntro) {
+      x.set(offsetHomeCoordinates.x);
+      y.set(offsetHomeCoordinates.y);
+      scale.set(1);
+      setAnimationStage(2);
+      isIntroAnimatingRef.current = false;
+      return;
+    }
+
     setAnimationStage(1);
 
     Promise.all([
@@ -253,7 +268,7 @@ const Canvas: FC<Props> = ({
       .catch(() => {
         isIntroAnimatingRef.current = false;
       });
-  }, [offsetHomeCoordinates, x, y, scale, effectivePanTransition]);
+  }, [offsetHomeCoordinates, x, y, scale, effectivePanTransition, skipIntro]);
 
   const viewportRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<HTMLDivElement>(null);
@@ -691,7 +706,7 @@ const Canvas: FC<Props> = ({
             className="absolute z-20 origin-top-left"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.3, ease: "easeIn" }}
+            transition={fadeTransition ?? FADE_TRANSITION}
             style={{
               width: `${sceneWidth}px`,
               height: `${sceneHeight}px`,

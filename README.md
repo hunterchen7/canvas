@@ -573,7 +573,9 @@ The library exports default gradient values you can use as a starting point:
 import {
   DEFAULT_CANVAS_GRADIENT,    // Default canvas background gradient
   DEFAULT_INTRO_GRADIENT,     // Default intro background gradient
-  DEFAULT_CANVAS_BOX_GRADIENT // Default blur mask gradient
+  DEFAULT_CANVAS_BOX_GRADIENT, // Default blur mask gradient
+  FADE_TRANSITION,            // Default scene fade-in transition
+  STAGE2_TRANSITION,          // Default pan-to-home transition
 } from '@hunterchen/canvas';
 ```
 
@@ -687,13 +689,15 @@ The `Canvas` component accepts the following props:
 | `canvasWidth` | `number` | No | `6000` | Total canvas width in pixels |
 | `canvasHeight` | `number` | No | `4000` | Total canvas height in pixels |
 | `navItems` | `NavItem[]` | No | - | Navigation items for navbar |
-| `skipIntro` | `boolean` | No | `false` | Skip intro animation |
+| `skipIntro` | `boolean` | No | `false` | Skip all intro animations (starts at home position) |
 | `introContent` | `ReactNode` | No | - | Custom intro content during loading |
 | `loadingText` | `string` | No | - | Custom loading text |
 | `introBackgroundGradient` | `string` | No | - | Background gradient for intro |
 | `canvasBoxGradient` | `string` | No | - | Canvas box gradient during intro |
 | `growTransition` | `Transition` | No | - | Custom grow transition (Framer Motion) |
 | `blurTransition` | `Transition` | No | - | Custom blur transition (Framer Motion) |
+| `panTransition` | `Transition` | No | - | Custom pan-to-home transition (Framer Motion) |
+| `fadeTransition` | `Transition` | No | - | Custom scene fade-in transition (Framer Motion) |
 | `canvasBackground` | `ReactNode` | No | `<DefaultCanvasBackground />` | Custom canvas background |
 | `wrapperBackground` | `ReactNode` | No | - | Custom wrapper/intro background |
 | `toolbarConfig` | `ToolbarConfig` | No | - | Toolbar customization options |

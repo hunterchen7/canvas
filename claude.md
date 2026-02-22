@@ -149,7 +149,8 @@ Main orchestrating component handling:
 **Props of note:**
 - `homeCoordinates`: Required initial viewport position
 - `navItems`: Optional navigation items
-- `skipIntro`: Skip loading animation
+- `skipIntro`: Skip all intro animations (starts directly at home position)
+- `growTransition`, `blurTransition`, `panTransition`, `fadeTransition`: Animation timing overrides
 - `toolbarConfig`, `navbarConfig`: Customization objects
 
 ### CanvasComponent (component.tsx)
@@ -173,6 +174,8 @@ Handles intro animation:
 | `MAX_ZOOM` | 3 | Maximum zoom level |
 | `ZOOM_BOUND` | 1.05 | Prevent zooming past edges |
 | `VIEWPORT_HYSTERESIS_BUFFER` | 120 | Buffer for visibility detection |
+| `FADE_TRANSITION` | `{ duration: 0.3, ease: "easeIn" }` | Scene fade-in transition |
+| `STAGE2_TRANSITION` | `{ duration: 0.96, ease: [...] }` | Pan-to-home transition |
 
 ## Build & Development
 
@@ -254,7 +257,7 @@ This project uses **release-please** for automated releases:
 `cn`, `getSectionPanCoordinates`, `panToOffsetScene`, `getScreenSizeEnum`, `isIOS`, `isMobile`, `prefersReducedMotion`
 
 ### Constants
-`DEFAULT_CANVAS_WIDTH`, `DEFAULT_CANVAS_HEIGHT`, `MAX_ZOOM`, `MIN_ZOOMS`, `canvasWidth`, `canvasHeight`, `DEFAULT_CANVAS_GRADIENT`, `DEFAULT_INTRO_GRADIENT`, `DEFAULT_CANVAS_BOX_GRADIENT`
+`DEFAULT_CANVAS_WIDTH`, `DEFAULT_CANVAS_HEIGHT`, `MAX_ZOOM`, `MIN_ZOOMS`, `canvasWidth`, `canvasHeight`, `DEFAULT_CANVAS_GRADIENT`, `DEFAULT_INTRO_GRADIENT`, `DEFAULT_CANVAS_BOX_GRADIENT`, `FADE_TRANSITION`, `STAGE2_TRANSITION`
 
 ### Types
 `SectionCoordinates`, `NavItem`, `CanvasSection`, `ToolbarConfig`, `NavbarConfig`, `PerformanceMode`, `PerformanceConfig`

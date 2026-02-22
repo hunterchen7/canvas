@@ -51,6 +51,7 @@ function App() {
         homeCoordinates={coordinates.home}
         navItems={navItems}
         skipIntro={true}
+        fadeTransition={{ duration: 1.2, ease: [0.25, 0.1, 0.25, 1] }}
         toolbarConfig={{
           position: "top-right",
           className: "font-sans font-medium px-2.5",
