@@ -62,6 +62,12 @@ export const STAGE2_TRANSITION = {
     ease: [0.37, 0.1, 0.6, 1],
 } as const;
 
+/** Canvas scene fade-in transition config */
+export const FADE_TRANSITION = {
+    duration: 0.3,
+    ease: "easeIn" as Easing,
+} as const;
+
 // ============================================================================
 // ZOOM & PAN
 // ============================================================================

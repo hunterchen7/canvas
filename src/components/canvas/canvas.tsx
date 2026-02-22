@@ -33,6 +33,7 @@ import {
 } from "../../lib/canvas";
 import {
   STAGE2_TRANSITION,
+  FADE_TRANSITION,
   MOUSE_WHEEL_ZOOM_SENSITIVITY,
   TRACKPAD_ZOOM_SENSITIVITY,
   DEFAULT_CANVAS_WIDTH,
@@ -82,6 +83,8 @@ interface Props {
   blurTransition?: Transition;
   /** Custom pan-to-home transition (stage 2) */
   panTransition?: Transition;
+  /** Custom fade-in transition for the canvas scene */
+  fadeTransition?: Transition;
 
   // ============== Background Customization ==============
   /** Custom canvas background. If not provided, uses DefaultCanvasBackground. */
@@ -120,6 +123,7 @@ const Canvas: FC<Props> = ({
   growTransition,
   blurTransition,
   panTransition,
+  fadeTransition,
   canvasBackground,
   wrapperBackground,
   toolbarConfig,
@@ -702,7 +706,7 @@ const Canvas: FC<Props> = ({
             className="absolute z-20 origin-top-left"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.3, ease: "easeIn" }}
+            transition={fadeTransition ?? FADE_TRANSITION}
             style={{
               width: `${sceneWidth}px`,
               height: `${sceneHeight}px`,
