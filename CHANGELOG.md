@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.0](https://github.com/hunterchen7/canvas/compare/canvas-v0.10.1...canvas-v0.11.0) (2026-02-23)
+
+
+### Features
+
+* add navigateToSection to canvas context ([#42](https://github.com/hunterchen7/canvas/issues/42)) ([2037274](https://github.com/hunterchen7/canvas/commit/203727423b1d7c7d91aa3a0dbfe4f3a702cae512))
+
 ## [0.10.1](https://github.com/hunterchen7/canvas/compare/canvas-v0.10.0...canvas-v0.10.1) (2026-02-22)
 
 
