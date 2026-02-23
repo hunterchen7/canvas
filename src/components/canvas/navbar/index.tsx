@@ -26,6 +26,8 @@ interface NavbarProps {
   items: NavItem[];
   /** Navbar configuration options */
   config?: NavbarConfig;
+  /** Register a handler so external code can trigger navigation via navigateToSection */
+  onRegisterNavigate?: (handler: ((sectionId: string) => void) | null) => void;
 }
 
 const positionStyles: Record<NavbarPosition, React.CSSProperties> = {
@@ -68,6 +70,7 @@ export default function Navbar({
   onReset,
   items,
   config = {},
+  onRegisterNavigate,
 }: NavbarProps) {
   const { x, y, scale, animationStage, setNextTargetSection } =
     useCanvasContext();
@@ -180,6 +183,27 @@ export default function Navbar({
     },
     [panToOffset, onReset, width, height, defaultZoom, setNextTargetSection],
   );
+
+  // Register handlePan for external navigation via navigateToSection
+  const handlePanRef = useRef(handlePan);
+  useEffect(() => {
+    handlePanRef.current = handlePan;
+  }, [handlePan]);
+
+  const itemsRef = useRef(items);
+  useEffect(() => {
+    itemsRef.current = items;
+  }, [items]);
+
+  useEffect(() => {
+    if (!onRegisterNavigate) return;
+    const handler = (sectionId: string) => {
+      const item = itemsRef.current.find((i) => i.id === sectionId);
+      if (item) handlePanRef.current(item);
+    };
+    onRegisterNavigate(handler);
+    return () => onRegisterNavigate(null);
+  }, [onRegisterNavigate]);
 
   // Clean up timers on unmount and pan to home on animation complete
   useEffect(() => {

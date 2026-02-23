@@ -38,6 +38,7 @@ import {
   TRACKPAD_ZOOM_SENSITIVITY,
   DEFAULT_CANVAS_WIDTH,
   DEFAULT_CANVAS_HEIGHT,
+  RESPONSIVE_ZOOM_MAP,
 } from "../../lib/constants";
 import useWindowDimensions from "../../hooks/useWindowDimensions";
 import Navbar from "./navbar";
@@ -645,6 +646,57 @@ const Canvas: FC<Props> = ({
     [panToOffset, viewportRef]
   );
 
+  // --- navigateToSection: delegates to Navbar when mounted, falls back to basic pan ---
+  const navbarNavigateRef = useRef<((sectionId: string) => void) | null>(null);
+
+  const registerNavbarNavigate = useCallback(
+    (handler: ((sectionId: string) => void) | null) => {
+      navbarNavigateRef.current = handler;
+    },
+    []
+  );
+
+  const navigateToSection = useCallback(
+    (sectionId: string) => {
+      if (navbarNavigateRef.current) {
+        // Navbar is mounted — delegate for full behavior (highlight, pre-render, etc.)
+        navbarNavigateRef.current(sectionId);
+      } else if (navItems) {
+        // Fallback: no navbar, do basic pan
+        const item = navItems.find((i) => i.id === sectionId);
+        if (!item) return;
+
+        setNextTargetSection(sectionId);
+
+        if (item.isHome) {
+          onResetViewAndItems();
+        } else {
+          const zoom = RESPONSIVE_ZOOM_MAP[getScreenSizeEnum(windowWidth)];
+          const panCoords = getSectionPanCoordinates({
+            windowDimensions: { width: windowWidth, height: windowHeight },
+            coords: {
+              x: item.x,
+              y: item.y,
+              width: item.width,
+              height: item.height,
+            },
+            targetZoom: zoom,
+            negative: true,
+          });
+          handlePanToOffset(panCoords, undefined, zoom);
+        }
+      }
+    },
+    [
+      navItems,
+      windowWidth,
+      windowHeight,
+      onResetViewAndItems,
+      handlePanToOffset,
+      setNextTargetSection,
+    ]
+  );
+
   return (
     <CanvasWrapper
       introProgress={introProgress}
@@ -668,6 +720,7 @@ const Canvas: FC<Props> = ({
         animationStage={animationStage}
         nextTargetSection={nextTargetSection}
         setNextTargetSection={setNextTargetSection}
+        navigateToSection={navigateToSection}
       >
         {animationStage >= 2 && (
           <>
@@ -683,6 +736,7 @@ const Canvas: FC<Props> = ({
                 onReset={onResetViewAndItems}
                 items={navItems}
                 config={navbarConfig}
+                onRegisterNavigate={registerNavbarNavigate}
               />
             )}
           </>

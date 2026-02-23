@@ -17,6 +17,8 @@ export interface CanvasContextState {
   animationStage: number;
   nextTargetSection: CanvasSection | null; // predictive pre-render target
   setNextTargetSection: (section: CanvasSection | null) => void;
+  /** Navigate to a section by its NavItem id. Pans the canvas and highlights the navbar button. */
+  navigateToSection: (sectionId: string) => void;
 }
 
 const defaultState = {
@@ -32,6 +34,9 @@ const defaultState = {
   nextTargetSection: null,
   setNextTargetSection: () => {
     console.log("setNextTargetSection not set");
+  },
+  navigateToSection: () => {
+    console.log("navigateToSection not set");
   },
 } as const;
 
