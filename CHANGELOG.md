@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.1](https://github.com/hunterchen7/canvas/compare/canvas-v0.11.0...canvas-v0.11.1) (2026-02-24)
+
+
+### Bug Fixes
+
+* resize off-screen canvas to match image for alpha detection ([#45](https://github.com/hunterchen7/canvas/issues/45)) ([ee2b982](https://github.com/hunterchen7/canvas/commit/ee2b98200a140bdfc4b287250794b6c4a06f61ac)), closes [#44](https://github.com/hunterchen7/canvas/issues/44)
+
 ## [0.11.0](https://github.com/hunterchen7/canvas/compare/canvas-v0.10.1...canvas-v0.11.0) (2026-02-23)
 
 
