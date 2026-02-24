@@ -141,6 +141,8 @@ export interface DraggableImageProps extends DraggableProps {
 }
 
 function drawImageToCanvas(img: HTMLImageElement, canvas: HTMLCanvasElement) {
+  canvas.width = img.naturalWidth;
+  canvas.height = img.naturalHeight;
   const ctx = canvas.getContext("2d", { willReadFrequently: true });
   if (!ctx) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -160,8 +162,8 @@ function getAlphaAtCoords(
 
   const rect = img.getBoundingClientRect();
 
-  const x = ((clientX - rect.left) / rect.width) * img.naturalWidth;
-  const y = ((clientY - rect.top) / rect.height) * img.naturalHeight;
+  const x = ((clientX - rect.left) / rect.width) * canvas.width;
+  const y = ((clientY - rect.top) / rect.height) * canvas.height;
 
   const alpha = ctx.getImageData(x, y, 1, 1).data[3] ?? 0;
   return alpha;
