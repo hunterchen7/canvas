@@ -4,6 +4,7 @@
  */
 
 import type { Transition } from "framer-motion";
+import { ScreenSizeEnum } from "../lib/constants";
 
 export interface SectionCoordinates {
   x: number;
@@ -211,4 +212,15 @@ export interface NavbarConfig {
   gap?: number;
   /** Padding inside the navbar in pixels. Default: 4 */
   padding?: number;
+}
+
+/**
+ * Configuration for zoom behavior per screen size.
+ * Partial overrides are merged with library defaults.
+ */
+export interface ZoomConfig {
+  /** Override minimum zoom levels per screen size. Merged with defaults from MIN_ZOOMS. */
+  minZooms?: Partial<Record<ScreenSizeEnum, number>>;
+  /** Override navigation zoom levels per screen size. Merged with defaults from RESPONSIVE_ZOOM_MAP. */
+  responsiveZoomMap?: Partial<Record<ScreenSizeEnum, number>>;
 }

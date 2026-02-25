@@ -10,8 +10,8 @@ import {
   getSectionPanCoordinates,
 } from "../../../lib/canvas";
 import {
-  RESPONSIVE_ZOOM_MAP,
   NAVBAR_DEBOUNCE_MS,
+  type ScreenSizeEnum,
 } from "../../../lib/constants";
 import { cn } from "../../../lib/utils";
 
@@ -28,6 +28,8 @@ interface NavbarProps {
   config?: NavbarConfig;
   /** Register a handler so external code can trigger navigation via navigateToSection */
   onRegisterNavigate?: (handler: ((sectionId: string) => void) | null) => void;
+  /** Resolved responsive zoom map (defaults merged with user overrides) */
+  responsiveZoomMap: Record<ScreenSizeEnum, number>;
 }
 
 const positionStyles: Record<NavbarPosition, React.CSSProperties> = {
@@ -71,6 +73,7 @@ export default function Navbar({
   items,
   config = {},
   onRegisterNavigate,
+  responsiveZoomMap,
 }: NavbarProps) {
   const { x, y, scale, animationStage, setNextTargetSection } =
     useCanvasContext();
@@ -87,7 +90,7 @@ export default function Navbar({
   const { height, width } = useWindowDimensions();
   const { mode } = usePerformanceMode();
 
-  const defaultZoom = RESPONSIVE_ZOOM_MAP[getScreenSizeEnum(width)];
+  const defaultZoom = responsiveZoomMap[getScreenSizeEnum(width)];
 
   // Derive debounce duration from performance mode
   const debounceMs = NAVBAR_DEBOUNCE_MS[mode] ?? 0;
