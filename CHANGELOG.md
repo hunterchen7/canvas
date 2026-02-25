@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.0](https://github.com/hunterchen7/canvas/compare/canvas-v0.11.1...canvas-v0.12.0) (2026-02-25)
+
+
+### Features
+
+* add configurable zoom multipliers via zoomConfig prop ([#47](https://github.com/hunterchen7/canvas/issues/47)) ([d8aa866](https://github.com/hunterchen7/canvas/commit/d8aa866d6e105b07613f726ed71cebbc90d2001c))
+
 ## [0.11.1](https://github.com/hunterchen7/canvas/compare/canvas-v0.11.0...canvas-v0.11.1) (2026-02-24)
 
 
