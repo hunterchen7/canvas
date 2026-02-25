@@ -62,4 +62,5 @@ export type {
   NavbarButtonConfig,
   NavbarTooltipConfig,
   AnimationTimingConfig,
+  ZoomConfig,
 } from "./types";

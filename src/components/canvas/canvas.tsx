@@ -49,6 +49,7 @@ import type {
   NavbarConfig,
   SectionCoordinates,
   ToolbarConfig,
+  ZoomConfig,
 } from "../../types";
 import { CanvasWrapper } from "./wrapper";
 import { usePerformanceMode } from "../../hooks/usePerformanceMode";
@@ -100,6 +101,10 @@ interface Props {
   // ============== Navbar Customization ==============
   /** Navbar customization options */
   navbarConfig?: NavbarConfig;
+
+  // ============== Zoom Customization ==============
+  /** Zoom level overrides per screen size */
+  zoomConfig?: ZoomConfig;
 }
 
 const stopAllMotion = (
@@ -131,6 +136,7 @@ const Canvas: FC<Props> = ({
   navbarConfig,
   canvasHeight,
   canvasWidth,
+  zoomConfig,
 }) => {
   const { height: windowHeight, width: windowWidth } = useWindowDimensions();
 
@@ -141,7 +147,16 @@ const Canvas: FC<Props> = ({
   const sceneWidth = canvasWidth ?? DEFAULT_CANVAS_WIDTH;
   const sceneHeight = canvasHeight ?? DEFAULT_CANVAS_HEIGHT;
 
-  const MIN_ZOOM = MIN_ZOOMS[getScreenSizeEnum(windowWidth)];
+  const resolvedMinZooms = useMemo(
+    () => zoomConfig?.minZooms ? { ...MIN_ZOOMS, ...zoomConfig.minZooms } : MIN_ZOOMS,
+    [zoomConfig?.minZooms]
+  );
+  const resolvedResponsiveZoomMap = useMemo(
+    () => zoomConfig?.responsiveZoomMap ? { ...RESPONSIVE_ZOOM_MAP, ...zoomConfig.responsiveZoomMap } : RESPONSIVE_ZOOM_MAP,
+    [zoomConfig?.responsiveZoomMap]
+  );
+
+  const MIN_ZOOM = resolvedMinZooms[getScreenSizeEnum(windowWidth)];
 
   // tracks if user is panning the screen
   const [isPanning, setIsPanning] = useState<boolean>(false);
@@ -671,7 +686,7 @@ const Canvas: FC<Props> = ({
         if (item.isHome) {
           onResetViewAndItems();
         } else {
-          const zoom = RESPONSIVE_ZOOM_MAP[getScreenSizeEnum(windowWidth)];
+          const zoom = resolvedResponsiveZoomMap[getScreenSizeEnum(windowWidth)];
           const panCoords = getSectionPanCoordinates({
             windowDimensions: { width: windowWidth, height: windowHeight },
             coords: {
@@ -694,6 +709,7 @@ const Canvas: FC<Props> = ({
       onResetViewAndItems,
       handlePanToOffset,
       setNextTargetSection,
+      resolvedResponsiveZoomMap,
     ]
   );
 
@@ -737,6 +753,7 @@ const Canvas: FC<Props> = ({
                 items={navItems}
                 config={navbarConfig}
                 onRegisterNavigate={registerNavbarNavigate}
+                responsiveZoomMap={resolvedResponsiveZoomMap}
               />
             )}
           </>
