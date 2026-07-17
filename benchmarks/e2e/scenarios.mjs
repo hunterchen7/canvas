@@ -441,9 +441,17 @@ const scenarioDefinitions = [
           }
           return Reflect.apply(originalArrayFrom, this, args);
         };
+        let isCountingArrayFrom = true;
+        const stopCountingArrayFrom = () => {
+          if (!isCountingArrayFrom) return;
+          isCountingArrayFrom = false;
+          Array.from = originalArrayFrom;
+          delete window.__CANVAS_STOP_PINCH_ARRAY_COUNT__;
+        };
+        window.__CANVAS_STOP_PINCH_ARRAY_COUNT__ = stopCountingArrayFrom;
 
         window.__CANVAS_RESTORE_PINCH_BENCHMARK__ = () => {
-          Array.from = originalArrayFrom;
+          stopCountingArrayFrom();
           element.removeEventListener("pointerdown", recordPointerId);
           delete window.__CANVAS_PINCH_POINTER_IDS__;
           delete window.__CANVAS_RESTORE_PINCH_BENCHMARK__;
@@ -477,6 +485,9 @@ const scenarioDefinitions = [
           checkpoints.push(await captureCheckpoint(page, `step-${index}`));
         }
 
+        await page.evaluate(() =>
+          window.__CANVAS_STOP_PINCH_ARRAY_COUNT__?.(),
+        );
         const pointerIds = await page.evaluate(
           () => window.__CANVAS_PINCH_POINTER_IDS__,
         );
@@ -508,7 +519,7 @@ const scenarioDefinitions = [
             const durations = [];
             for (let repetition = 0; repetition < 5; repetition += 1) {
               const started = performance.now();
-              for (let index = 0; index < 20_000; index += 1) {
+              for (let index = 0; index < 100_000; index += 1) {
                 element.dispatchEvent(events[index % events.length]);
               }
               durations.push(performance.now() - started);
