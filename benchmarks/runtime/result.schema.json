@@ -1,0 +1,192 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/hunterchen7/canvas/benchmarks/runtime/result.schema.json",
+  "title": "Canvas runtime benchmark result",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "scenarioVersion",
+    "status",
+    "runId",
+    "runner",
+    "config",
+    "environment",
+    "canvas",
+    "profiler",
+    "renderCount",
+    "rendersById",
+    "listeners",
+    "frames",
+    "longTasks",
+    "longAnimationFrames",
+    "phases",
+    "motion",
+    "motionSamples",
+    "animationStageEvents",
+    "behaviorSnapshots",
+    "warnings",
+    "errors",
+    "profilerSamples"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "scenarioVersion": { "const": "1.0.0" },
+    "status": { "enum": ["complete", "error"] },
+    "runId": { "type": "string" },
+    "runner": { "enum": ["interactive", "in-page", "playwright"] },
+    "startedAtIso": { "type": "string", "format": "date-time" },
+    "finishedAtIso": { "type": "string", "format": "date-time" },
+    "elapsedMs": { "type": "number", "minimum": 0 },
+    "config": { "$ref": "#/$defs/config" },
+    "environment": { "type": "object" },
+    "canvas": { "$ref": "#/$defs/canvasState" },
+    "profiler": { "$ref": "#/$defs/profiler" },
+    "renderCount": { "type": "integer", "minimum": 0 },
+    "rendersById": {
+      "type": "object",
+      "additionalProperties": { "type": "integer", "minimum": 0 }
+    },
+    "listeners": { "type": "object" },
+    "frames": { "$ref": "#/$defs/duration" },
+    "longTasks": { "$ref": "#/$defs/duration" },
+    "longAnimationFrames": { "$ref": "#/$defs/duration" },
+    "phases": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "motion": { "$ref": "#/$defs/motion" },
+    "motionSamples": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["atMs", "animationStage", "x", "y", "scale"],
+        "properties": {
+          "atMs": { "type": "number" },
+          "benchmarkPhase": {
+            "type": ["string", "null"]
+          },
+          "animationStage": { "type": "number" },
+          "x": { "type": "number" },
+          "y": { "type": "number" },
+          "scale": { "type": "number" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "animationStageEvents": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "behaviorSnapshots": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "label",
+          "atMs",
+          "canvas",
+          "mountedSectionIds",
+          "draggableTransforms",
+          "toolbarText",
+          "navbarButtons"
+        ]
+      }
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } },
+    "errors": { "type": "array", "items": { "type": "string" } },
+    "profilerSamples": {
+      "type": "array",
+      "items": { "type": "object" }
+    }
+  },
+  "$defs": {
+    "config": {
+      "type": "object",
+      "required": [
+        "schemaVersion",
+        "scenarioVersion",
+        "runId",
+        "sectionCount",
+        "navItemCount",
+        "sectionComplexity",
+        "requestedMode",
+        "introEnabled",
+        "autorun",
+        "seed"
+      ],
+      "properties": {
+        "schemaVersion": { "const": "1.0.0" },
+        "scenarioVersion": { "const": "1.0.0" },
+        "runId": { "type": "string" },
+        "sectionCount": { "type": "integer", "minimum": 1 },
+        "navItemCount": { "type": "integer", "minimum": 1 },
+        "sectionComplexity": { "type": "integer", "minimum": 1 },
+        "requestedMode": { "enum": ["auto", "high", "medium", "low"] },
+        "introEnabled": { "type": "boolean" },
+        "autorun": { "type": "boolean" },
+        "seed": { "type": "integer" }
+      },
+      "additionalProperties": false
+    },
+    "canvasState": {
+      "type": "object",
+      "required": ["animationStage", "x", "y", "scale", "detectedMode"],
+      "properties": {
+        "animationStage": { "type": "number" },
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "scale": { "type": "number" },
+        "detectedMode": { "enum": ["high", "medium", "low", "unknown"] }
+      },
+      "additionalProperties": false
+    },
+    "duration": {
+      "type": "object",
+      "required": ["sampleCount", "totalMs", "meanMs", "p50Ms", "p95Ms", "p99Ms", "maxMs"],
+      "properties": {
+        "sampleCount": { "type": "integer", "minimum": 0 },
+        "totalMs": { "type": "number", "minimum": 0 },
+        "meanMs": { "type": "number", "minimum": 0 },
+        "p50Ms": { "type": "number", "minimum": 0 },
+        "p95Ms": { "type": "number", "minimum": 0 },
+        "p99Ms": { "type": "number", "minimum": 0 },
+        "maxMs": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": true
+    },
+    "profiler": {
+      "type": "object",
+      "required": ["commitCount", "actualDuration"],
+      "properties": {
+        "commitCount": { "type": "integer", "minimum": 0 },
+        "actualDuration": { "$ref": "#/$defs/duration" }
+      },
+      "additionalProperties": true
+    },
+    "motion": {
+      "type": "object",
+      "required": [
+        "sampleCount",
+        "start",
+        "end",
+        "panPathDistancePx",
+        "scalePathDistance",
+        "maxPanStepPx",
+        "maxScaleStep",
+        "trajectoryHash"
+      ],
+      "properties": {
+        "sampleCount": { "type": "integer", "minimum": 0 },
+        "start": { "anyOf": [{ "$ref": "#/$defs/canvasState" }, { "type": "null" }] },
+        "end": { "anyOf": [{ "$ref": "#/$defs/canvasState" }, { "type": "null" }] },
+        "panPathDistancePx": { "type": "number", "minimum": 0 },
+        "scalePathDistance": { "type": "number", "minimum": 0 },
+        "maxPanStepPx": { "type": "number", "minimum": 0 },
+        "maxScaleStep": { "type": "number", "minimum": 0 },
+        "trajectoryHash": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
