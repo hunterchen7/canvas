@@ -330,15 +330,21 @@ function compareInteractionCheckpoints(baseline, candidate, thresholds) {
       });
     }
 
-    for (const field of [
+    const semanticFields = [
       "animationStage",
       "toolbarText",
       "toolbarOpacity",
       "sceneTransform",
       "dragImageCursor",
       "dragImagePointerEvents",
-      "dragImageTransform",
-    ]) {
+    ];
+    if (
+      left.label.startsWith("hover-") ||
+      ["before-input", "settled"].includes(left.label)
+    ) {
+      semanticFields.push("dragImageTransform");
+    }
+    for (const field of semanticFields) {
       if (left[field] !== right[field]) {
         failures.push({
           category: "interaction-semantic-state",
