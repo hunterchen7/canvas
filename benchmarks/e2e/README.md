@@ -9,6 +9,7 @@ It only reads library source through a Vite alias. The fixture and runner live u
 - Intro grow, blur, fade, and pan-to-home timing.
 - `DefaultIntroContent` logo/title markup, geometry, and stable pixels.
 - Pointer pan and ctrl-wheel zoom.
+- Changing-size and same-size resize fanout stress across 100 sections.
 - Navbar spring navigation and default, custom, and dynamically enabled Toolbar readout updates.
 - Framer Motion drag plus transparent SVG alpha hit-testing, cursor state, and per-hover geometry-read counts.
 - Stable full-page screenshots, selected DOM geometry/computed styles, and serialized SVG identity.

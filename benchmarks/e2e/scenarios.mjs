@@ -208,6 +208,61 @@ async function wheelSequence(page, { x, y, deltaX, deltaY, count, ctrlKey = fals
 
 const scenarioDefinitions = [
   {
+    name: "window-dimension-fanout",
+    trajectoryMode: "checkpoints",
+    anchorTypes: [],
+    query: ({ sections }) =>
+      `?intro=0&sections=${Math.max(sections, 100)}`,
+    async prepare(page, url) {
+      await page.goto(url, { waitUntil: "networkidle" });
+      await waitForFixture(page);
+      await waitForVisualIdle(page);
+      await resetBrowserMetrics(page);
+    },
+    async act(page) {
+      const checkpoints = [await captureCheckpoint(page, "before-input")];
+      await page.evaluate(async () => {
+        const originalWidth = window.innerWidth;
+        const descriptor = Object.getOwnPropertyDescriptor(window, "innerWidth");
+        let syntheticWidth = originalWidth;
+        Object.defineProperty(window, "innerWidth", {
+          configurable: true,
+          get: () => syntheticWidth,
+        });
+
+        const changingStarted = performance.now();
+        for (let index = 0; index < 2_000; index += 1) {
+          syntheticWidth = index % 2 === 0 ? originalWidth - 1 : originalWidth;
+          window.dispatchEvent(new Event("resize"));
+        }
+        const changingDuration = performance.now() - changingStarted;
+
+        if (descriptor) Object.defineProperty(window, "innerWidth", descriptor);
+        else delete window.innerWidth;
+        window.dispatchEvent(new Event("resize"));
+        await new Promise((resolve) => requestAnimationFrame(() => resolve()));
+
+        const sameSizeStarted = performance.now();
+        for (let index = 0; index < 5_000; index += 1) {
+          window.dispatchEvent(new Event("resize"));
+        }
+        const sameSizeDuration = performance.now() - sameSizeStarted;
+
+        window.__CANVAS_PERF__?.recordWorkMetric(
+          "changingResizeDispatchMs",
+          changingDuration,
+        );
+        window.__CANVAS_PERF__?.recordWorkMetric(
+          "sameSizeResizeDispatchMs",
+          sameSizeDuration,
+        );
+      });
+      await waitForVisualIdle(page, 250);
+      checkpoints.push(await captureCheckpoint(page, "settled"));
+      return checkpoints;
+    },
+  },
+  {
     name: "default-intro-content",
     trajectoryMode: "checkpoints",
     anchorTypes: [],

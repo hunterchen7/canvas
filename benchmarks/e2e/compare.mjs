@@ -516,6 +516,11 @@ function comparePerformance(baseline, candidate, thresholds) {
       baseline.browser.counters?.draggableImageRectCalls ?? 0,
       candidate.browser.counters?.draggableImageRectCalls ?? 0,
     ],
+    ...Object.keys(baseline.browser.workMetrics ?? {}).map((metric) => [
+      metric,
+      baseline.browser.workMetrics[metric] ?? 0,
+      candidate.browser.workMetrics?.[metric] ?? 0,
+    ]),
   ];
   const results = measurements.map(([metric, left, right]) => {
     const absoluteDifference = right - left;

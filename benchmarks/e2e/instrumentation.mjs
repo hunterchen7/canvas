@@ -25,6 +25,7 @@ export function installBrowserInstrumentation() {
     longTasks: [],
     longAnimationFrames: [],
     events: [],
+    workMetrics: {},
   };
 
   const nativeGetBoundingClientRect = Element.prototype.getBoundingClientRect;
@@ -197,7 +198,11 @@ export function installBrowserInstrumentation() {
       state.longTasks.length = 0;
       state.longAnimationFrames.length = 0;
       state.events.length = 0;
+      state.workMetrics = {};
       return state.baseTime;
+    },
+    recordWorkMetric(name, value) {
+      state.workMetrics[name] = value;
     },
     snapshot() {
       return {
@@ -209,6 +214,7 @@ export function installBrowserInstrumentation() {
         counters: {
           draggableImageRectCalls: state.draggableImageRectCalls,
         },
+        workMetrics: { ...state.workMetrics },
         summary: summarize(),
         frameIntervals: [...state.frameIntervals],
         trajectory: state.trajectory.map((sample) => ({ ...sample })),
