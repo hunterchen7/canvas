@@ -142,6 +142,7 @@ async function captureCheckpoint(page, label) {
     const state = window.__CANVAS_HARNESS__?.read();
     const image = document.querySelector("img[alt='Benchmark draggable shape']");
     const imageRect = image?.getBoundingClientRect();
+    const imageStyle = image ? getComputedStyle(image) : null;
     const dragRoot = image?.parentElement;
     const dragTransform = dragRoot ? getComputedStyle(dragRoot).transform : null;
     const dragMatrix = dragTransform
@@ -152,7 +153,11 @@ async function captureCheckpoint(page, label) {
       ...state,
       dragTranslation: dragMatrix ? { x: dragMatrix.m41, y: dragMatrix.m42 } : null,
       dragTransform,
-      dragImageTransform: image ? getComputedStyle(image).transform : null,
+      dragImageTransform: imageStyle?.transform ?? null,
+      dragImageCursor:
+        imageStyle?.cursor.replace(window.location.origin, "<fixture-origin>") ??
+        null,
+      dragImagePointerEvents: imageStyle?.pointerEvents ?? null,
       dragImageRect: imageRect
         ? {
             x: imageRect.x,
@@ -377,6 +382,43 @@ const scenarioDefinitions = [
       );
       checkpoints.push(await captureCheckpoint(page, "custom-enabled"));
       await waitForVisualIdle(page, 300);
+      checkpoints.push(await captureCheckpoint(page, "settled"));
+      return checkpoints;
+    },
+  },
+  {
+    name: "drag-hover-hit-test",
+    trajectoryMode: "checkpoints",
+    anchorTypes: [],
+    query: ({ sections }) => `?intro=0&sections=${sections}`,
+    async prepare(page, url) {
+      await page.goto(url, { waitUntil: "networkidle" });
+      await waitForFixture(page);
+      await page.locator("button[aria-label='Drag']").click();
+      await waitForVisualIdle(page, 900);
+      await resetBrowserMetrics(page);
+    },
+    async act(page) {
+      const image = page.locator("img[alt='Benchmark draggable shape']");
+      const box = await image.boundingBox();
+      if (!box) throw new Error("Draggable benchmark image is not visible");
+      const checkpoints = [await captureCheckpoint(page, "before-input")];
+      const points = [
+        [0.04, 0.04],
+        [0.5, 0.5],
+        [0.96, 0.96],
+        [0.5, 0.5],
+      ];
+      for (const [index, [xRatio, yRatio]] of points.entries()) {
+        await page.mouse.move(
+          box.x + box.width * xRatio,
+          box.y + box.height * yRatio,
+        );
+        await waitForVisualIdle(page, 150);
+        checkpoints.push(await captureCheckpoint(page, `hover-${index + 1}`));
+      }
+      await page.mouse.move(box.x - 20, box.y - 20);
+      await waitForVisualIdle(page, 150);
       checkpoints.push(await captureCheckpoint(page, "settled"));
       return checkpoints;
     },

@@ -330,7 +330,15 @@ function compareInteractionCheckpoints(baseline, candidate, thresholds) {
       });
     }
 
-    for (const field of ["animationStage", "toolbarText", "toolbarOpacity", "sceneTransform"]) {
+    for (const field of [
+      "animationStage",
+      "toolbarText",
+      "toolbarOpacity",
+      "sceneTransform",
+      "dragImageCursor",
+      "dragImagePointerEvents",
+      "dragImageTransform",
+    ]) {
       if (left[field] !== right[field]) {
         failures.push({
           category: "interaction-semantic-state",
@@ -497,6 +505,11 @@ function comparePerformance(baseline, candidate, thresholds) {
     ["ScriptDurationMs", baseline.cdp.ScriptDurationMs ?? 0, candidate.cdp.ScriptDurationMs ?? 0],
     ["LayoutDurationMs", baseline.cdp.LayoutDurationMs ?? 0, candidate.cdp.LayoutDurationMs ?? 0],
     ["RecalcStyleDurationMs", baseline.cdp.RecalcStyleDurationMs ?? 0, candidate.cdp.RecalcStyleDurationMs ?? 0],
+    [
+      "draggableImageRectCalls",
+      baseline.browser.counters?.draggableImageRectCalls ?? 0,
+      candidate.browser.counters?.draggableImageRectCalls ?? 0,
+    ],
   ];
   const results = measurements.map(([metric, left, right]) => {
     const absoluteDifference = right - left;

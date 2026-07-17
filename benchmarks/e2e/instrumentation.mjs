@@ -19,11 +19,23 @@ export function installBrowserInstrumentation() {
   const state = {
     baseTime: performance.now(),
     lastFrame: null,
+    draggableImageRectCalls: 0,
     frameIntervals: [],
     trajectory: [],
     longTasks: [],
     longAnimationFrames: [],
     events: [],
+  };
+
+  const nativeGetBoundingClientRect = Element.prototype.getBoundingClientRect;
+  Element.prototype.getBoundingClientRect = function (...arguments_) {
+    if (
+      this instanceof HTMLImageElement &&
+      this.alt === "Benchmark draggable shape"
+    ) {
+      state.draggableImageRectCalls += 1;
+    }
+    return nativeGetBoundingClientRect.apply(this, arguments_);
   };
 
   const relativeTime = (absoluteTime) => absoluteTime - state.baseTime;
@@ -179,6 +191,7 @@ export function installBrowserInstrumentation() {
     reset() {
       state.baseTime = performance.now();
       state.lastFrame = null;
+      state.draggableImageRectCalls = 0;
       state.frameIntervals.length = 0;
       state.trajectory.length = 0;
       state.longTasks.length = 0;
@@ -192,6 +205,9 @@ export function installBrowserInstrumentation() {
           longTask: PerformanceObserver.supportedEntryTypes.includes("longtask"),
           longAnimationFrame:
             PerformanceObserver.supportedEntryTypes.includes("long-animation-frame"),
+        },
+        counters: {
+          draggableImageRectCalls: state.draggableImageRectCalls,
         },
         summary: summarize(),
         frameIntervals: [...state.frameIntervals],
