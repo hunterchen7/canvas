@@ -624,6 +624,33 @@ const scenarioDefinitions = [
         await waitForVisualIdle(page, 150);
         checkpoints.push(await captureCheckpoint(page, `hover-${index + 1}`));
       }
+      await page.evaluate(() => {
+        const image = document.querySelector(
+          "img[alt='Benchmark draggable shape']",
+        );
+        if (!(image instanceof HTMLImageElement)) {
+          throw new Error("Draggable benchmark image is not visible");
+        }
+        const rect = image.getBoundingClientRect();
+        const event = new MouseEvent("mousemove", {
+          bubbles: true,
+          clientX: rect.left + rect.width / 2,
+          clientY: rect.top + rect.height / 2,
+        });
+        const durations = [];
+        for (let repetition = 0; repetition < 5; repetition += 1) {
+          const started = performance.now();
+          for (let index = 0; index < 100_000; index += 1) {
+            window.dispatchEvent(event);
+          }
+          durations.push(performance.now() - started);
+        }
+        durations.sort((left, right) => left - right);
+        window.__CANVAS_PERF__?.recordWorkMetric(
+          "draggable.hoverBurstMedianMs",
+          durations[Math.floor(durations.length / 2)],
+        );
+      });
       await page.mouse.move(box.x - 20, box.y - 20);
       await waitForVisualIdle(page, 150);
       checkpoints.push(await captureCheckpoint(page, "settled"));
