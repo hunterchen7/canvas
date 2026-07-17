@@ -31,6 +31,7 @@ Options:
   --sections NUMBER          Extra stress CanvasComponents, 0-250 (default: 0)
   --browser chromium|chrome  Bundled Chromium or system Chrome (default: chromium)
   --headed                   Show the browser
+  --trace                    Record Playwright screenshots and DOM snapshots
   --fail-on-perf-regression  Fail in addition to reporting noisy performance regressions
   --help                     Show this help
 `);
@@ -48,6 +49,7 @@ function parseArguments(argv) {
     sections: 0,
     browser: "chromium",
     headed: false,
+    trace: false,
     failOnPerfRegression: false,
   };
 
@@ -71,6 +73,7 @@ function parseArguments(argv) {
     else if (argument === "--sections") options.sections = Number(value());
     else if (argument === "--browser") options.browser = value();
     else if (argument === "--headed") options.headed = true;
+    else if (argument === "--trace") options.trace = true;
     else if (argument === "--fail-on-perf-regression") options.failOnPerfRegression = true;
     else throw new Error(`Unknown argument: ${argument}`);
   }
@@ -155,7 +158,15 @@ async function launchBrowser(browserName, headed) {
   }
 }
 
-async function runTarget({ browser, label, baseUrl, outputDirectory, scenarios, sections }) {
+async function runTarget({
+  browser,
+  label,
+  baseUrl,
+  outputDirectory,
+  scenarios,
+  sections,
+  trace,
+}) {
   const context = await browser.newContext({
     viewport: { width: 1280, height: 720 },
     screen: { width: 1280, height: 720 },
@@ -188,7 +199,13 @@ async function runTarget({ browser, label, baseUrl, outputDirectory, scenarios, 
   });
 
   await fs.mkdir(outputDirectory, { recursive: true });
-  await context.tracing.start({ screenshots: true, snapshots: true, sources: false });
+  if (trace) {
+    await context.tracing.start({
+      screenshots: true,
+      snapshots: true,
+      sources: false,
+    });
+  }
   try {
     const results = await runScenarios({
       context,
@@ -197,13 +214,29 @@ async function runTarget({ browser, label, baseUrl, outputDirectory, scenarios, 
       selectedNames: scenarios,
       sections,
     });
+    const target = {
+      label,
+      baseUrl,
+      diagnostics: {
+        playwrightTrace: {
+          enabled: trace,
+          artifact: trace ? "trace.zip" : null,
+        },
+      },
+      errors,
+      results,
+    };
     await fs.writeFile(
       path.join(outputDirectory, "target.json"),
-      `${JSON.stringify({ label, baseUrl, errors, results }, null, 2)}\n`,
+      `${JSON.stringify(target, null, 2)}\n`,
     );
-    return { label, baseUrl, errors, results };
+    return target;
   } finally {
-    await context.tracing.stop({ path: path.join(outputDirectory, "trace.zip") }).catch(() => undefined);
+    if (trace) {
+      await context.tracing
+        .stop({ path: path.join(outputDirectory, "trace.zip") })
+        .catch(() => undefined);
+    }
     await context.close();
   }
 }
@@ -238,6 +271,7 @@ async function main() {
         outputDirectory: path.join(options.output, "baseline"),
         scenarios: options.scenarios,
         sections: options.sections,
+        trace: options.trace,
       });
       const candidate = await runTarget({
         browser,
@@ -246,6 +280,7 @@ async function main() {
         outputDirectory: path.join(options.output, "candidate"),
         scenarios: options.scenarios,
         sections: options.sections,
+        trace: options.trace,
       });
 
       const comparisons = [];
@@ -288,6 +323,14 @@ async function main() {
           candidateUrl,
           scenarios: options.scenarios,
           sections: options.sections,
+        },
+        diagnostics: {
+          playwrightTrace: {
+            enabled: options.trace,
+            artifacts: options.trace
+              ? ["baseline/trace.zip", "candidate/trace.zip"]
+              : [],
+          },
         },
         thresholds: STRICT_PARITY_THRESHOLDS,
         summary: {

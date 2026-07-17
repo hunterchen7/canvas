@@ -50,7 +50,7 @@ node benchmarks/e2e/run.mjs \
   --output /tmp/canvas-e2e-100
 ```
 
-Use `--browser chrome` for installed system Chrome, `--headed` for debugging, or `--scenarios intro,zoom,navbar,toolbar,drag` to select cases. Two already-running fixtures can be supplied with `--baseline-url` and `--candidate-url`.
+Use `--browser chrome` for installed system Chrome, `--headed` for debugging, or `--scenarios intro,zoom,navbar,toolbar,drag` to select cases. Two already-running fixtures can be supplied with `--baseline-url` and `--candidate-url`. Add `--trace` when you need a Playwright trace with screenshots and DOM snapshots; tracing is disabled by default so its recording overhead does not perturb normal CPU comparisons.
 
 ## Artifacts
 
@@ -58,7 +58,7 @@ Use `--browser chrome` for installed system Chrome, `--headed` for debugging, or
 
 - `scenarios/<name>.json`: raw trajectory, event, frame interval, long-task/LoAF, CDP, DOM, style, geometry, and SVG data.
 - `screenshots/<name>.png`: stable-state full-page screenshot.
-- `trace.zip`: Playwright trace with screenshots and DOM snapshots.
+- `trace.zip`: Playwright trace with screenshots and DOM snapshots, created only with `--trace`.
 - `target.json`: target metadata, browser errors, and scenario records.
 
 `diffs/<name>.png` is an exact pixel diff. The default gate allows zero different pixels. Geometry allows only 0.01 px to absorb serialization rounding. Direct interactions are gated at input-indexed state checkpoints, including draggable translation, and intro/navigation animations gate exact configuration, stage order, endpoints, and truly settled pixels/geometry. Wall-clock rAF trajectories and stage timing remain advisory because browser scheduling varies between identical runs; all raw samples and advisory differences are retained for inspection. Before the stable capture, the runner waits for motion and document animations to settle, stops fixture-only intervals, and deterministically rebuilds compositing layers.
