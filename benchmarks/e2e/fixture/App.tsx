@@ -51,6 +51,10 @@ const navItems: NavItem[] = [
 
 const DRAG_HOVER_SCALE = 1.02;
 const DRAG_TRANSITION = { duration: 0.1, ease: "easeOut" } as const;
+const formatToolbarCoordinates = (x: number, y: number) =>
+  `coords ${x}/${y}`;
+const formatToolbarScale = (scale: number) =>
+  `zoom ${(scale * 100).toFixed(2)}%`;
 
 function sectionForCoordinates(offset: SectionCoordinates | undefined) {
   if (!offset) return null;
@@ -234,6 +238,7 @@ function StressSections({ count }: { count: number }) {
 export default function App() {
   const query = useMemo(() => new URLSearchParams(window.location.search), []);
   const skipIntro = query.get("intro") !== "1";
+  const customToolbarFormat = query.get("toolbar") === "custom";
   const stressCount = Math.max(0, Math.min(250, Number(query.get("sections") ?? 0) || 0));
 
   return (
@@ -258,6 +263,10 @@ export default function App() {
           position: "top-right",
           className: "font-sans",
           style: { backgroundColor: "#ffffff", borderColor: "#d4d4d8" },
+          coordinatesFormat: customToolbarFormat
+            ? formatToolbarCoordinates
+            : undefined,
+          scaleFormat: customToolbarFormat ? formatToolbarScale : undefined,
         }}
         navbarConfig={{
           position: "bottom",

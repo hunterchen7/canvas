@@ -8,7 +8,7 @@ It only reads library source through a Vite alias. The fixture and runner live u
 
 - Intro grow, blur, fade, and pan-to-home timing.
 - Pointer pan and ctrl-wheel zoom.
-- Navbar spring navigation and Toolbar readout updates.
+- Navbar spring navigation and default/custom Toolbar readout updates.
 - Framer Motion drag plus transparent SVG alpha hit-testing.
 - Stable full-page screenshots, selected DOM geometry/computed styles, and serialized SVG identity.
 - rAF frame intervals, Long Tasks, Long Animation Frames, and Chrome `Performance.getMetrics` task/script/layout/style-duration proxies.

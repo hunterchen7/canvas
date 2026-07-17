@@ -325,6 +325,30 @@ const scenarioDefinitions = [
     },
   },
   {
+    name: "toolbar-custom-format",
+    trajectoryMode: "checkpoints",
+    anchorTypes: ["wheel"],
+    query: ({ sections }) => `?intro=0&sections=${sections}&toolbar=custom`,
+    async prepare(page, url) {
+      await page.goto(url, { waitUntil: "networkidle" });
+      await waitForFixture(page);
+      await waitForVisualIdle(page);
+      await resetBrowserMetrics(page);
+    },
+    async act(page) {
+      const checkpoints = await wheelSequence(page, {
+        x: 640,
+        y: 360,
+        deltaX: 24,
+        deltaY: 18,
+        count: 8,
+      });
+      await waitForVisualIdle(page, 300);
+      checkpoints.push(await captureCheckpoint(page, "settled"));
+      return checkpoints;
+    },
+  },
+  {
     name: "drag",
     trajectoryMode: "checkpoints",
     anchorTypes: ["pointerdown"],
