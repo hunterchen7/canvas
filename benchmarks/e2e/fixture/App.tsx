@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo } from "react";
+import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import {
   Canvas,
   CanvasComponent,
@@ -27,6 +27,7 @@ type HarnessSnapshot = {
 
 declare global {
   interface Window {
+    __CANVAS_SET_CUSTOM_TOOLBAR_FORMAT__?: (enabled: boolean) => void;
     __CANVAS_HARNESS__?: {
       ready: boolean;
       read: () => HarnessSnapshot;
@@ -238,8 +239,17 @@ function StressSections({ count }: { count: number }) {
 export default function App() {
   const query = useMemo(() => new URLSearchParams(window.location.search), []);
   const skipIntro = query.get("intro") !== "1";
-  const customToolbarFormat = query.get("toolbar") === "custom";
+  const [customToolbarFormat, setCustomToolbarFormat] = useState(
+    () => query.get("toolbar") === "custom",
+  );
   const stressCount = Math.max(0, Math.min(250, Number(query.get("sections") ?? 0) || 0));
+
+  useEffect(() => {
+    window.__CANVAS_SET_CUSTOM_TOOLBAR_FORMAT__ = setCustomToolbarFormat;
+    return () => {
+      delete window.__CANVAS_SET_CUSTOM_TOOLBAR_FORMAT__;
+    };
+  }, []);
 
   return (
     <main data-testid="benchmark-root">
