@@ -22,7 +22,6 @@ import {
   canvasHeight,
   canvasWidth,
   getDistance,
-  getMidpoint,
   getScreenSizeEnum,
   getSectionPanCoordinates,
   INTERACTIVE_SELECTOR,
@@ -315,7 +314,6 @@ const Canvas: FC<Props> = ({
   );
   const initialPinchStateRef = useRef<{
     distance: number;
-    midpoint: Point;
     zoom: number;
     panOffset: Point;
   } | null>(null);
@@ -386,10 +384,11 @@ const Canvas: FC<Props> = ({
         if (viewportRef.current) viewportRef.current.style.cursor = "grabbing";
       } else if (activePointersRef.current.size === 2) {
         setIsPanning(false);
-        const pointers = Array.from(activePointersRef.current.values());
+        const pointers = activePointersRef.current.values();
+        const p1 = pointers.next().value!;
+        const p2 = pointers.next().value!;
         initialPinchStateRef.current = {
-          distance: getDistance(pointers[0]!, pointers[1]!),
-          midpoint: getMidpoint(pointers[0]!, pointers[1]!),
+          distance: getDistance(p1, p2),
           zoom: scale.get(),
           panOffset: { x: x.get(), y: y.get() },
         };
@@ -447,12 +446,13 @@ const Canvas: FC<Props> = ({
         initialPinchStateRef.current
       ) {
         event.preventDefault();
-        const pointers = Array.from(activePointersRef.current.values());
-        const p1 = pointers[0]!;
-        const p2 = pointers[1]!;
+        const pointers = activePointersRef.current.values();
+        const p1 = pointers.next().value!;
+        const p2 = pointers.next().value!;
 
         const currentDistance = getDistance(p1, p2);
-        const currentMidpoint = getMidpoint(p1, p2);
+        const mx = (p1.clientX + p2.clientX) / 2;
+        const my = (p1.clientY + p2.clientY) / 2;
 
         const {
           distance: initialDistance,
@@ -469,9 +469,6 @@ const Canvas: FC<Props> = ({
           Math.min(newZoom, 10),
           MIN_ZOOM // Ensure zoom is not less than MIN_ZOOM
         );
-
-        const mx = currentMidpoint.x;
-        const my = currentMidpoint.y;
 
         const minPanX = windowWidth - sceneWidth * newZoom;
         const maxPanX = 0;
@@ -540,7 +537,7 @@ const Canvas: FC<Props> = ({
         activePointersRef.current.size === 1 &&
         !initialPinchStateRef.current
       ) {
-        const lastPointer = Array.from(activePointersRef.current.values())[0]!;
+        const lastPointer = activePointersRef.current.values().next().value!;
         setIsPanning(true);
         setPanStartPoint({ x: lastPointer.clientX, y: lastPointer.clientY });
         setInitialPanOffsetOnDrag({ x: x.get(), y: y.get() });
