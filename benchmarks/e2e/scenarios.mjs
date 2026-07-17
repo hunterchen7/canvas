@@ -398,6 +398,146 @@ const scenarioDefinitions = [
     },
   },
   {
+    name: "pinch-hot-path",
+    trajectoryMode: "checkpoints",
+    anchorTypes: ["pointerdown", "pointermove", "pointerup"],
+    query: ({ sections }) => `?intro=0&sections=${sections}`,
+    async prepare(page, url) {
+      await page.goto(url, { waitUntil: "networkidle" });
+      await waitForFixture(page);
+      await waitForVisualIdle(page);
+      await resetBrowserMetrics(page);
+    },
+    async act(page, cdp) {
+      if (!cdp) throw new Error("Pinch benchmark requires a CDP session");
+      const viewport = page.locator("[data-benchmark-viewport='true']");
+      const box = await viewport.boundingBox();
+      if (!box) throw new Error("Canvas viewport was not found");
+
+      await page.evaluate(() => {
+        const element = document.querySelector(
+          "[data-benchmark-viewport='true']",
+        );
+        if (!(element instanceof HTMLElement)) {
+          throw new Error("Canvas viewport was not found");
+        }
+        window.__CANVAS_PINCH_POINTER_IDS__ = [];
+        const recordPointerId = (event) => {
+          if (!window.__CANVAS_PINCH_POINTER_IDS__.includes(event.pointerId)) {
+            window.__CANVAS_PINCH_POINTER_IDS__.push(event.pointerId);
+          }
+        };
+        element.addEventListener("pointerdown", recordPointerId);
+
+        const originalArrayFrom = Array.from;
+        Array.from = function (...args) {
+          if (
+            Object.prototype.toString.call(args[0]) ===
+            "[object Map Iterator]"
+          ) {
+            window.__CANVAS_PERF__?.incrementWorkMetric(
+              "pinch.mapIteratorArrayFromCalls",
+            );
+          }
+          return Reflect.apply(originalArrayFrom, this, args);
+        };
+
+        window.__CANVAS_RESTORE_PINCH_BENCHMARK__ = () => {
+          Array.from = originalArrayFrom;
+          element.removeEventListener("pointerdown", recordPointerId);
+          delete window.__CANVAS_PINCH_POINTER_IDS__;
+          delete window.__CANVAS_RESTORE_PINCH_BENCHMARK__;
+        };
+      });
+
+      const dispatchTouch = (type, touchPoints) =>
+        cdp.send("Input.dispatchTouchEvent", { type, touchPoints });
+
+      const centerX = box.x + box.width / 2;
+      const centerY = box.y + box.height / 2;
+      const firstTouch = { id: 1, x: centerX - 80, y: centerY };
+      let secondTouch = { id: 2, x: centerX + 80, y: centerY };
+      const checkpoints = [await captureCheckpoint(page, "before-input")];
+      try {
+        await dispatchTouch("touchStart", [firstTouch]);
+        await waitFrames(page, 2);
+        checkpoints.push(await captureCheckpoint(page, "pointerdown-1"));
+        await dispatchTouch("touchStart", [firstTouch, secondTouch]);
+        await waitFrames(page, 2);
+        checkpoints.push(await captureCheckpoint(page, "pointerdown-2"));
+
+        for (let index = 1; index <= 12; index += 1) {
+          secondTouch = {
+            ...secondTouch,
+            x: centerX + 80 + index * 3,
+            y: centerY + index * 2,
+          };
+          await dispatchTouch("touchMove", [firstTouch, secondTouch]);
+          await waitFrames(page, 1);
+          checkpoints.push(await captureCheckpoint(page, `step-${index}`));
+        }
+
+        const pointerIds = await page.evaluate(
+          () => window.__CANVAS_PINCH_POINTER_IDS__,
+        );
+        if (pointerIds.length !== 2) {
+          throw new Error(
+            `Expected two trusted pointer IDs, received ${pointerIds.length}`,
+          );
+        }
+        await page.evaluate(
+          ({ x, y, pointerId }) => {
+            const element = document.querySelector(
+              "[data-benchmark-viewport='true']",
+            );
+            if (!(element instanceof HTMLElement)) {
+              throw new Error("Canvas viewport was not found");
+            }
+            const events = [0, 1].map(
+              (offset) =>
+                new PointerEvent("pointermove", {
+                  bubbles: true,
+                  cancelable: true,
+                  pointerId,
+                  pointerType: "touch",
+                  buttons: 1,
+                  clientX: x + offset,
+                  clientY: y + offset,
+                }),
+            );
+            const durations = [];
+            for (let repetition = 0; repetition < 5; repetition += 1) {
+              const started = performance.now();
+              for (let index = 0; index < 20_000; index += 1) {
+                element.dispatchEvent(events[index % events.length]);
+              }
+              durations.push(performance.now() - started);
+            }
+            durations.sort((left, right) => left - right);
+            window.__CANVAS_PERF__?.recordWorkMetric(
+              "pinch.moveBurstMedianMs",
+              durations[Math.floor(durations.length / 2)],
+            );
+          },
+          { x: secondTouch.x, y: secondTouch.y, pointerId: pointerIds[1] },
+        );
+        checkpoints.push(await captureCheckpoint(page, "after-burst"));
+
+        await dispatchTouch("touchEnd", [secondTouch]);
+        await waitFrames(page, 2);
+        checkpoints.push(await captureCheckpoint(page, "pointerup-2"));
+        await dispatchTouch("touchEnd", [firstTouch]);
+        await waitFrames(page, 2);
+        checkpoints.push(await captureCheckpoint(page, "pointerup-1"));
+      } finally {
+        await page.evaluate(() => window.__CANVAS_RESTORE_PINCH_BENCHMARK__?.());
+      }
+      await waitForVisualIdle(page, 250);
+      checkpoints.push(await captureCheckpoint(page, "settled"));
+      return checkpoints;
+    },
+  },
+  {
     name: "default-intro-content",
     trajectoryMode: "checkpoints",
     anchorTypes: [],
@@ -713,7 +853,7 @@ export async function runScenarios({
       const beforeAction = scenario.includeNavigationMetrics
         ? beforeNavigation
         : await cdp.send("Performance.getMetrics");
-      const interactionCheckpoints = (await scenario.act(page)) ?? [];
+      const interactionCheckpoints = (await scenario.act(page, cdp)) ?? [];
       const afterAction = await cdp.send("Performance.getMetrics");
       const browserPerformance = await page.evaluate(() => window.__CANVAS_PERF__?.snapshot());
       if (!browserPerformance) throw new Error("Browser instrumentation was not installed");
