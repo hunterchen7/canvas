@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import {
   Canvas,
   CanvasComponent,
+  DefaultIntroContent,
   DraggableImage,
   useCanvasContext,
   BLUR_TRANSITION,
@@ -242,6 +243,7 @@ export default function App() {
   const [customToolbarFormat, setCustomToolbarFormat] = useState(
     () => query.get("toolbar") === "custom",
   );
+  const showDefaultIntroContent = query.get("standaloneIntro") === "1";
   const stressCount = Math.max(0, Math.min(250, Number(query.get("sections") ?? 0) || 0));
 
   useEffect(() => {
@@ -253,6 +255,17 @@ export default function App() {
 
   return (
     <main data-testid="benchmark-root">
+      {showDefaultIntroContent && (
+        <div data-benchmark-contract="default-intro-content">
+          <DefaultIntroContent
+            logoSrc="/benchmark-shape.svg"
+            logoAlt="Benchmark intro logo"
+            logoWidth={64}
+            logoHeight={48}
+            title="Default intro content"
+          />
+        </div>
+      )}
       <Canvas
         homeCoordinates={coordinates.home}
         navItems={navItems}

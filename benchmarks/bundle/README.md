@@ -8,11 +8,12 @@ measures each fixture in two modes:
 - `bundled`: all dependencies are included, approximating a standalone browser
   bundle.
 
-The fixtures cover `Canvas`, `CanvasComponent`, `CanvasNavbar`, `Draggable`,
-`isIOS`, `getDistance`, and `cn`. Each result records minified raw, gzip, and
-Brotli bytes; output chunks; total/workspace/dependency module counts; and a
-per-package module breakdown. The run also measures compiled CSS and the npm
-tarball's packed bytes, unpacked bytes, and file count.
+The fixtures cover `Canvas`, `CanvasComponent`, `DefaultIntroContent`,
+`CanvasNavbar`, `Draggable`, `isIOS`, `getDistance`, and `cn`. Each result
+records minified raw, gzip, and Brotli bytes; output chunks;
+total/workspace/dependency module counts; and a per-package module breakdown.
+The run also measures compiled CSS and the npm tarball's packed bytes, unpacked
+bytes, and file count.
 
 Total bytes are split into initial and asynchronously loaded delivery metrics.
 This keeps code-splitting proposals measurable without treating deferred bytes

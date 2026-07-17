@@ -20,6 +20,7 @@ const DIST_DIR = path.join(REPOSITORY_ROOT, "dist");
 const FIXTURES = [
   ["Canvas", "canvas.mjs"],
   ["CanvasComponent", "canvas-component.mjs"],
+  ["DefaultIntroContent", "default-intro-content.mjs"],
   ["Navbar", "navbar.mjs"],
   ["Draggable", "draggable.mjs"],
   ["isIOS", "is-ios.mjs"],

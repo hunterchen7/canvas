@@ -208,6 +208,23 @@ async function wheelSequence(page, { x, y, deltaX, deltaY, count, ctrlKey = fals
 
 const scenarioDefinitions = [
   {
+    name: "default-intro-content",
+    trajectoryMode: "checkpoints",
+    anchorTypes: [],
+    query: ({ sections }) =>
+      `?intro=0&sections=${sections}&standaloneIntro=1`,
+    async prepare(page, url) {
+      await page.goto(url, { waitUntil: "networkidle" });
+      await waitForFixture(page);
+      await waitForVisualIdle(page);
+      await resetBrowserMetrics(page);
+    },
+    async act(page) {
+      await waitForVisualIdle(page, 250);
+      return [await captureCheckpoint(page, "stable")];
+    },
+  },
+  {
     name: "static-home",
     trajectoryMode: "checkpoints",
     anchorTypes: [],

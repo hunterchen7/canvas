@@ -231,6 +231,116 @@
         }
       }
     },
+    "DefaultIntroContent": {
+      "externalPeers": {
+        "bytes": {
+          "raw": 26204,
+          "gzip": 8502,
+          "brotli": 7453
+        },
+        "chunks": 1,
+        "modules": {
+          "total": 7,
+          "workspace": 5,
+          "dependencies": 2,
+          "byPackage": {
+            "clsx": 1,
+            "tailwind-merge": 1
+          }
+        },
+        "delivery": {
+          "initial": {
+            "bytes": {
+              "raw": 26204,
+              "gzip": 8502,
+              "brotli": 7453
+            },
+            "chunks": 1,
+            "modules": {
+              "total": 7,
+              "workspace": 5,
+              "dependencies": 2,
+              "byPackage": {
+                "clsx": 1,
+                "tailwind-merge": 1
+              }
+            }
+          },
+          "async": {
+            "bytes": {
+              "raw": 0,
+              "gzip": 0,
+              "brotli": 0
+            },
+            "chunks": 0,
+            "modules": {
+              "total": 0,
+              "workspace": 0,
+              "dependencies": 0,
+              "byPackage": {}
+            }
+          }
+        }
+      },
+      "bundled": {
+        "bytes": {
+          "raw": 143592,
+          "gzip": 46046,
+          "brotli": 41068
+        },
+        "chunks": 1,
+        "modules": {
+          "total": 267,
+          "workspace": 6,
+          "dependencies": 261,
+          "byPackage": {
+            "clsx": 1,
+            "framer-motion": 56,
+            "motion-dom": 175,
+            "motion-utils": 24,
+            "react": 4,
+            "tailwind-merge": 1
+          }
+        },
+        "delivery": {
+          "initial": {
+            "bytes": {
+              "raw": 143592,
+              "gzip": 46046,
+              "brotli": 41068
+            },
+            "chunks": 1,
+            "modules": {
+              "total": 267,
+              "workspace": 6,
+              "dependencies": 261,
+              "byPackage": {
+                "clsx": 1,
+                "framer-motion": 56,
+                "motion-dom": 175,
+                "motion-utils": 24,
+                "react": 4,
+                "tailwind-merge": 1
+              }
+            }
+          },
+          "async": {
+            "bytes": {
+              "raw": 0,
+              "gzip": 0,
+              "brotli": 0
+            },
+            "chunks": 0,
+            "modules": {
+              "total": 0,
+              "workspace": 0,
+              "dependencies": 0,
+              "byPackage": {}
+            }
+          }
+        }
+      }
+    },
     "Navbar": {
       "externalPeers": {
         "bytes": {

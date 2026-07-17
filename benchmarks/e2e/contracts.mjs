@@ -34,6 +34,8 @@ export function captureDomContract() {
     ["lab", "[data-benchmark-contract='lab']"],
     ["drag", "[data-benchmark-contract='drag']"],
     ["drag-image", "img[alt='Benchmark draggable shape']"],
+    ["intro-logo", "img[alt='Benchmark intro logo']"],
+    ["intro-content", "[data-benchmark-contract='default-intro-content']"],
     ["nav-home", "button[aria-label='Home']"],
     ["nav-lab", "button[aria-label='Lab']"],
     ["nav-drag", "button[aria-label='Drag']"],
