@@ -22,6 +22,12 @@ export default defineConfig({
   resolve: {
     alias: {
       "@canvas-source": path.join(libraryRoot, "src/index.ts"),
+      // Reference worktrees intentionally do not need their own node_modules.
+      // Resolve the library's runtime dependencies from the benchmark worktree
+      // so a clean historical checkout can be compared directly.
+      clsx: path.join(repositoryRoot, "node_modules/clsx"),
+      "lucide-react": path.join(repositoryRoot, "node_modules/lucide-react"),
+      "tailwind-merge": path.join(repositoryRoot, "node_modules/tailwind-merge"),
     },
     dedupe: ["react", "react-dom", "framer-motion"],
   },
