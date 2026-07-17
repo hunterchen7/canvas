@@ -1,32 +1,48 @@
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
-type WindowDimentions = {
+type WindowDimensions = {
   width: number;
   height: number;
 };
 
-const useWindowDimensions = (): WindowDimentions => {
-  const [windowDimensions, setWindowDimensions] = useState<WindowDimentions>({
-    width: typeof window !== "undefined" ? window.innerWidth : 1200,
-    height: typeof window !== "undefined" ? window.innerHeight : 800,
-  });
+const serverDimensions: WindowDimensions = { width: 1200, height: 800 };
+const subscribers = new Set<() => void>();
+let cachedDimensions: WindowDimensions | undefined;
 
-  useEffect(() => {
-    function handleResize(): void {
-      setWindowDimensions({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    }
+const getSnapshot = (): WindowDimensions => {
+  if (typeof window === "undefined") return serverDimensions;
 
-    // Set initial dimensions on mount
-    handleResize();
-
-    window.addEventListener("resize", handleResize);
-    return (): void => window.removeEventListener("resize", handleResize);
-  }, []); // Empty array ensures that effect is only run on mount
-
-  return windowDimensions;
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  if (
+    !cachedDimensions ||
+    cachedDimensions.width !== width ||
+    cachedDimensions.height !== height
+  ) {
+    cachedDimensions = { width, height };
+  }
+  return cachedDimensions;
 };
+
+const notifySubscribers = () => {
+  subscribers.forEach((subscriber) => subscriber());
+};
+
+const subscribe = (subscriber: () => void) => {
+  subscribers.add(subscriber);
+  if (subscribers.size === 1 && typeof window !== "undefined") {
+    window.addEventListener("resize", notifySubscribers);
+  }
+
+  return () => {
+    subscribers.delete(subscriber);
+    if (subscribers.size === 0 && typeof window !== "undefined") {
+      window.removeEventListener("resize", notifySubscribers);
+    }
+  };
+};
+
+const useWindowDimensions = (): WindowDimensions =>
+  useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 
 export default useWindowDimensions;
