@@ -52,7 +52,7 @@ import type {
   ZoomConfig,
 } from "../../types";
 import { CanvasWrapper } from "./wrapper";
-import { usePerformanceMode } from "../../hooks/usePerformanceMode";
+import { usePerformanceModeForWidth } from "../../hooks/usePerformanceMode";
 import type { ReactNode } from "react";
 import { DefaultCanvasBackground } from "./backgrounds";
 
@@ -140,7 +140,7 @@ const Canvas: FC<Props> = ({
 }) => {
   const { height: windowHeight, width: windowWidth } = useWindowDimensions();
 
-  const { mode } = usePerformanceMode();
+  const { mode } = usePerformanceModeForWidth(windowWidth);
 
   const hasNavbar = Boolean(navItems && navItems.length > 0);
 

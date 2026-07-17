@@ -3,7 +3,7 @@ import type { SectionCoordinates } from "../../types";
 import { useCanvasContext } from "../../contexts/CanvasContext";
 import { motion } from "framer-motion";
 import useWindowDimensions from "../../hooks/useWindowDimensions";
-import { usePerformanceMode } from "../../hooks/usePerformanceMode";
+import { usePerformanceModeForWidth } from "../../hooks/usePerformanceMode";
 import {
   VIEWPORT_HYSTERESIS_BUFFER,
   IMAGE_FALLBACK_WIDTH_THRESHOLD,
@@ -91,7 +91,7 @@ export const CanvasComponent: FC<CanvasProps> = ({
 }) => {
   const { x, y, scale, animationStage, nextTargetSection } = useCanvasContext();
   const { width } = useWindowDimensions();
-  const { mode } = usePerformanceMode();
+  const { mode } = usePerformanceModeForWidth(width);
 
   // Subscribe to motion value changes so we re-render while panning/zooming
   const [sceneX, setSceneX] = useState(() => x.get());
