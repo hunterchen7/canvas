@@ -206,7 +206,113 @@ async function wheelSequence(page, { x, y, deltaX, deltaY, count, ctrlKey = fals
   return checkpoints;
 }
 
+async function instrumentedWheelSequence(
+  page,
+  { deltaX, deltaY, count, ctrlKey = false, label },
+) {
+  const checkpoints = [await captureCheckpoint(page, `${label}-before`)];
+  for (let index = 0; index < count; index += 1) {
+    await page.evaluate(
+      ({ eventInit }) => {
+        const viewport = document.querySelector("[data-benchmark-viewport='true']");
+        if (!(viewport instanceof HTMLElement)) {
+          throw new Error("Canvas viewport was not found");
+        }
+        const rect = viewport.getBoundingClientRect();
+        const event = new WheelEvent("wheel", {
+          bubbles: true,
+          cancelable: true,
+          clientX: rect.left + rect.width / 2,
+          clientY: rect.top + rect.height / 2,
+          ...eventInit,
+        });
+        const counts = (window.__CANVAS_WHEEL_PROPERTY_COUNTS__ ??= {});
+        for (const property of [
+          "deltaMode",
+          "deltaY",
+          "clientX",
+          "clientY",
+        ]) {
+          const value = event[property];
+          Object.defineProperty(event, property, {
+            configurable: true,
+            get() {
+              counts[property] = (counts[property] ?? 0) + 1;
+              return value;
+            },
+          });
+        }
+        const scaleGetsBefore = window.__CANVAS_PERF__?.readProbe(
+          "scaleGetCalls",
+        );
+        viewport.dispatchEvent(event);
+        const scaleGetsAfter = window.__CANVAS_PERF__?.readProbe(
+          "scaleGetCalls",
+        );
+        if (
+          typeof scaleGetsBefore === "number" &&
+          typeof scaleGetsAfter === "number"
+        ) {
+          window.__CANVAS_PERF__?.incrementWorkMetric(
+            "wheel.scaleGetCalls",
+            scaleGetsAfter - scaleGetsBefore,
+          );
+        }
+      },
+      { eventInit: { deltaX, deltaY, ctrlKey } },
+    );
+    await sleep(16);
+    checkpoints.push(await captureCheckpoint(page, `${label}-${index + 1}`));
+  }
+  return checkpoints;
+}
+
 const scenarioDefinitions = [
+  {
+    name: "wheel-hot-path",
+    trajectoryMode: "checkpoints",
+    anchorTypes: ["wheel"],
+    query: ({ sections }) =>
+      `?intro=0&sections=${sections}&instrumentMotion=1`,
+    async prepare(page, url) {
+      await page.goto(url, { waitUntil: "networkidle" });
+      await waitForFixture(page);
+      await waitForVisualIdle(page);
+      await resetBrowserMetrics(page);
+    },
+    async act(page) {
+      await waitFrames(page, 2);
+      const checkpoints = [
+        ...(await instrumentedWheelSequence(page, {
+          deltaX: 18,
+          deltaY: 12,
+          count: 12,
+          label: "pan",
+        })),
+        ...(await instrumentedWheelSequence(page, {
+          deltaX: 0,
+          deltaY: -5,
+          count: 10,
+          ctrlKey: true,
+          label: "zoom",
+        })),
+      ];
+      await page.evaluate(() => {
+        for (const [property, count] of Object.entries(
+          window.__CANVAS_WHEEL_PROPERTY_COUNTS__ ?? {},
+        )) {
+          window.__CANVAS_PERF__?.recordWorkMetric(
+            `wheel.${property}Reads`,
+            count,
+          );
+        }
+        delete window.__CANVAS_WHEEL_PROPERTY_COUNTS__;
+      });
+      await waitForVisualIdle(page, 300);
+      checkpoints.push(await captureCheckpoint(page, "settled"));
+      return checkpoints;
+    },
+  },
   {
     name: "window-dimension-fanout",
     trajectoryMode: "checkpoints",

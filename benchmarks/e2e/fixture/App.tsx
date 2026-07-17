@@ -28,6 +28,9 @@ type HarnessSnapshot = {
 
 declare global {
   interface Window {
+    __CANVAS_PERF__?: {
+      incrementProbe: (name: string, amount?: number) => void;
+    };
     __CANVAS_SET_CUSTOM_TOOLBAR_FORMAT__?: (enabled: boolean) => void;
     __CANVAS_HARNESS__?: {
       ready: boolean;
@@ -69,6 +72,22 @@ function sectionForCoordinates(offset: SectionCoordinates | undefined) {
 
 function HarnessBridge() {
   const { x, y, scale, animationStage, navigateToSection } = useCanvasContext();
+
+  useEffect(() => {
+    const instrumentMotionValues =
+      new URLSearchParams(window.location.search).get("instrumentMotion") ===
+      "1";
+    if (!instrumentMotionValues) return;
+
+    const originalGet = scale.get;
+    scale.get = () => {
+      window.__CANVAS_PERF__?.incrementProbe("scaleGetCalls");
+      return originalGet.call(scale);
+    };
+    return () => {
+      scale.get = originalGet;
+    };
+  }, [scale]);
 
   useLayoutEffect(() => {
     const bridge = document.querySelector<HTMLElement>("[data-benchmark-bridge]");
