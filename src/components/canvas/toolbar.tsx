@@ -1,5 +1,5 @@
 import { type Point, useTransform, motion } from "framer-motion";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useCanvasContext } from "../../contexts/CanvasContext";
 import {
   TOOLBAR_OPACITY_POS_EPS,
@@ -70,15 +70,39 @@ const Toolbar = ({
   const displayY = useTransform(rawDy, (v) => Math.round(v).toString());
   const displayScale = useTransform(scale, (v) => v.toFixed(2));
 
-  // For custom formatters, we need to use state to track values
-  const [currentX, setCurrentX] = useState(0);
-  const [currentY, setCurrentY] = useState(0);
-  const [currentScale, setCurrentScale] = useState(1);
+  // Mirror the latest values without causing renders so dynamically enabling a
+  // custom formatter starts from the same value it would have observed before.
+  const latest = useRef({ x: 0, y: 0, scale: 1 });
+  const enabledFormatters = useRef({
+    coordinates: Boolean(coordinatesFormat),
+    scale: Boolean(scaleFormat),
+  });
+  const [coordinatesRevision, setCoordinatesRevision] = useState(0);
+  const [scaleRevision, setScaleRevision] = useState(0);
+  enabledFormatters.current.coordinates = Boolean(coordinatesFormat);
+  enabledFormatters.current.scale = Boolean(scaleFormat);
 
   useEffect(() => {
-    const unsubX = rawDx.on("change", (v) => setCurrentX(Math.round(v)));
-    const unsubY = rawDy.on("change", (v) => setCurrentY(Math.round(v)));
-    const unsubScale = scale.on("change", (v) => setCurrentScale(v));
+    const updateCoordinate = (axis: "x" | "y", value: number) => {
+      if (latest.current[axis] === value) return;
+      latest.current[axis] = value;
+      if (enabledFormatters.current.coordinates) {
+        setCoordinatesRevision((revision) => revision + 1);
+      }
+    };
+    const unsubX = rawDx.on("change", (value) =>
+      updateCoordinate("x", Math.round(value)),
+    );
+    const unsubY = rawDy.on("change", (value) =>
+      updateCoordinate("y", Math.round(value)),
+    );
+    const unsubScale = scale.on("change", (value) => {
+      if (latest.current.scale === value) return;
+      latest.current.scale = value;
+      if (enabledFormatters.current.scale) {
+        setScaleRevision((revision) => revision + 1);
+      }
+    });
     return () => {
       unsubX();
       unsubY();
@@ -101,20 +125,21 @@ const Toolbar = ({
   const showScale = display === "scale" || display === "both";
   const showSeparator = display === "both";
 
-  // Compute formatted values
+  // Revisions make the ref values reactive only while their custom formatter
+  // is enabled; default MotionValue rendering never schedules React work.
   const formattedCoordinates = useMemo(() => {
     if (coordinatesFormat) {
-      return coordinatesFormat(currentX, currentY);
+      return coordinatesFormat(latest.current.x, latest.current.y);
     }
-    return null; // Will use motion spans for default
-  }, [coordinatesFormat, currentX, currentY]);
+    return null;
+  }, [coordinatesFormat, coordinatesRevision]);
 
   const formattedScale = useMemo(() => {
     if (scaleFormat) {
-      return scaleFormat(currentScale);
+      return scaleFormat(latest.current.scale);
     }
-    return null; // Will use motion span for default
-  }, [scaleFormat, currentScale]);
+    return null;
+  }, [scaleFormat, scaleRevision]);
 
   // Placeholder content for SSR/initial render
   const placeholderContent = useMemo(() => {
