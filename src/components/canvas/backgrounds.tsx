@@ -1,5 +1,4 @@
 import React, { type ReactNode } from "react";
-import { motion } from "framer-motion";
 import { canvasWidth, canvasHeight } from "../../lib/canvas";
 import { cn } from "../../lib/utils";
 
@@ -175,7 +174,7 @@ export const DefaultIntroContent: React.FC<DefaultIntroContentProps> = ({
       )}
     >
       {logoSrc && (
-        <motion.img
+        <img
           src={logoSrc}
           alt={logoAlt}
           width={logoWidth}
