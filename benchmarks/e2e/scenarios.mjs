@@ -307,6 +307,35 @@ const scenarioDefinitions = [
           );
         }
         delete window.__CANVAS_WHEEL_PROPERTY_COUNTS__;
+
+        const viewport = document.querySelector(
+          "[data-benchmark-viewport='true']",
+        );
+        if (!(viewport instanceof HTMLElement)) {
+          throw new Error("Canvas viewport was not found");
+        }
+        const rect = viewport.getBoundingClientRect();
+        const event = new WheelEvent("wheel", {
+          bubbles: true,
+          cancelable: true,
+          clientX: rect.left + rect.width / 2,
+          clientY: rect.top + rect.height / 2,
+          deltaX: 0,
+          deltaY: 0,
+        });
+        const durations = [];
+        for (let repetition = 0; repetition < 5; repetition += 1) {
+          const started = performance.now();
+          for (let index = 0; index < 20_000; index += 1) {
+            viewport.dispatchEvent(event);
+          }
+          durations.push(performance.now() - started);
+        }
+        durations.sort((left, right) => left - right);
+        window.__CANVAS_PERF__?.recordWorkMetric(
+          "wheel.panBurstMedianMs",
+          durations[Math.floor(durations.length / 2)],
+        );
       });
       await waitForVisualIdle(page, 300);
       checkpoints.push(await captureCheckpoint(page, "settled"));
