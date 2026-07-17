@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 import { spawn } from "node:child_process";
 import { mkdir, writeFile } from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "@playwright/test";
+import { startDeepProfile } from "./deep-profile.mjs";
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const runtimeRoot = path.resolve(scriptDirectory, "..");
@@ -39,6 +41,40 @@ function boolean(values, key, fallback) {
   return value !== "false" && value !== "0";
 }
 
+const PROFILE_KINDS = new Set(["cpu", "trace", "allocations"]);
+
+function profileKinds(values) {
+  const explicit = values.get("profile");
+  if (explicit == null && !values.has("profile-dir")) return [];
+  if (explicit === "false" || explicit === "0") return [];
+  const requested =
+    explicit == null || explicit === "true" || explicit === "all"
+      ? explicit === "all"
+        ? [...PROFILE_KINDS]
+        : ["cpu", "trace"]
+      : explicit.split(",").map((value) => value.trim()).filter(Boolean);
+  const unknown = requested.filter((kind) => !PROFILE_KINDS.has(kind));
+  if (unknown.length > 0) {
+    throw new Error(
+      `Invalid --profile kind${unknown.length === 1 ? "" : "s"} ${unknown.join(", ")}; use cpu, trace, or allocations`,
+    );
+  }
+  return [...new Set(requested)];
+}
+
+function profileOutputDirectory(values, runId) {
+  const supplied = values.get("profile-dir");
+  if (supplied) return path.resolve(process.cwd(), supplied);
+  const output = values.get("output");
+  if (!output) return path.join(os.tmpdir(), `${runId}-profile`);
+  const outputPath = path.resolve(process.cwd(), output);
+  const extension = path.extname(outputPath);
+  return path.join(
+    path.dirname(outputPath),
+    `${path.basename(outputPath, extension)}-profile`,
+  );
+}
+
 function viewportFor(mode, values) {
   if (values.has("width") || values.has("height")) {
     return {
@@ -68,14 +104,21 @@ async function waitForServer(url, processHandle, timeoutMs) {
   throw new Error(`Vite did not become ready at ${url} within ${timeoutMs}ms`);
 }
 
-async function phase(page, name, action) {
+async function phase(page, name, action, deepProfile) {
   await page.evaluate((phaseName) => {
     window.__CANVAS_BENCHMARK__.beginPhase(phaseName);
   }, name);
+  if (deepProfile) await deepProfile.mark(`canvas:phase:${name}:start`);
   await action();
   await page.evaluate((phaseName) => {
     window.__CANVAS_BENCHMARK__.endPhase(phaseName);
   }, name);
+  if (deepProfile) {
+    const startMark = `canvas:phase:${name}:start`;
+    const endMark = `canvas:phase:${name}:end`;
+    await deepProfile.mark(endMark);
+    await deepProfile.measure(`canvas:phase:${name}`, startMark, endMark);
+  }
 }
 
 async function waitForMotion(page, timeoutMs = 7000) {
@@ -101,6 +144,25 @@ async function main() {
   const runId =
     values.get("run-id") ??
     `canvas-${mode}-${sections}-${complexity}-${Date.now().toString(36)}`;
+  const requestedProfileKinds = profileKinds(values);
+  const profilingEnabled = requestedProfileKinds.length > 0;
+  const deepProfileDirectory = profilingEnabled
+    ? profileOutputDirectory(values, runId)
+    : null;
+  const cpuSamplingIntervalUs = integer(
+    values,
+    "cpu-sampling-interval-us",
+    1_000,
+    100,
+    1_000_000,
+  );
+  const allocationSamplingIntervalBytes = integer(
+    values,
+    "allocation-sampling-interval-bytes",
+    32_768,
+    1_024,
+    16_777_216,
+  );
   const query = new URLSearchParams({
     sections: String(sections),
     navItems: String(navItems),
@@ -118,6 +180,9 @@ async function main() {
   let browser = null;
   let page = null;
   let result = null;
+  let runnerError = null;
+  let deepProfile = null;
+  let deepProfileResult = null;
 
   try {
     if (!suppliedUrl) {
@@ -156,6 +221,27 @@ async function main() {
       }
     });
 
+    if (profilingEnabled) {
+      deepProfile = await startDeepProfile({
+        page,
+        outputDirectory: deepProfileDirectory,
+        kinds: requestedProfileKinds,
+        cpuSamplingIntervalUs,
+        allocationSamplingIntervalBytes,
+        runMetadata: {
+          runId,
+          mode,
+          sections,
+          navItems,
+          complexity,
+          seed,
+          viewport,
+          url: baseUrl,
+        },
+      });
+      await deepProfile.markOnNextDocument("canvas:phase:intro:start");
+    }
+
     await page.goto(`${baseUrl}/?${query}`, {
       waitUntil: "domcontentloaded",
       timeout: timeoutMs,
@@ -172,6 +258,14 @@ async function main() {
     );
     await waitForMotion(page);
     await page.evaluate(() => window.__CANVAS_BENCHMARK__.endPhase("intro"));
+    if (deepProfile) {
+      await deepProfile.mark("canvas:phase:intro:end");
+      await deepProfile.measure(
+        "canvas:phase:intro",
+        "canvas:phase:intro:start",
+        "canvas:phase:intro:end",
+      );
+    }
 
     const navbarButtons = page.locator('button[aria-label^="Section "]');
     const navbarCount = await navbarButtons.count();
@@ -185,7 +279,7 @@ async function main() {
         activeSectionId = `section-${number}`;
         await target.click();
         await waitForMotion(page);
-      });
+      }, deepProfile);
 
       await phase(page, "visibility", async () => {
         const target = navbarButtons.nth(Math.floor(navbarCount / 2));
@@ -194,7 +288,7 @@ async function main() {
         activeSectionId = `section-${number}`;
         await target.click();
         await waitForMotion(page);
-      });
+      }, deepProfile);
     }
 
     await phase(page, "drag", async () => {
@@ -211,7 +305,7 @@ async function main() {
       await page.mouse.move(startX + 90, startY + 55, { steps: 12 });
       await page.mouse.up();
       await page.waitForTimeout(250);
-    });
+    }, deepProfile);
 
     const viewportLocator = page.locator(
       "[data-benchmark-shell] .touch-none.select-none.overflow-hidden",
@@ -228,7 +322,7 @@ async function main() {
         await page.waitForTimeout(16);
       }
       await page.waitForTimeout(300);
-    });
+    }, deepProfile);
 
     await phase(page, "zoom", async () => {
       await page.mouse.move(centerX, centerY);
@@ -239,14 +333,15 @@ async function main() {
       }
       await page.keyboard.up("Control");
       await page.waitForTimeout(300);
-    });
+    }, deepProfile);
 
     await phase(page, "settle", async () => {
       await page.waitForTimeout(500);
-    });
+    }, deepProfile);
 
     result = await page.evaluate(() => window.__CANVAS_BENCHMARK__.finalize());
   } catch (error) {
+    runnerError = error;
     if (page) {
       try {
         result = await page.evaluate(
@@ -260,6 +355,20 @@ async function main() {
     if (!result) throw error;
     process.exitCode = 1;
   } finally {
+    if (deepProfile) {
+      try {
+        deepProfileResult = await deepProfile.stop({
+          benchmarkResult: result,
+          status: result?.status ?? (runnerError ? "error" : "complete"),
+          error: runnerError,
+        });
+      } catch (profileError) {
+        process.stderr.write(
+          `[profile] ${profileError instanceof Error ? profileError.stack ?? profileError.message : profileError}\n`,
+        );
+        if (!runnerError) throw profileError;
+      }
+    }
     await browser?.close();
     if (server && server.exitCode == null) server.kill("SIGTERM");
   }
@@ -271,6 +380,9 @@ async function main() {
     await mkdir(path.dirname(outputPath), { recursive: true });
     await writeFile(outputPath, serialized, "utf8");
     process.stderr.write(`Wrote ${outputPath}\n`);
+  }
+  if (deepProfileResult) {
+    process.stderr.write(`Wrote deep profile ${deepProfileResult.outputDirectory}\n`);
   }
   process.stdout.write(serialized);
 }

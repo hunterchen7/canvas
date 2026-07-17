@@ -35,6 +35,7 @@
     "bench:bundle:compare": "node benchmarks/bundle/run.mjs --baseline benchmarks/bundle/baseline.json",
     "bench:bundle:candidates": "node benchmarks/bundle/evaluate-candidates.mjs",
     "bench:runtime": "node benchmarks/runtime/scripts/run.mjs",
+    "bench:profile": "node benchmarks/runtime/scripts/run.mjs --profile=cpu,trace",
     "bench:parity": "node benchmarks/e2e/run.mjs"
   },
   "peerDependencies": {

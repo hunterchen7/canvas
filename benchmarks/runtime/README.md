@@ -43,6 +43,53 @@ Useful options:
 - `--url http://127.0.0.1:4173` to reuse an existing server
 - `--width` and `--height` to override the mode viewport preset
 
+## Deep CPU and rendering traces
+
+Deep profiling is opt-in because recording a trace changes the timing being
+observed. It is a diagnostic tool for locating work after a repeatable runtime
+or parity benchmark identifies a regression; its numbers do not feed the
+acceptance gates.
+
+Capture a sampled V8 CPU profile and Chrome rendering trace:
+
+```sh
+npm run bench:profile -- \
+  --sections 24 \
+  --complexity 24 \
+  --mode high \
+  --profile-dir /tmp/canvas-profile
+```
+
+`--profile` is shorthand for `--profile=cpu,trace`. Allocation sampling can be
+added for a separate diagnostic run:
+
+```sh
+npm run bench:runtime -- \
+  --profile=cpu,trace,allocations \
+  --profile-dir /tmp/canvas-profile-with-allocations
+```
+
+Useful controls:
+
+- `--cpu-sampling-interval-us N` (default `1000`)
+- `--allocation-sampling-interval-bytes N` (default `32768`)
+- `--profile-dir PATH`; if omitted, the runner uses a temporary directory
+
+The directory contains `cpu.cpuprofile` for the Chrome DevTools Performance
+panel, `trace.json.gz` for the DevTools trace viewer, optional
+`allocations.heapprofile`, and compact `summary.json`, `manifest.json`, and
+`result.json` files. The summary correlates named intro/navbar/visibility/drag/
+pan/zoom/settle phases with main-thread tasks, JavaScript, GC, style, layout,
+paint, raster, compositor activity, top sampled functions, and the existing
+React Profiler/render-counter result.
+
+CPU profiles are statistical samples from the renderer's V8 isolate, not exact
+hardware CPU cycle counts. The Chrome trace supplies scheduling and rendering
+pipeline context, but headless Chromium may use software rendering and does not
+represent physical GPU utilization. Allocation sampling is also statistical;
+it intentionally avoids a stop-the-world heap snapshot inside the measured
+window.
+
 The mode presets are intentionally viewport-based because the library detects mode from the real window:
 
 | Requested mode | Viewport |

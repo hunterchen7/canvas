@@ -10,7 +10,8 @@ the existing visual and interaction contracts.
   delivery, module attribution, CSS, and the packed npm artifact.
 - `runtime/` runs a configurable Canvas stress fixture and records React
   Profiler commits/durations, render counters, listener counts, rAF pacing,
-  Long Tasks, Long Animation Frames, heap data, and motion trajectories.
+  Long Tasks, Long Animation Frames, heap data, and motion trajectories. Its
+  opt-in deep profiler adds V8 CPU samples and Chrome rendering-pipeline traces.
 - `e2e/` compares a reference worktree with a candidate worktree using exact
   screenshots, DOM/computed-style/SVG/geometry contracts, deterministic input
   checkpoints, animation semantics, and Chrome main-thread CPU proxies.
@@ -45,6 +46,7 @@ accepted by updating a baseline.
 ```sh
 npm run bench:bundle:compare
 npm run bench:runtime -- --sections 24 --nav-items 8 --complexity 24 --mode high
+npm run bench:profile -- --profile-dir /tmp/canvas-profile
 npm run bench:parity -- \
   --baseline-root /absolute/path/to/reference \
   --candidate-root /absolute/path/to/candidate \
