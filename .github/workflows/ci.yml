@@ -51,7 +51,9 @@ jobs:
         run: npm test
 
       - name: Verify native analyzer parity
-        run: npm run test:analyzer
+        run: >-
+          go -C benchmarks/analyzer test ./... &&
+          node --test benchmarks/analyzer/differential.ts
 
       - name: Build package
         run: npm run build

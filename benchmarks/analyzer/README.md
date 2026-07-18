@@ -35,7 +35,8 @@ Omit the paths, or pass `-`, to use stdin and stdout. A request has this shape:
 ## Verify compatibility
 
 ```sh
-npm run test:analyzer
+go -C benchmarks/analyzer test ./...
+node --test benchmarks/analyzer/differential.ts
 ```
 
 This runs Go unit tests and then builds the native binary and differentially compares it with the TypeScript reference over fixed edge cases, 100 seeded randomized comparisons, and a byte-stability check.
@@ -43,7 +44,8 @@ This runs Go unit tests and then builds the native binary and differentially com
 ## Benchmark both implementations
 
 ```sh
-npm run bench:analyzer
+node benchmarks/analyzer/benchmark.ts
+go -C benchmarks/analyzer test -run '^$' -bench BenchmarkComparePairedSamples -benchmem -count=5
 ```
 
-The TypeScript harness reports milliseconds per comparison. Go's standard benchmark reports nanoseconds per operation and allocation counts for the same 64-pair, 10,000-bootstrap workload. Compare medians across repeated runs on an otherwise idle machine; process startup is intentionally excluded from both measurements.
+The TypeScript harness reports milliseconds per comparison. Go's standard benchmark reports nanoseconds per operation and allocation counts for the same 64-pair, 10,000-bootstrap workload. The command above collects five native samples. Compare medians across repeated runs on an otherwise idle machine; process startup is intentionally excluded from both measurements.
