@@ -1,6 +1,6 @@
 # Canvas browser parity and performance suite
 
-This suite captures the same deterministic fixture from a reference worktree and a candidate worktree. It never updates or accepts a baseline automatically. Any pixel, DOM, computed-style, SVG, geometry, interaction-checkpoint, or animation-semantic mismatch fails strict parity and is listed in `report.json` under `summary.deferredUserDecisions` for explicit review.
+This suite captures the same deterministic fixture from a reference worktree and a candidate worktree. It never updates or accepts a baseline automatically. Any pixel, DOM, computed-style, SVG, geometry, interaction-checkpoint, animation-semantic, page-exception, or console-error mismatch fails strict parity. Visual and behavioral differences are listed in `report.json` under `summary.deferredUserDecisions`; browser errors are retained under `diagnostics.browserErrors`.
 
 It only reads library source through a Vite alias. The fixture and runner live under `benchmarks/e2e`; no production source or package manifest changes are required.
 
@@ -29,6 +29,13 @@ node benchmarks/e2e/run.mjs \
   --output /tmp/canvas-e2e
 ```
 
+`--baseline-root` is required for a local comparison; `--candidate-root`
+defaults to the current checkout. The runner fingerprints both `src` trees,
+rejects equal source hashes, injects the expected source proof into each local
+fixture, verifies that proof in every scenario, and re-hashes both worktrees
+after each target. This prevents an omitted baseline, stale Vite resolution, or
+mid-run source edit from producing a false parity pass.
+
 Fast vertical slice:
 
 ```sh
@@ -50,7 +57,12 @@ node benchmarks/e2e/run.mjs \
   --output /tmp/canvas-e2e-100
 ```
 
-Use `--browser chrome` for installed system Chrome, `--headed` for debugging, or `--scenarios intro,zoom,navbar,toolbar,drag` to select cases. Two already-running fixtures can be supplied with `--baseline-url` and `--candidate-url`. Add `--trace` when you need a Playwright trace with screenshots and DOM snapshots; tracing is disabled by default so its recording overhead does not perturb normal CPU comparisons.
+Use `--browser chrome` for installed system Chrome, `--headed` for debugging, or `--scenarios intro,zoom,navbar,toolbar,drag` to select cases. Two already-running fixtures can be supplied only as a pair with distinct `--baseline-url` and `--candidate-url` values; URL mode cannot be mixed with local-root flags. Add `--trace` when you need a Playwright trace with screenshots and DOM snapshots; tracing is disabled by default so its recording overhead does not perturb normal CPU comparisons.
+
+Local fixture ports are selected from currently available loopback ports rather
+than assumed to be free. Vite process groups and their temporary caches are
+cleaned up on successful completion, startup failure, `SIGINT`, and `SIGTERM`,
+with forced termination if a graceful stop times out.
 
 ## Paired deep profiling
 
@@ -187,7 +199,7 @@ npx playwright install chromium
 ## Interpreting failures
 
 - Exit 0: strict parity passed; performance results remain in the report.
-- Exit 1: a parity mismatch or runner error requires review.
+- Exit 1: a parity mismatch, browser error, source-verification failure, or runner error requires review.
 - Exit 2: parity passed, but `--fail-on-perf-regression` found a configured performance regression.
 
 Do not regenerate or bless a mismatch as part of an optimization. Review the baseline/candidate screenshots, magenta diff, DOM/SVG contracts, and raw trajectory first, then defer any intentional visual, animation, loading, or interactivity change for an explicit user decision.

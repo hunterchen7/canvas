@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { spawn } from "node:child_process";
 import fs from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
@@ -9,6 +10,16 @@ import { compareScenario } from "./compare.mjs";
 import { installBrowserInstrumentation } from "./instrumentation.mjs";
 import { allScenarioNames, runScenarios } from "./scenarios.mjs";
 import { STRICT_PARITY_THRESHOLDS } from "./thresholds.mjs";
+import { resolveLibraryTarget } from "../runtime/scripts/library-target.mjs";
+import { createPortAllocator } from "../runtime/scripts/run-paired.mjs";
+import {
+  assertDistinctSourceTargets,
+  assertStableSourceTargets,
+  evaluateRunOutcome,
+  sourceIdentitySummary,
+  validateSourceSelection,
+} from "./runner-helpers.mjs";
+import { stopChildProcessTree } from "./process-tree.mjs";
 
 const e2eRoot = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(e2eRoot, "../..");
@@ -22,10 +33,10 @@ Usage:
   node benchmarks/e2e/run.mjs [options]
 
 Options:
-  --baseline-root PATH       Reference library worktree (default: candidate root)
+  --baseline-root PATH       Reference library worktree (required for local runs)
   --candidate-root PATH      Candidate library worktree (default: current repository)
-  --baseline-url URL         Use an already-running baseline fixture
-  --candidate-url URL        Use an already-running candidate fixture
+  --baseline-url URL         Explicit baseline fixture (requires --candidate-url)
+  --candidate-url URL        Explicit candidate fixture (requires --baseline-url)
   --output PATH              Artifact directory
   --scenarios LIST           Comma-separated scenarios (${allScenarioNames.join(",")})
   --sections NUMBER          Extra stress CanvasComponents, 0-250 (default: 0)
@@ -42,6 +53,8 @@ function parseArguments(argv) {
   const options = {
     candidateRoot: repositoryRoot,
     baselineRoot: null,
+    candidateRootProvided: false,
+    baselineRootProvided: false,
     baselineUrl: null,
     candidateUrl: null,
     output: path.join(e2eRoot, "artifacts", timestamp),
@@ -64,9 +77,13 @@ function parseArguments(argv) {
     if (argument === "--help") {
       printHelp();
       process.exit(0);
-    } else if (argument === "--baseline-root") options.baselineRoot = path.resolve(value());
-    else if (argument === "--candidate-root") options.candidateRoot = path.resolve(value());
-    else if (argument === "--baseline-url") options.baselineUrl = value();
+    } else if (argument === "--baseline-root") {
+      options.baselineRoot = path.resolve(value());
+      options.baselineRootProvided = true;
+    } else if (argument === "--candidate-root") {
+      options.candidateRoot = path.resolve(value());
+      options.candidateRootProvided = true;
+    } else if (argument === "--baseline-url") options.baselineUrl = value();
     else if (argument === "--candidate-url") options.candidateUrl = value();
     else if (argument === "--output") options.output = path.resolve(value());
     else if (argument === "--scenarios") options.scenarios = value().split(",").filter(Boolean);
@@ -78,7 +95,6 @@ function parseArguments(argv) {
     else throw new Error(`Unknown argument: ${argument}`);
   }
 
-  options.baselineRoot ??= options.candidateRoot;
   options.sections = Math.max(0, Math.min(250, Math.trunc(options.sections || 0)));
   const unknown = options.scenarios.filter((name) => !allScenarioNames.includes(name));
   if (unknown.length > 0) throw new Error(`Unknown scenarios: ${unknown.join(", ")}`);
@@ -88,14 +104,20 @@ function parseArguments(argv) {
   return options;
 }
 
-async function waitForServer(url, child, logs) {
+async function waitForServer(url, child, logs, startupState) {
   const deadline = Date.now() + 30_000;
   while (Date.now() < deadline) {
+    if (startupState.error) {
+      throw new Error(
+        `Could not start Vite: ${startupState.error.message}\n${logs.join("")}`,
+        { cause: startupState.error },
+      );
+    }
     if (child.exitCode !== null) {
       throw new Error(`Vite exited with ${child.exitCode}\n${logs.join("")}`);
     }
     try {
-      const response = await fetch(url);
+      const response = await fetch(url, { signal: AbortSignal.timeout(1_000) });
       if (response.ok) return;
     } catch {
       // Server is still starting.
@@ -105,8 +127,19 @@ async function waitForServer(url, child, logs) {
   throw new Error(`Timed out waiting for ${url}\n${logs.join("")}`);
 }
 
-async function startFixtureServer({ libraryRoot, port, id }) {
+async function startFixtureServer({
+  libraryRoot,
+  libraryIdentity,
+  port,
+  id,
+  register,
+}) {
   const logs = [];
+  const serverId = `${id}-${process.pid}-${port}`;
+  const cacheDirectory = path.join(
+    os.tmpdir(),
+    `canvas-e2e-vite-${serverId}`,
+  );
   const child = spawn(
     process.execPath,
     [
@@ -126,25 +159,44 @@ async function startFixtureServer({ libraryRoot, port, id }) {
       env: {
         ...process.env,
         CANVAS_LIBRARY_ROOT: libraryRoot,
-        CANVAS_E2E_SERVER_ID: `${id}-${process.pid}`,
+        CANVAS_LIBRARY_IDENTITY_JSON: JSON.stringify(libraryIdentity),
+        CANVAS_E2E_SERVER_ID: serverId,
       },
       stdio: ["ignore", "pipe", "pipe"],
+      detached: process.platform !== "win32",
     },
   );
   const collect = (chunk) => {
     logs.push(chunk.toString());
     if (logs.length > 100) logs.shift();
   };
+  const startupState = { error: null };
+  child.once("error", (error) => {
+    startupState.error = error;
+    collect(`${error.stack || error.message || error}\n`);
+  });
   child.stdout.on("data", collect);
   child.stderr.on("data", collect);
   const url = `http://127.0.0.1:${port}/`;
-  await waitForServer(url, child, logs);
-  return {
+  let stopPromise = null;
+  const server = {
     url,
-    stop: () => {
-      if (child.exitCode === null) child.kill("SIGTERM");
+    stop() {
+      stopPromise ??= (async () => {
+        await stopChildProcessTree(child);
+        await fs.rm(cacheDirectory, { recursive: true, force: true });
+      })();
+      return stopPromise;
     },
   };
+  register?.(server);
+  try {
+    await waitForServer(url, child, logs, startupState);
+  } catch (error) {
+    await server.stop();
+    throw error;
+  }
+  return server;
 }
 
 async function launchBrowser(browserName, headed) {
@@ -166,6 +218,7 @@ async function runTarget({
   scenarios,
   sections,
   trace,
+  expectedSourceIdentity,
 }) {
   const context = await browser.newContext({
     viewport: { width: 1280, height: 720 },
@@ -213,6 +266,7 @@ async function runTarget({
       outputDirectory,
       selectedNames: scenarios,
       sections,
+      expectedSourceIdentity,
     });
     const target = {
       label,
@@ -243,132 +297,276 @@ async function runTarget({
 
 async function main() {
   const options = parseArguments(process.argv.slice(2));
-  await fs.mkdir(options.output, { recursive: true });
-  await fs.mkdir(path.join(options.output, "diffs"), { recursive: true });
+  const sourceSelection = validateSourceSelection(options);
+  const servers = new Set();
+  const sourceChecks = [];
+  let startupTargets = null;
+  let browser = null;
+  let cleanupQueue = Promise.resolve();
+  let receivedSignal = null;
+  let signalCleanupError = null;
 
-  const servers = [];
-  let baselineUrl = options.baselineUrl;
-  let candidateUrl = options.candidateUrl;
+  const cleanup = () => {
+    cleanupQueue = cleanupQueue.then(
+      async () => {
+        const activeBrowser = browser;
+        browser = null;
+        const activeServers = [...servers];
+        servers.clear();
+        await Promise.all([
+          activeBrowser?.close(),
+          ...activeServers.map((server) => server.stop()),
+        ]);
+      },
+      async () => {
+        const activeBrowser = browser;
+        browser = null;
+        const activeServers = [...servers];
+        servers.clear();
+        await Promise.all([
+          activeBrowser?.close(),
+          ...activeServers.map((server) => server.stop()),
+        ]);
+      },
+    );
+    return cleanupQueue;
+  };
+  const signalHandlers = new Map();
+  for (const signal of ["SIGINT", "SIGTERM"]) {
+    const handler = () => {
+      if (receivedSignal) return;
+      receivedSignal = signal;
+      process.exitCode = signal === "SIGINT" ? 130 : 143;
+      void cleanup().catch((error) => {
+        signalCleanupError = error;
+        console.error(
+          `Signal cleanup failed: ${error.stack || error.message || error}`,
+        );
+      });
+    };
+    signalHandlers.set(signal, handler);
+    process.on(signal, handler);
+  }
+  const throwIfInterrupted = () => {
+    if (receivedSignal) {
+      throw new Error(`Parity run interrupted by ${receivedSignal}`);
+    }
+  };
+  const resolveLocalTargets = async () => {
+    const [baseline, candidate] = await Promise.all([
+      resolveLibraryTarget({
+        repositoryRoot,
+        libraryRoot: options.baselineRoot,
+        libraryLabel: "baseline",
+      }),
+      resolveLibraryTarget({
+        repositoryRoot,
+        libraryRoot: options.candidateRoot,
+        libraryLabel: "candidate",
+      }),
+    ]);
+    assertDistinctSourceTargets(baseline, candidate);
+    return { baseline, candidate };
+  };
+  const recordSourceCheck = async (checkpoint) => {
+    if (!startupTargets) return;
+    const current = await resolveLocalTargets();
+    assertStableSourceTargets(startupTargets, current, checkpoint);
+    sourceChecks.push({
+      checkpoint,
+      checkedAt: new Date().toISOString(),
+      targets: {
+        baseline: sourceIdentitySummary(current.baseline),
+        candidate: sourceIdentitySummary(current.candidate),
+      },
+    });
+  };
+
+  let baselineUrl = sourceSelection.baselineUrl;
+  let candidateUrl = sourceSelection.candidateUrl;
   try {
+    await fs.mkdir(options.output, { recursive: true });
+    await fs.mkdir(path.join(options.output, "diffs"), { recursive: true });
+    if (sourceSelection.mode === "local") {
+      startupTargets = await resolveLocalTargets();
+      sourceChecks.push({
+        checkpoint: "startup",
+        checkedAt: new Date().toISOString(),
+        targets: {
+          baseline: sourceIdentitySummary(startupTargets.baseline),
+          candidate: sourceIdentitySummary(startupTargets.candidate),
+        },
+      });
+      throwIfInterrupted();
+    }
+
+    const allocatePort = createPortAllocator(
+      10_000 + ((process.pid % 25_000) * 2),
+    );
     if (!baselineUrl) {
-      const server = await startFixtureServer({ libraryRoot: options.baselineRoot, port: 4317, id: "baseline" });
-      servers.push(server);
+      const server = await startFixtureServer({
+        libraryRoot: startupTargets.baseline.root,
+        libraryIdentity: startupTargets.baseline.identity,
+        port: await allocatePort(),
+        id: "baseline",
+        register: (resource) => servers.add(resource),
+      });
       baselineUrl = server.url;
+      throwIfInterrupted();
     }
     if (!candidateUrl) {
-      const server = await startFixtureServer({ libraryRoot: options.candidateRoot, port: 4318, id: "candidate" });
-      servers.push(server);
+      const server = await startFixtureServer({
+        libraryRoot: startupTargets.candidate.root,
+        libraryIdentity: startupTargets.candidate.identity,
+        port: await allocatePort(),
+        id: "candidate",
+        register: (resource) => servers.add(resource),
+      });
       candidateUrl = server.url;
+      throwIfInterrupted();
     }
 
-    const browser = await launchBrowser(options.browser, options.headed);
-    try {
-      const browserVersion = browser.version();
-      const baseline = await runTarget({
-        browser,
-        label: "baseline",
-        baseUrl: baselineUrl,
-        outputDirectory: path.join(options.output, "baseline"),
+    browser = await launchBrowser(options.browser, options.headed);
+    throwIfInterrupted();
+    const browserVersion = browser.version();
+    const baseline = await runTarget({
+      browser,
+      label: "baseline",
+      baseUrl: baselineUrl,
+      outputDirectory: path.join(options.output, "baseline"),
+      scenarios: options.scenarios,
+      sections: options.sections,
+      trace: options.trace,
+      expectedSourceIdentity: startupTargets?.baseline.identity ?? null,
+    });
+    throwIfInterrupted();
+    await recordSourceCheck("after-baseline");
+    const candidate = await runTarget({
+      browser,
+      label: "candidate",
+      baseUrl: candidateUrl,
+      outputDirectory: path.join(options.output, "candidate"),
+      scenarios: options.scenarios,
+      sections: options.sections,
+      trace: options.trace,
+      expectedSourceIdentity: startupTargets?.candidate.identity ?? null,
+    });
+    throwIfInterrupted();
+    await recordSourceCheck("after-candidate");
+
+    const comparisons = [];
+    for (const name of options.scenarios) {
+      const baselineResult = baseline.results.find(
+        (result) => result.name === name,
+      );
+      const candidateResult = candidate.results.find(
+        (result) => result.name === name,
+      );
+      if (!baselineResult || !candidateResult) {
+        throw new Error(`Missing scenario result: ${name}`);
+      }
+      comparisons.push(
+        await compareScenario({
+          name,
+          baseline: baselineResult,
+          candidate: candidateResult,
+          diffDirectory: path.join(options.output, "diffs"),
+          anchorTypes: baselineResult.anchorTypes,
+          trajectoryMode: baselineResult.trajectoryMode,
+        }),
+      );
+    }
+
+    const outcome = evaluateRunOutcome({
+      comparisons,
+      baselineErrors: baseline.errors,
+      candidateErrors: candidate.errors,
+    });
+    const report = {
+      schemaVersion: 1,
+      generatedAt: new Date().toISOString(),
+      environment: {
+        browser: options.browser,
+        browserVersion,
+        node: process.version,
+        platform: process.platform,
+        arch: process.arch,
+        viewport: { width: 1280, height: 720, deviceScaleFactor: 1 },
+        locale: "en-CA",
+        timezone: "America/Toronto",
+        reducedMotion: "no-preference",
+      },
+      inputs: {
+        sourceMode: sourceSelection.mode,
+        baselineRoot:
+          sourceSelection.mode === "local" ? startupTargets.baseline.root : null,
+        candidateRoot:
+          sourceSelection.mode === "local" ? startupTargets.candidate.root : null,
+        baselineUrl,
+        candidateUrl,
         scenarios: options.scenarios,
         sections: options.sections,
-        trace: options.trace,
-      });
-      const candidate = await runTarget({
-        browser,
-        label: "candidate",
-        baseUrl: candidateUrl,
-        outputDirectory: path.join(options.output, "candidate"),
-        scenarios: options.scenarios,
-        sections: options.sections,
-        trace: options.trace,
-      });
+      },
+      provenance: {
+        baseline: sourceIdentitySummary(startupTargets?.baseline),
+        candidate: sourceIdentitySummary(startupTargets?.candidate),
+        sourceChecks,
+      },
+      diagnostics: {
+        playwrightTrace: {
+          enabled: options.trace,
+          artifacts: options.trace
+            ? ["baseline/trace.zip", "candidate/trace.zip"]
+            : [],
+        },
+        browserErrors: outcome.errors,
+      },
+      thresholds: STRICT_PARITY_THRESHOLDS,
+      summary: {
+        parityPass: outcome.parityPass,
+        comparisonParityPass: outcome.comparisonParityPass,
+        performancePass: outcome.performancePass,
+        pageErrors: outcome.pageErrorCount,
+        deferredUserDecisions: comparisons.flatMap((comparison) =>
+          comparison.parityFailures.map((failure) => ({
+            scenario: comparison.name,
+            ...failure,
+          })),
+        ),
+      },
+      comparisons,
+    };
+    const reportPath = path.join(options.output, "report.json");
+    await fs.writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`);
 
-      const comparisons = [];
-      for (const name of options.scenarios) {
-        const baselineResult = baseline.results.find((result) => result.name === name);
-        const candidateResult = candidate.results.find((result) => result.name === name);
-        if (!baselineResult || !candidateResult) throw new Error(`Missing scenario result: ${name}`);
-        comparisons.push(
-          await compareScenario({
-            name,
-            baseline: baselineResult,
-            candidate: candidateResult,
-            diffDirectory: path.join(options.output, "diffs"),
-            anchorTypes: baselineResult.anchorTypes,
-            trajectoryMode: baselineResult.trajectoryMode,
-          }),
-        );
-      }
-
-      const parityPass = comparisons.every((comparison) => comparison.pass);
-      const performancePass = comparisons.every((comparison) => comparison.performancePass);
-      const report = {
-        schemaVersion: 1,
-        generatedAt: new Date().toISOString(),
-        environment: {
-          browser: options.browser,
-          browserVersion,
-          node: process.version,
-          platform: process.platform,
-          arch: process.arch,
-          viewport: { width: 1280, height: 720, deviceScaleFactor: 1 },
-          locale: "en-CA",
-          timezone: "America/Toronto",
-          reducedMotion: "no-preference",
-        },
-        inputs: {
-          baselineRoot: options.baselineRoot,
-          candidateRoot: options.candidateRoot,
-          baselineUrl,
-          candidateUrl,
-          scenarios: options.scenarios,
-          sections: options.sections,
-        },
-        diagnostics: {
-          playwrightTrace: {
-            enabled: options.trace,
-            artifacts: options.trace
-              ? ["baseline/trace.zip", "candidate/trace.zip"]
-              : [],
-          },
-        },
-        thresholds: STRICT_PARITY_THRESHOLDS,
-        summary: {
-          parityPass,
-          performancePass,
-          pageErrors: baseline.errors.length + candidate.errors.length,
-          deferredUserDecisions: comparisons.flatMap((comparison) =>
-            comparison.parityFailures.map((failure) => ({ scenario: comparison.name, ...failure })),
-          ),
-        },
-        comparisons,
-      };
-      const reportPath = path.join(options.output, "report.json");
-      await fs.writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`);
-
-      console.log(`Report: ${reportPath}`);
-      for (const comparison of comparisons) {
-        const parity = comparison.pass ? "PASS" : "REVIEW";
-        const perf = comparison.performancePass ? "perf-ok" : "perf-regression";
-        console.log(
-          `${parity.padEnd(6)} ${comparison.name.padEnd(12)} ${perf} pixels=${comparison.visual.differentPixels ?? "size-mismatch"}`,
-        );
-      }
-      if (!parityPass) {
-        console.error("Strict parity failed. Mismatches are recorded as deferred user decisions; no changes are accepted automatically.");
-        process.exitCode = 1;
-      } else if (options.failOnPerfRegression && !performancePass) {
-        process.exitCode = 2;
-      }
-    } finally {
-      await browser.close();
+    console.log(`Report: ${reportPath}`);
+    for (const comparison of comparisons) {
+      const parity = comparison.pass ? "PASS" : "REVIEW";
+      const perf = comparison.performancePass ? "perf-ok" : "perf-regression";
+      console.log(
+        `${parity.padEnd(6)} ${comparison.name.padEnd(12)} ${perf} pixels=${comparison.visual.differentPixels ?? "size-mismatch"}`,
+      );
+    }
+    if (!outcome.parityPass) {
+      console.error(
+        outcome.pageErrorCount > 0
+          ? `Strict parity failed with ${outcome.pageErrorCount} browser error(s); inspect diagnostics.browserErrors.`
+          : "Strict parity failed. Mismatches are recorded as deferred user decisions; no changes are accepted automatically.",
+      );
+      process.exitCode = 1;
+    } else if (options.failOnPerfRegression && !outcome.performancePass) {
+      process.exitCode = 2;
     }
   } finally {
-    for (const server of servers) server.stop();
+    for (const [signal, handler] of signalHandlers) {
+      process.off(signal, handler);
+    }
+    await cleanup();
+    if (signalCleanupError) throw signalCleanupError;
   }
 }
 
 main().catch((error) => {
   console.error(error.stack || error.message || error);
-  process.exitCode = 1;
+  if (!process.exitCode) process.exitCode = 1;
 });

@@ -208,7 +208,7 @@ async function resetBrowserMetrics(page) {
   await page.evaluate(() => window.__CANVAS_PERF__?.reset());
 }
 
-async function assertLoadedSourceIdentity(page, expectedIdentity) {
+export async function assertLoadedSourceIdentity(page, expectedIdentity) {
   const loadedIdentity = await page.evaluate(
     () => window.__CANVAS_LIBRARY_IDENTITY__ ?? null,
   );
@@ -1459,6 +1459,7 @@ export async function runScenarios({
   outputDirectory,
   selectedNames = allScenarioNames,
   sections = 0,
+  expectedSourceIdentity = null,
 }) {
   const selected = scenarioDefinitions.filter((scenario) => selectedNames.includes(scenario.name));
   const results = [];
@@ -1474,6 +1475,11 @@ export async function runScenarios({
 
     try {
       await scenario.prepare(page, url);
+      const loadedSourceIdentity = expectedSourceIdentity
+        ? await assertLoadedSourceIdentity(page, expectedSourceIdentity)
+        : await page.evaluate(
+            () => window.__CANVAS_LIBRARY_IDENTITY__ ?? null,
+          );
       const beforeAction = scenario.includeNavigationMetrics
         ? beforeNavigation
         : await cdp.send("Performance.getMetrics");
@@ -1501,6 +1507,7 @@ export async function runScenarios({
         contract,
         finalHarnessState,
         animationContract,
+        loadedSourceIdentity,
         performance: {
           browser: browserPerformance,
           cdp: subtractMetrics(beforeAction, afterAction),
