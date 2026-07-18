@@ -14,6 +14,7 @@ import {
 } from "./scenarios.mjs";
 import { startDeepProfile } from "../runtime/scripts/deep-profile.mjs";
 import { resolveLibraryTarget } from "../runtime/scripts/library-target.mjs";
+import { comparePairedSamples } from "../runtime/scripts/profile-compare.mjs";
 
 const e2eRoot = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(e2eRoot, "../..");
@@ -440,12 +441,14 @@ function aggregatePairs(pairs) {
   }
   return Object.fromEntries(
     [...names].sort().map((name) => {
-      const baseline = pairs
-        .map((pair) => pair.targets?.baseline?.metrics?.[name])
-        .filter(Number.isFinite);
-      const candidate = pairs
-        .map((pair) => pair.targets?.candidate?.metrics?.[name])
-        .filter(Number.isFinite);
+      const baselineSamples = pairs.map(
+        (pair) => pair.targets?.baseline?.metrics?.[name],
+      );
+      const candidateSamples = pairs.map(
+        (pair) => pair.targets?.candidate?.metrics?.[name],
+      );
+      const baseline = baselineSamples.filter(Number.isFinite);
+      const candidate = candidateSamples.filter(Number.isFinite);
       const pairedAbsoluteChanges = [];
       const pairedPercentChanges = [];
       for (const pair of pairs) {
@@ -462,6 +465,18 @@ function aggregatePairs(pairs) {
           candidate: summarizeNumbers(candidate),
           pairedAbsoluteChange: summarizeNumbers(pairedAbsoluteChanges),
           pairedPercentChange: summarizeNumbers(pairedPercentChanges),
+          pairedComparison: comparePairedSamples(
+            baselineSamples,
+            candidateSamples,
+            {
+              lowerIsBetter: /(?:SampleCount|eventCount)$/u.test(name)
+                ? null
+                : true,
+              bootstrapIterations: 10_000,
+              seed: `canvas-e2e-profile:${name}`,
+              minimumPairs: 5,
+            },
+          ),
         },
       ];
     }),
@@ -764,6 +779,17 @@ async function main() {
     sourceVerification:
       "Runner-started Vite servers use canonical roots with source-only SHA-256 and Git tree provenance.",
     performanceGate: false,
+    statistics: {
+      statistic: "paired median delta",
+      bootstrapIterations: 10_000,
+      confidenceLevel: 0.95,
+      minimumPairs: 5,
+      multipleComparisons: {
+        exploratory: true,
+        adjusted: false,
+        method: "none",
+      },
+    },
   };
   const orders = [];
   const groups = [];

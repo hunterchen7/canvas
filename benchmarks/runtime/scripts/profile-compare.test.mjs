@@ -1,4 +1,7 @@
 import assert from "node:assert/strict";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import test from "node:test";
 import {
   buildPairedProfileReport,
@@ -96,6 +99,20 @@ test("comparePairedSamples refuses to classify undersized samples", () => {
   });
   assert.equal(result.minimumPairsForClassification, 5);
   assert.equal(result.classification, "insufficient-data");
+});
+
+test("unknown-direction metrics report increases instead of unchanged values", () => {
+  const result = comparePairedSamples(
+    [10, 10, 10, 10, 10],
+    [20, 20, 20, 20, 20],
+    { lowerIsBetter: null, bootstrapIterations: 100 },
+  );
+  assert.equal(result.classification, "not-classified");
+  assert.equal(result.signConsistency.unchangedCount, 0);
+  assert.equal(result.signConsistency.increaseCount, 5);
+  assert.equal(result.signConsistency.increaseFraction, 1);
+  assert.equal(result.signConsistency.improvementFraction, null);
+  assert.equal(result.signConsistency.dominantDirection, "increase");
 });
 
 test("canonicalizeProfileUrl joins Vite worktree modules across origins", () => {
@@ -196,12 +213,39 @@ function profileSummary(value, root, lineNumber = 10) {
 
 test("flattenProfileRun includes all deep-profile families and ignores function lines", () => {
   const flattened = flattenProfileRun(
-    { profileSummary: profileSummary(2, "/work/candidate", 99) },
+    {
+      profileSummary: profileSummary(2, "/work/candidate", 99),
+      runtimeResult: {
+        frames: { p95Ms: 8.3, estimatedDroppedFrames: 2 },
+        listeners: { totals: { active: 27 } },
+        environment: { usedJsHeapSizeBytes: 1_024 },
+        phases: [
+          {
+            name: "drag",
+            frames: { p95Ms: 7.2, estimatedDroppedFrames: 1 },
+            longTasks: { supported: true, totalMs: 4 },
+            longAnimationFrames: {
+              supported: true,
+              totalBlockingDurationMs: 3,
+            },
+          },
+        ],
+      },
+    },
     { rootPrefixes: ["/work/candidate"] },
   );
   const keys = new Set(flattened.map((metric) => metric.key));
   assert(keys.has("runtime.overall.profiler.commitCount"));
   assert(keys.has("runtime.phase.drag.profiler.commitCount"));
+  assert(keys.has("runtime.overall.frames.p95Ms"));
+  assert(keys.has("runtime.overall.listeners.totals.active"));
+  assert(keys.has("runtime.phase.drag.frames.p95Ms"));
+  assert(keys.has("runtime.phase.drag.longTasks.totalMs"));
+  assert(
+    keys.has(
+      "runtime.phase.drag.longAnimationFrames.totalBlockingDurationMs",
+    ),
+  );
   assert(keys.has("trace.overall.mainThreadActivity.javascript.activeTimeMs"));
   assert(keys.has("trace.phase.drag.mainThreadActivity.layout.activeTimeMs"));
   assert(keys.has("cpu.breakdown.javascript"));
@@ -261,7 +305,10 @@ test("buildPairedProfileReport constructs case metrics and preserves display fra
   assert.equal(report.summary.completePairCount, 3);
   assert.equal(report.cases[0].pairCount, 3);
   assert.equal(report.cases[1].incompletePairCount, 1);
-  assert.equal(report.warnings.length, 1);
+  assert.equal(report.warnings.length, 2);
+  assert.equal(report.settings.multipleComparisons.exploratory, true);
+  assert.equal(report.settings.multipleComparisons.adjusted, false);
+  assert.match(report.warnings[0], /unadjusted for multiple comparisons/);
   const commitMetric = report.cases[0].metrics.find(
     (metric) => metric.key === "runtime.overall.profiler.commitCount",
   );
@@ -275,4 +322,107 @@ test("buildPairedProfileReport constructs case metrics and preserves display fra
   assert.equal(functionMetric.displayFrames.baseline[0].lineNumber, 10);
   assert.equal(functionMetric.displayFrames.candidate[0].lineNumber, 200);
   assert.equal(functionMetric.function.module, "/packages/canvas/src/render.ts");
+});
+
+test("production source maps join differently hashed target bundles", (context) => {
+  const temporary = mkdtempSync(path.join(os.tmpdir(), "canvas-profile-compare-"));
+  context.after(() => rmSync(temporary, { recursive: true, force: true }));
+
+  const runs = [];
+  for (const [target, hash, root] of [
+    ["baseline", "baselineHash", "/work/baseline"],
+    ["candidate", "candidateHash", "/work/candidate"],
+  ]) {
+    const portableDirectory = `pairs/pair-1/${target}/profile`;
+    const absoluteDirectory = path.join(temporary, target, "profile");
+    const assets = path.join(absoluteDirectory, "production-build", "assets");
+    mkdirSync(assets, { recursive: true });
+    const generatedFile = `index-${hash}.js`;
+    writeFileSync(
+      path.join(assets, `${generatedFile}.map`),
+      JSON.stringify({
+        version: 3,
+        file: generatedFile,
+        sources: [`${root}/src/render.ts`],
+        sourcesContent: ["export function renderCanvas() {}\n"],
+        names: ["renderCanvas"],
+        mappings: "AAAAA",
+      }),
+    );
+    runs.push({
+      caseName: "production-cpu",
+      pairIndex: 1,
+      target,
+      profileDirectory: portableDirectory,
+      profileDirectoryAbsolute: absoluteDirectory,
+      profileSummary: {
+        cpu: {
+          topSelfTime: [
+            {
+              functionName: target === "baseline" ? "a" : "b",
+              url: `http://127.0.0.1:4000/assets/${generatedFile}`,
+              lineNumber: 1,
+              columnNumber: 1,
+              selfTimeMs: target === "baseline" ? 10 : 5,
+              selfSamples: target === "baseline" ? 10 : 5,
+            },
+          ],
+          topInclusiveTime: [],
+        },
+        allocations: {
+          topAllocationSites: [
+            {
+              functionName: target === "baseline" ? "a" : "b",
+              url: `http://127.0.0.1:4000/assets/${generatedFile}`,
+              lineNumber: 1,
+              columnNumber: 1,
+              sampledBytes: target === "baseline" ? 1_024 : 512,
+              sampleCount: target === "baseline" ? 2 : 1,
+            },
+          ],
+        },
+      },
+    });
+  }
+
+  const report = buildPairedProfileReport({
+    targets: {
+      baseline: { root: "/work/baseline" },
+      candidate: { root: "/work/candidate" },
+    },
+    cases: ["production-cpu"],
+    runs,
+    settings: { minimumPairs: 1, bootstrapIterations: 100 },
+  });
+  const metric = report.cases[0].metrics.find(
+    (entry) =>
+      entry.scope === "function" && entry.key.endsWith(".selfTimeMs"),
+  );
+  assert(metric);
+  assert.equal(metric.function.module, "/src/render.ts");
+  assert.equal(metric.function.functionName, "renderCanvas");
+  assert.equal(metric.comparison.pairCount, 1);
+  assert.equal(metric.comparison.absoluteDelta.median, -5);
+  const allocationMetric = report.cases[0].metrics.find(
+    (entry) =>
+      entry.source === "allocations" && entry.key.endsWith(".sampledBytes"),
+  );
+  assert(allocationMetric);
+  assert.equal(allocationMetric.function.module, "/src/render.ts");
+  assert.equal(allocationMetric.function.functionName, "renderCanvas");
+  assert.equal(allocationMetric.comparison.pairCount, 1);
+  assert.equal(allocationMetric.comparison.absoluteDelta.median, -512);
+  assert.equal(
+    metric.displayFrames.baseline[0].generated.functionName,
+    "a",
+  );
+  assert.equal(
+    metric.displayFrames.candidate[0].generated.functionName,
+    "b",
+  );
+  assert.equal(
+    report.cases[0].pairs[0].targets.baseline.profileDirectory,
+    "pairs/pair-1/baseline/profile",
+  );
+  assert.equal(JSON.stringify(report).includes(temporary), false);
 });

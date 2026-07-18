@@ -1,6 +1,13 @@
+import { existsSync, readFileSync, readdirSync } from "node:fs";
+import path from "node:path";
+import sourceMapJs from "source-map-js";
+
+const { SourceMapConsumer } = sourceMapJs;
 const DEFAULT_BOOTSTRAP_ITERATIONS = 10_000;
 const DEFAULT_BOOTSTRAP_SEED = 0x5eedc0de;
 const DEFAULT_MINIMUM_PAIRS = 5;
+const MULTIPLE_COMPARISONS_WARNING =
+  "Per-metric bootstrap intervals and improvement/regression classifications are exploratory and unadjusted for multiple comparisons; do not interpret them as family-wise significance or performance gates.";
 
 function finiteNumber(value) {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
@@ -208,14 +215,16 @@ export function comparePairedSamples(
   let improvementCount = 0;
   let regressionCount = 0;
   let unchangedCount = 0;
+  let decreaseCount = 0;
+  let increaseCount = 0;
   for (const pair of pairs) {
     if (Math.abs(pair.absoluteDelta) <= zeroTolerance) {
       unchangedCount += 1;
     } else {
       const negative = pair.absoluteDelta < 0;
-      if (lowerIsBetter == null) {
-        unchangedCount += 1;
-      } else {
+      if (negative) decreaseCount += 1;
+      else increaseCount += 1;
+      if (lowerIsBetter != null) {
         const improved = lowerIsBetter ? negative : !negative;
         if (improved) improvementCount += 1;
         else regressionCount += 1;
@@ -239,23 +248,24 @@ export function comparePairedSamples(
     iterations: bootstrapIterations,
     seed: seed ^ 0x9e3779b9,
   });
-  const dominantCount = Math.max(
-    improvementCount,
-    regressionCount,
-    unchangedCount,
-  );
+  const directionalCounts =
+    lowerIsBetter == null
+      ? [decreaseCount, increaseCount, unchangedCount]
+      : [improvementCount, regressionCount, unchangedCount];
+  const directionalLabels =
+    lowerIsBetter == null
+      ? ["decrease", "increase", "unchanged"]
+      : ["improvement", "regression", "unchanged"];
+  const dominantCount = Math.max(...directionalCounts);
+  const dominantIndexes = directionalCounts
+    .map((count, index) => (count === dominantCount ? index : -1))
+    .filter((index) => index >= 0);
   const dominantDirection =
     pairs.length === 0
       ? "no-data"
-      : [improvementCount, regressionCount, unchangedCount].filter(
-            (count) => count === dominantCount,
-          ).length > 1
+      : dominantIndexes.length > 1
         ? "mixed"
-        : dominantCount === improvementCount
-          ? "improvement"
-          : dominantCount === regressionCount
-            ? "regression"
-            : "unchanged";
+        : directionalLabels[dominantIndexes[0]];
 
   return {
     inputPairCount,
@@ -276,12 +286,22 @@ export function comparePairedSamples(
       improvementCount,
       regressionCount,
       unchangedCount,
+      decreaseCount,
+      increaseCount,
       improvementFraction:
-        pairs.length > 0 ? improvementCount / pairs.length : null,
+        pairs.length > 0 && lowerIsBetter != null
+          ? improvementCount / pairs.length
+          : null,
       regressionFraction:
-        pairs.length > 0 ? regressionCount / pairs.length : null,
+        pairs.length > 0 && lowerIsBetter != null
+          ? regressionCount / pairs.length
+          : null,
       unchangedFraction:
         pairs.length > 0 ? unchangedCount / pairs.length : null,
+      decreaseFraction:
+        pairs.length > 0 ? decreaseCount / pairs.length : null,
+      increaseFraction:
+        pairs.length > 0 ? increaseCount / pairs.length : null,
       dominantDirection,
       dominantFraction: pairs.length > 0 ? dominantCount / pairs.length : null,
     },
@@ -370,6 +390,169 @@ export function canonicalizeProfileUrl(value, options = {}) {
   return result || "<anonymous>";
 }
 
+function sourceMapFiles(directory) {
+  const files = [];
+  const visit = (current) => {
+    for (const entry of readdirSync(current, { withFileTypes: true })) {
+      const absolute = path.join(current, entry.name);
+      if (entry.isDirectory()) visit(absolute);
+      else if (entry.isFile() && entry.name.endsWith(".map")) files.push(absolute);
+    }
+  };
+  visit(directory);
+  return files.sort((left, right) => left.localeCompare(right));
+}
+
+function publicGeneratedPath(value) {
+  if (typeof value !== "string" || value.trim() === "") return null;
+  const normalized = normalizedPath(pathFromUrl(value, []));
+  if (!normalized || /^<[^>]+>$/u.test(normalized)) return null;
+  const absolute = normalized.startsWith("/") ? normalized : `/${normalized}`;
+  return path.posix.normalize(withoutQueryOrHash(absolute));
+}
+
+function mappedSourcePath(source, generatedPath) {
+  const normalized = normalizedPath(source);
+  if (
+    normalized.startsWith("/") ||
+    /^[A-Za-z]:\//u.test(normalized) ||
+    /^[A-Za-z][A-Za-z\d+.-]*:\/\//u.test(normalized)
+  ) {
+    return normalized;
+  }
+  return path.posix.resolve(path.posix.dirname(generatedPath), normalized);
+}
+
+function sourceMapSymbolicator(run) {
+  const profileSummary = run?.profileSummary ?? run?.summary ?? null;
+  if (!profileSummary?.cpu && !profileSummary?.allocations) {
+    return { symbolicate: null, warnings: [], mapCount: 0 };
+  }
+  const suppliedDirectory =
+    run?.profileDirectoryAbsolute ?? run?.profileDirectory ?? null;
+  if (typeof suppliedDirectory !== "string" || suppliedDirectory === "") {
+    return { symbolicate: null, warnings: [], mapCount: 0 };
+  }
+  const profileDirectory = path.resolve(suppliedDirectory);
+  const productionBuild = path.join(profileDirectory, "production-build");
+  if (!existsSync(productionBuild)) {
+    return { symbolicate: null, warnings: [], mapCount: 0 };
+  }
+
+  const warnings = [];
+  const mapsByGeneratedPath = new Map();
+  const mapsByBasename = new Map();
+  let mapFiles;
+  try {
+    mapFiles = sourceMapFiles(productionBuild);
+  } catch (error) {
+    return {
+      symbolicate: null,
+      warnings: [
+        `Could not inspect preserved production source maps: ${error instanceof Error ? error.message : error}`,
+      ],
+      mapCount: 0,
+    };
+  }
+  if (mapFiles.length === 0) {
+    return {
+      symbolicate: null,
+      warnings: ["Preserved production build contains no source maps."],
+      mapCount: 0,
+    };
+  }
+
+  for (const mapFile of mapFiles) {
+    try {
+      const raw = JSON.parse(readFileSync(mapFile, "utf8"));
+      const relativeMap = normalizedPath(path.relative(productionBuild, mapFile));
+      const generatedFromMapName = publicGeneratedPath(
+        relativeMap.slice(0, -".map".length),
+      );
+      const generatedFromFile =
+        typeof raw.file === "string" && raw.file
+          ? publicGeneratedPath(
+              path.posix.join(path.posix.dirname(relativeMap), raw.file),
+            )
+          : null;
+      const generatedPaths = [generatedFromMapName, generatedFromFile].filter(
+        Boolean,
+      );
+      if (generatedPaths.length === 0) {
+        warnings.push(`Could not determine generated asset for ${relativeMap}.`);
+        continue;
+      }
+      const sourceMap = {
+        consumer: new SourceMapConsumer(raw),
+        generatedPath: generatedPaths[0],
+        mapFile: relativeMap,
+      };
+      for (const generatedPath of new Set(generatedPaths)) {
+        mapsByGeneratedPath.set(generatedPath, sourceMap);
+        const basename = path.posix.basename(generatedPath);
+        const existing = mapsByBasename.get(basename);
+        mapsByBasename.set(
+          basename,
+          existing == null || existing === sourceMap ? sourceMap : false,
+        );
+      }
+    } catch (error) {
+      warnings.push(
+        `Could not load ${normalizedPath(path.relative(productionBuild, mapFile))}: ${error instanceof Error ? error.message : error}`,
+      );
+    }
+  }
+
+  const symbolicate = (entry) => {
+    const generatedPath = publicGeneratedPath(entry?.url);
+    const lineNumber = finiteNumber(entry?.lineNumber);
+    const columnNumber = finiteNumber(entry?.columnNumber);
+    if (!generatedPath || lineNumber == null || columnNumber == null) return entry;
+    const sourceMap =
+      mapsByGeneratedPath.get(generatedPath) ??
+      mapsByBasename.get(path.posix.basename(generatedPath));
+    if (!sourceMap) return entry;
+    try {
+      const original = sourceMap.consumer.originalPositionFor({
+        line: Math.max(1, Math.trunc(lineNumber)),
+        column: Math.max(0, Math.trunc(columnNumber) - 1),
+      });
+      if (
+        typeof original.source !== "string" ||
+        !Number.isFinite(original.line) ||
+        !Number.isFinite(original.column)
+      ) {
+        return entry;
+      }
+      return {
+        ...entry,
+        functionName:
+          typeof original.name === "string" && original.name
+            ? original.name
+            : entry.functionName,
+        url: mappedSourcePath(original.source, sourceMap.generatedPath),
+        lineNumber: original.line,
+        columnNumber: original.column + 1,
+        generated: {
+          functionName: entry.functionName ?? "(anonymous)",
+          url: entry.url ?? "<anonymous>",
+          lineNumber: entry.lineNumber ?? null,
+          columnNumber: entry.columnNumber ?? null,
+          sourceMap: sourceMap.mapFile,
+        },
+      };
+    } catch {
+      return entry;
+    }
+  };
+
+  return {
+    symbolicate,
+    warnings,
+    mapCount: mapsByGeneratedPath.size,
+  };
+}
+
 function metricUnit(key) {
   if (/Bytes$/u.test(key)) return "bytes";
   if (/Percent$/u.test(key)) return "percent";
@@ -436,15 +619,16 @@ function uniqueFrames(frames) {
   });
 }
 
-function groupedFrames(entries, canonicalOptions) {
+function groupedFrames(entries, canonicalOptions, symbolicateFrame = null) {
   const exact = new Map();
-  for (const entry of entries) {
-    if (!entry || typeof entry !== "object") continue;
+  for (const generatedEntry of entries) {
+    if (!generatedEntry || typeof generatedEntry !== "object") continue;
+    const entry = symbolicateFrame?.(generatedEntry) ?? generatedEntry;
     const rawKey = [
-      entry.functionName,
-      entry.url,
-      entry.lineNumber,
-      entry.columnNumber,
+      generatedEntry.functionName,
+      generatedEntry.url,
+      generatedEntry.lineNumber,
+      generatedEntry.columnNumber,
     ].join("\u0000");
     const current = exact.get(rawKey) ?? {};
     exact.set(rawKey, {
@@ -499,6 +683,7 @@ function groupedFrames(entries, canonicalOptions) {
       canonicalUrl: module,
       lineNumber: entry.lineNumber ?? null,
       columnNumber: entry.columnNumber ?? null,
+      ...(entry.generated ? { generated: entry.generated } : {}),
     });
     for (const field of [
       "selfTimeMs",
@@ -523,22 +708,54 @@ function groupedFrames(entries, canonicalOptions) {
 export function flattenProfileRun(run, options = {}) {
   const summary = run?.profileSummary ?? run?.summary ?? {};
   const metrics = new Map();
-  const react = summary.react ?? run?.runtimeResult ?? null;
-  if (react) {
-    addTree(metrics, "runtime.overall.profiler", react.profiler, {
-      source: "runtime",
-      scope: "overall",
-    });
-    addMetric(metrics, "runtime.overall.renderCount", react.renderCount, {
-      source: "runtime",
-      scope: "overall",
-    });
-    addTree(metrics, "runtime.overall.rendersById", react.rendersById, {
-      source: "runtime",
-      scope: "overall",
-    });
-    for (const phase of Array.isArray(react.phases) ? react.phases : []) {
+  const runtimeResult = run?.runtimeResult ?? null;
+  const reactSummary = summary.react ?? null;
+  const sourceMaps =
+    options.sourceMaps ??
+    (options.symbolicateFrame ? null : sourceMapSymbolicator(run));
+  const symbolicateFrame =
+    options.symbolicateFrame ?? sourceMaps?.symbolicate ?? null;
+  if (reactSummary || runtimeResult) {
+    addTree(
+      metrics,
+      "runtime.overall.profiler",
+      runtimeResult?.profiler ?? reactSummary?.profiler,
+      {
+        source: "runtime",
+        scope: "overall",
+      },
+    );
+    addMetric(
+      metrics,
+      "runtime.overall.renderCount",
+      runtimeResult?.renderCount ?? reactSummary?.renderCount,
+      {
+        source: "runtime",
+        scope: "overall",
+      },
+    );
+    addTree(
+      metrics,
+      "runtime.overall.rendersById",
+      runtimeResult?.rendersById ?? reactSummary?.rendersById,
+      {
+        source: "runtime",
+        scope: "overall",
+      },
+    );
+    const phases = new Map();
+    for (const phase of Array.isArray(reactSummary?.phases)
+      ? reactSummary.phases
+      : []) {
+      phases.set(String(phase?.name ?? "unknown"), { ...phase });
+    }
+    for (const phase of Array.isArray(runtimeResult?.phases)
+      ? runtimeResult.phases
+      : []) {
       const name = String(phase?.name ?? "unknown");
+      phases.set(name, { ...(phases.get(name) ?? {}), ...phase });
+    }
+    for (const [name, phase] of phases) {
       const prefix = `runtime.phase.${name}`;
       addMetric(metrics, `${prefix}.durationMs`, phase?.durationMs, {
         source: "runtime",
@@ -560,7 +777,34 @@ export function flattenProfileRun(run, options = {}) {
         scope: "phase",
         phase: name,
       });
+      for (const branch of ["frames", "longTasks", "longAnimationFrames"]) {
+        addTree(metrics, `${prefix}.${branch}`, phase?.[branch], {
+          source: "runtime",
+          scope: "phase",
+          phase: name,
+        }, new Set(["supported"]));
+      }
     }
+  }
+
+  if (runtimeResult) {
+    for (const branch of [
+      "frames",
+      "longTasks",
+      "longAnimationFrames",
+      "listeners",
+    ]) {
+      addTree(metrics, `runtime.overall.${branch}`, runtimeResult[branch], {
+        source: "runtime",
+        scope: "overall",
+      }, new Set(["supported", "approximate"]));
+    }
+    addMetric(
+      metrics,
+      "runtime.overall.environment.usedJsHeapSizeBytes",
+      runtimeResult.environment?.usedJsHeapSizeBytes,
+      { source: "runtime", scope: "overall" },
+    );
   }
 
   const trace = summary.trace;
@@ -610,6 +854,7 @@ export function flattenProfileRun(run, options = {}) {
     const functions = groupedFrames(
       [...(cpu.topSelfTime ?? []), ...(cpu.topInclusiveTime ?? [])],
       options,
+      symbolicateFrame,
     );
     for (const group of functions.values()) {
       const encoded = `${encodeURIComponent(group.module)}#${encodeURIComponent(group.functionName)}`;
@@ -649,7 +894,11 @@ export function flattenProfileRun(run, options = {}) {
         scope: "overall",
       });
     }
-    const sites = groupedFrames(allocations.topAllocationSites ?? [], options);
+    const sites = groupedFrames(
+      allocations.topAllocationSites ?? [],
+      options,
+      symbolicateFrame,
+    );
     for (const group of sites.values()) {
       const encoded = `${encodeURIComponent(group.module)}#${encodeURIComponent(group.functionName)}`;
       const functionMetadata = {
@@ -741,7 +990,7 @@ export function buildPairedProfileReport({
   settings = {},
   environment = null,
 } = {}) {
-  const warnings = [];
+  const warnings = [MULTIPLE_COMPARISONS_WARNING];
   const normalizedTargets = targetEntries(targets, runs);
   const baselineKey = String(settings.baselineTarget ?? normalizedTargets[0]?.key ?? "baseline");
   const candidateKey = String(settings.candidateTarget ?? normalizedTargets[1]?.key ?? "candidate");
@@ -781,21 +1030,26 @@ export function buildPairedProfileReport({
     });
     completePairCount += completePairs.length;
 
-    const flattened = completePairs.map((pair) => ({
-      pair,
-      baseline: new Map(
-        flattenProfileRun(pair[baselineKey], canonicalOptions).map((metric) => [
-          metric.key,
-          metric,
-        ]),
-      ),
-      candidate: new Map(
-        flattenProfileRun(pair[candidateKey], canonicalOptions).map((metric) => [
-          metric.key,
-          metric,
-        ]),
-      ),
-    }));
+    const flattened = completePairs.map((pair) => {
+      const flattenTarget = (run, targetKey) => {
+        const sourceMaps = sourceMapSymbolicator(run);
+        for (const warning of sourceMaps.warnings) {
+          warnings.push(
+            `Case ${caseName} pair ${pair.pairIndex} target ${targetKey}: ${warning}`,
+          );
+        }
+        return new Map(
+          flattenProfileRun(run, { ...canonicalOptions, sourceMaps }).map(
+            (metric) => [metric.key, metric],
+          ),
+        );
+      };
+      return {
+        pair,
+        baseline: flattenTarget(pair[baselineKey], baselineKey),
+        candidate: flattenTarget(pair[candidateKey], candidateKey),
+      };
+    });
     const metricKeys = new Set();
     for (const pair of flattened) {
       for (const key of pair.baseline.keys()) metricKeys.add(key);
@@ -905,6 +1159,12 @@ export function buildPairedProfileReport({
       minimumPairs: settings.minimumPairs ?? DEFAULT_MINIMUM_PAIRS,
       statistic: "paired median delta",
       confidenceLevel: 0.95,
+      multipleComparisons: {
+        exploratory: true,
+        adjusted: false,
+        method: "none",
+        family: "all reported metrics within each case",
+      },
     },
     environment: serializableMetadata(environment),
     summary: {
