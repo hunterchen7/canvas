@@ -242,6 +242,7 @@ class DeepProfileController {
     cpuSamplingIntervalUs,
     allocationSamplingIntervalBytes,
     runMetadata,
+    manifestKind,
   }) {
     if (!page || typeof page.context !== "function") {
       throw new Error("startDeepProfile requires a Playwright Page");
@@ -262,6 +263,10 @@ class DeepProfileController {
       "allocationSamplingIntervalBytes",
     );
     this.runMetadata = serializable(runMetadata ?? {});
+    this.manifestKind =
+      typeof manifestKind === "string" && manifestKind.trim()
+        ? manifestKind.trim()
+        : "canvas-runtime-deep-profile";
     this.session = null;
     this.browserMetadata = null;
     this.cpuStarted = false;
@@ -591,7 +596,7 @@ class DeepProfileController {
 
     const manifest = {
       schemaVersion: PROFILE_SCHEMA_VERSION,
-      kind: "canvas-runtime-deep-profile",
+      kind: this.manifestKind,
       diagnosticOnly: true,
       startedAtIso: this.startedAtIso,
       stoppedAtIso: this.stoppedAtIso,

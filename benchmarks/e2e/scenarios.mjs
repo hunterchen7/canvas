@@ -280,7 +280,7 @@ const scenarioDefinitions = [
       await waitForVisualIdle(page);
       await resetBrowserMetrics(page);
     },
-    async act(page) {
+    async act(page, _cdp, { workloadScale = 1 } = {}) {
       await waitFrames(page, 2);
       const checkpoints = [
         ...(await instrumentedWheelSequence(page, {
@@ -297,7 +297,7 @@ const scenarioDefinitions = [
           label: "zoom",
         })),
       ];
-      await page.evaluate(() => {
+      await page.evaluate(({ burstIterations }) => {
         for (const [property, count] of Object.entries(
           window.__CANVAS_WHEEL_PROPERTY_COUNTS__ ?? {},
         )) {
@@ -326,7 +326,7 @@ const scenarioDefinitions = [
         const durations = [];
         for (let repetition = 0; repetition < 5; repetition += 1) {
           const started = performance.now();
-          for (let index = 0; index < 20_000; index += 1) {
+          for (let index = 0; index < burstIterations; index += 1) {
             viewport.dispatchEvent(event);
           }
           durations.push(performance.now() - started);
@@ -336,7 +336,7 @@ const scenarioDefinitions = [
           "wheel.panBurstMedianMs",
           durations[Math.floor(durations.length / 2)],
         );
-      });
+      }, { burstIterations: Math.max(1, Math.round(20_000 * workloadScale)) });
       await waitForVisualIdle(page, 300);
       checkpoints.push(await captureCheckpoint(page, "settled"));
       return checkpoints;
@@ -354,9 +354,9 @@ const scenarioDefinitions = [
       await waitForVisualIdle(page);
       await resetBrowserMetrics(page);
     },
-    async act(page) {
+    async act(page, _cdp, { workloadScale = 1 } = {}) {
       const checkpoints = [await captureCheckpoint(page, "before-input")];
-      await page.evaluate(async () => {
+      await page.evaluate(async ({ changingIterations, sameSizeIterations }) => {
         const originalWidth = window.innerWidth;
         const descriptor = Object.getOwnPropertyDescriptor(window, "innerWidth");
         let syntheticWidth = originalWidth;
@@ -366,7 +366,7 @@ const scenarioDefinitions = [
         });
 
         const changingStarted = performance.now();
-        for (let index = 0; index < 2_000; index += 1) {
+        for (let index = 0; index < changingIterations; index += 1) {
           syntheticWidth = index % 2 === 0 ? originalWidth - 1 : originalWidth;
           window.dispatchEvent(new Event("resize"));
         }
@@ -378,7 +378,7 @@ const scenarioDefinitions = [
         await new Promise((resolve) => requestAnimationFrame(() => resolve()));
 
         const sameSizeStarted = performance.now();
-        for (let index = 0; index < 5_000; index += 1) {
+        for (let index = 0; index < sameSizeIterations; index += 1) {
           window.dispatchEvent(new Event("resize"));
         }
         const sameSizeDuration = performance.now() - sameSizeStarted;
@@ -391,6 +391,9 @@ const scenarioDefinitions = [
           "sameSizeResizeDispatchMs",
           sameSizeDuration,
         );
+      }, {
+        changingIterations: Math.max(1, Math.round(2_000 * workloadScale)),
+        sameSizeIterations: Math.max(1, Math.round(5_000 * workloadScale)),
       });
       await waitForVisualIdle(page, 250);
       checkpoints.push(await captureCheckpoint(page, "settled"));
@@ -408,7 +411,7 @@ const scenarioDefinitions = [
       await waitForVisualIdle(page);
       await resetBrowserMetrics(page);
     },
-    async act(page, cdp) {
+    async act(page, cdp, { workloadScale = 1 } = {}) {
       if (!cdp) throw new Error("Pinch benchmark requires a CDP session");
       const viewport = page.locator("[data-benchmark-viewport='true']");
       const box = await viewport.boundingBox();
@@ -497,7 +500,7 @@ const scenarioDefinitions = [
           );
         }
         await page.evaluate(
-          ({ x, y, pointerId }) => {
+          ({ x, y, pointerId, burstIterations }) => {
             const element = document.querySelector(
               "[data-benchmark-viewport='true']",
             );
@@ -519,7 +522,7 @@ const scenarioDefinitions = [
             const durations = [];
             for (let repetition = 0; repetition < 5; repetition += 1) {
               const started = performance.now();
-              for (let index = 0; index < 100_000; index += 1) {
+              for (let index = 0; index < burstIterations; index += 1) {
                 element.dispatchEvent(events[index % events.length]);
               }
               durations.push(performance.now() - started);
@@ -530,7 +533,12 @@ const scenarioDefinitions = [
               durations[Math.floor(durations.length / 2)],
             );
           },
-          { x: secondTouch.x, y: secondTouch.y, pointerId: pointerIds[1] },
+          {
+            x: secondTouch.x,
+            y: secondTouch.y,
+            pointerId: pointerIds[1],
+            burstIterations: Math.max(1, Math.round(100_000 * workloadScale)),
+          },
         );
         checkpoints.push(await captureCheckpoint(page, "after-burst"));
 
@@ -756,7 +764,7 @@ const scenarioDefinitions = [
       await waitForVisualIdle(page, 900);
       await resetBrowserMetrics(page);
     },
-    async act(page) {
+    async act(page, _cdp, { workloadScale = 1 } = {}) {
       const image = page.locator("img[alt='Benchmark draggable shape']");
       const box = await image.boundingBox();
       if (!box) throw new Error("Draggable benchmark image is not visible");
@@ -775,7 +783,7 @@ const scenarioDefinitions = [
         await waitForVisualIdle(page, 150);
         checkpoints.push(await captureCheckpoint(page, `hover-${index + 1}`));
       }
-      await page.evaluate(() => {
+      await page.evaluate(({ burstIterations }) => {
         const image = document.querySelector(
           "img[alt='Benchmark draggable shape']",
         );
@@ -791,7 +799,7 @@ const scenarioDefinitions = [
         const durations = [];
         for (let repetition = 0; repetition < 5; repetition += 1) {
           const started = performance.now();
-          for (let index = 0; index < 100_000; index += 1) {
+          for (let index = 0; index < burstIterations; index += 1) {
             window.dispatchEvent(event);
           }
           durations.push(performance.now() - started);
@@ -801,7 +809,7 @@ const scenarioDefinitions = [
           "draggable.hoverBurstMedianMs",
           durations[Math.floor(durations.length / 2)],
         );
-      });
+      }, { burstIterations: Math.max(1, Math.round(100_000 * workloadScale)) });
       await page.mouse.move(box.x - 20, box.y - 20);
       await waitForVisualIdle(page, 150);
       checkpoints.push(await captureCheckpoint(page, "settled"));
@@ -839,6 +847,187 @@ const scenarioDefinitions = [
 ];
 
 export const allScenarioNames = scenarioDefinitions.map((scenario) => scenario.name);
+
+export const deepProfileScenarioNames = Object.freeze([
+  "wheel-hot-path",
+  "window-dimension-fanout",
+  "pinch-hot-path",
+  "drag-hover-hit-test",
+]);
+
+/**
+ * Runs one amplified scenario with an optional capture factory. The capture is
+ * started only after prepare() has settled and is stopped immediately after
+ * act() returns, before browser metrics, raster stabilization, contracts, or
+ * screenshots are collected.
+ */
+export async function runProfileScenario({
+  context,
+  baseUrl,
+  outputDirectory = null,
+  name,
+  sections = 0,
+  workloadScale = 1,
+  createCapture = null,
+  captureArtifacts = true,
+}) {
+  if (!deepProfileScenarioNames.includes(name)) {
+    throw new Error(
+      `Unknown deep-profile scenario ${JSON.stringify(name)}; use ${deepProfileScenarioNames.join(", ")}`,
+    );
+  }
+  if (!Number.isFinite(workloadScale) || workloadScale <= 0) {
+    throw new Error("workloadScale must be a positive number");
+  }
+  if (createCapture != null && typeof createCapture !== "function") {
+    throw new Error("createCapture must be a function when provided");
+  }
+  if (captureArtifacts && !outputDirectory) {
+    throw new Error("outputDirectory is required when captureArtifacts is enabled");
+  }
+
+  const scenario = scenarioDefinitions.find((entry) => entry.name === name);
+  const page = await context.newPage();
+  const cdp = await context.newCDPSession(page);
+  await cdp.send("Performance.enable");
+  const beforeNavigation = await cdp.send("Performance.getMetrics");
+  const url = new URL(scenario.query({ sections }), baseUrl).href;
+  let capture = null;
+  let captureResult = null;
+  let actionError = null;
+  let interactionCheckpoints = [];
+  let actionStartedAtMs = null;
+  let actionDurationMs = null;
+
+  try {
+    await scenario.prepare(page, url);
+    const beforeAction = scenario.includeNavigationMetrics
+      ? beforeNavigation
+      : await cdp.send("Performance.getMetrics");
+
+    if (createCapture) {
+      capture = await createCapture({
+        page,
+        scenario: {
+          name: scenario.name,
+          anchorTypes: [...scenario.anchorTypes],
+          trajectoryMode: scenario.trajectoryMode,
+        },
+        url,
+      });
+      await capture.mark?.("canvas:phase:action:start");
+    }
+
+    actionStartedAtMs = performance.now();
+    try {
+      interactionCheckpoints =
+        (await scenario.act(page, cdp, { workloadScale })) ?? [];
+    } catch (error) {
+      actionError = error;
+    } finally {
+      actionDurationMs = performance.now() - actionStartedAtMs;
+      if (capture) {
+        await capture.mark?.("canvas:phase:action:end");
+        await capture.measure?.(
+          "canvas:phase:action",
+          "canvas:phase:action:start",
+          "canvas:phase:action:end",
+        );
+        captureResult = await capture.stop({
+          status: actionError ? "error" : "complete",
+          error: actionError,
+          benchmarkResult: {
+            schemaVersion: 1,
+            kind: "canvas-e2e-profile-action",
+            status: actionError ? "error" : "complete",
+            scenario: scenario.name,
+            url: `${new URL(url).pathname}${new URL(url).search}`,
+            sections,
+            workloadScale,
+            actionDurationMs,
+            interactionCheckpointCount: interactionCheckpoints.length,
+            captureBoundary: {
+              startsAfterPrepare: true,
+              endsBeforeRasterStabilization: true,
+            },
+          },
+        });
+      }
+    }
+    if (actionError) throw actionError;
+
+    if (!captureArtifacts) {
+      return {
+        result: {
+          name: scenario.name,
+          url: `${new URL(url).pathname}${new URL(url).search}`,
+          interactionCheckpoints,
+          actionDurationMs,
+          workloadScale,
+        },
+        capture: captureResult,
+      };
+    }
+
+    const afterAction = await cdp.send("Performance.getMetrics");
+    const browserPerformance = await page.evaluate(
+      () => window.__CANVAS_PERF__?.snapshot(),
+    );
+    if (!browserPerformance) {
+      throw new Error("Browser instrumentation was not installed");
+    }
+
+    await stabilizeRasterForCapture(page);
+    await fs.mkdir(outputDirectory, { recursive: true });
+    const screenshotPath = path.join(outputDirectory, "screenshot.png");
+    await page.screenshot({
+      path: screenshotPath,
+      fullPage: true,
+      animations: "allow",
+    });
+    const contract = await page.evaluate(captureDomContract);
+    const finalHarnessState = await page.evaluate(
+      () => window.__CANVAS_HARNESS__?.read(),
+    );
+    const animationContract = await page.evaluate(
+      () => window.__CANVAS_HARNESS__?.animationContract,
+    );
+    const result = {
+      name: scenario.name,
+      url: `${new URL(url).pathname}${new URL(url).search}`,
+      anchorTypes: scenario.anchorTypes,
+      trajectoryMode: scenario.trajectoryMode,
+      interactionCheckpoints,
+      screenshotPath,
+      contract,
+      finalHarnessState,
+      animationContract,
+      workloadScale,
+      actionDurationMs,
+      captureBoundary: {
+        startsAfterPrepare: true,
+        endsBeforeRasterStabilization: true,
+      },
+      performance: {
+        browser: browserPerformance,
+        cdp: subtractMetrics(beforeAction, afterAction),
+      },
+    };
+    await fs.writeFile(
+      path.join(outputDirectory, "scenario-result.json"),
+      `${JSON.stringify(result, null, 2)}\n`,
+    );
+    return { result, capture: captureResult };
+  } finally {
+    if (capture && !captureResult) {
+      await capture
+        .stop({ status: "error", error: actionError ?? new Error("Scenario aborted") })
+        .catch(() => undefined);
+    }
+    await cdp.detach().catch(() => undefined);
+    await page.close();
+  }
+}
 
 export async function runScenarios({
   context,
