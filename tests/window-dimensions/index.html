@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Window dimensions hydration test</title>
+    <script>
+      (() => {
+        const nativeAddEventListener = window.addEventListener;
+        const nativeRemoveEventListener = window.removeEventListener;
+        const activeResizeListeners = new Set();
+        let resizeAdds = 0;
+        let resizeRemoves = 0;
+
+        window.addEventListener = function (type, listener, options) {
+          if (type === "resize") {
+            resizeAdds += 1;
+            activeResizeListeners.add(listener);
+          }
+          return nativeAddEventListener.call(this, type, listener, options);
+        };
+
+        window.removeEventListener = function (type, listener, options) {
+          if (type === "resize") {
+            resizeRemoves += 1;
+            activeResizeListeners.delete(listener);
+          }
+          return nativeRemoveEventListener.call(this, type, listener, options);
+        };
+
+        window.__WINDOW_DIMENSIONS_LISTENERS__ = () => ({
+          adds: resizeAdds,
+          removes: resizeRemoves,
+          active: activeResizeListeners.size,
+        });
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"><output data-dimensions-probe="server">1200x800</output></div>
+    <script type="module" src="/client.tsx"></script>
+  </body>
+</html>

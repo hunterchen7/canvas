@@ -9,8 +9,10 @@ const serverDimensions: WindowDimensions = { width: 1200, height: 800 };
 const subscribers = new Set<() => void>();
 let cachedDimensions: WindowDimensions | undefined;
 
+const getServerSnapshot = (): WindowDimensions => serverDimensions;
+
 const getSnapshot = (): WindowDimensions => {
-  if (typeof window === "undefined") return serverDimensions;
+  if (typeof window === "undefined") return getServerSnapshot();
 
   const width = window.innerWidth;
   const height = window.innerHeight;
@@ -43,6 +45,6 @@ const subscribe = (subscriber: () => void) => {
 };
 
 const useWindowDimensions = (): WindowDimensions =>
-  useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+  useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
 export default useWindowDimensions;
