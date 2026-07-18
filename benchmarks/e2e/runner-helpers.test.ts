@@ -5,7 +5,7 @@ import {
   assertStableSourceTargets,
   evaluateRunOutcome,
   validateSourceSelection,
-} from "./runner-helpers.mjs";
+} from "./runner-helpers.ts";
 
 function target(hash, proof = hash, sourceTree = hash) {
   return {

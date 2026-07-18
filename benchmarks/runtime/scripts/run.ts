@@ -5,7 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "@playwright/test";
-import { stopChildProcessTree } from "../../e2e/process-tree.mjs";
+import { stopChildProcessTree } from "../../e2e/process-tree.ts";
 import { startDeepProfile } from "./deep-profile.ts";
 import {
   browserErrorFailure,

@@ -13,22 +13,23 @@ import { promisify } from "node:util";
 const execFileAsync = promisify(execFile);
 const IDENTITY_SCHEMA_VERSION = "1.0.0";
 
-function canonicalJson(value) {
+function canonicalJson(value: unknown): string {
   if (Array.isArray(value)) {
     return `[${value.map((item) => canonicalJson(item)).join(",")}]`;
   }
   if (value && typeof value === "object") {
-    return `{${Object.keys(value)
+    const record = value as Record<string, unknown>;
+    return `{${Object.keys(record)
       .sort()
-      .map((key) => `${JSON.stringify(key)}:${canonicalJson(value[key])}`)
+      .map((key) => `${JSON.stringify(key)}:${canonicalJson(record[key])}`)
       .join(",")}}`;
   }
   return JSON.stringify(value);
 }
 
 async function requireDirectory(
-  directory,
-  description,
+  directory: string,
+  description: string,
   { allowSymbolicLink = true } = {},
 ) {
   let details;
@@ -44,7 +45,7 @@ async function requireDirectory(
   }
 }
 
-async function requireRegularFile(filename, description) {
+async function requireRegularFile(filename: string, description: string) {
   let details;
   try {
     details = await lstat(filename);
@@ -58,10 +59,10 @@ async function requireRegularFile(filename, description) {
   }
 }
 
-async function sourceFiles(sourceDirectory) {
-  const files = [];
+async function sourceFiles(sourceDirectory: string) {
+  const files: Array<{ absolutePath: string; relativePath: string }> = [];
 
-  async function visit(directory) {
+  async function visit(directory: string): Promise<void> {
     const entries = await readdir(directory, { withFileTypes: true });
     entries.sort((left, right) =>
       left.name < right.name ? -1 : left.name > right.name ? 1 : 0,
@@ -94,7 +95,7 @@ async function sourceFiles(sourceDirectory) {
   return files;
 }
 
-async function hashSourceTree(sourceDirectory) {
+async function hashSourceTree(sourceDirectory: string) {
   const files = await sourceFiles(sourceDirectory);
   const digest = createHash("sha256");
   let bytes = 0;
@@ -117,7 +118,11 @@ async function hashSourceTree(sourceDirectory) {
   };
 }
 
-async function gitOutput(root, arguments_, { optional = false } = {}) {
+async function gitOutput(
+  root: string,
+  arguments_: string[],
+  { optional = false } = {},
+): Promise<string | null> {
   try {
     const { stdout } = await execFileAsync("git", ["-C", root, ...arguments_], {
       encoding: "utf8",
@@ -130,7 +135,7 @@ async function gitOutput(root, arguments_, { optional = false } = {}) {
   }
 }
 
-async function gitIdentity(root) {
+async function gitIdentity(root: string) {
   const repository = await gitOutput(root, ["rev-parse", "--show-toplevel"], {
     optional: true,
   });
@@ -181,6 +186,10 @@ export async function resolveLibraryTarget({
   repositoryRoot,
   libraryRoot,
   libraryLabel,
+}: {
+  repositoryRoot: string;
+  libraryRoot?: string | null;
+  libraryLabel?: string | null;
 }) {
   if (typeof repositoryRoot !== "string" || repositoryRoot.trim() === "") {
     throw new Error("repositoryRoot must be a non-empty path");
@@ -260,7 +269,7 @@ export async function resolveLibraryTarget({
   });
 }
 
-export function assertMatchingLibraryIdentity(expected, observed) {
+export function assertMatchingLibraryIdentity(expected: any, observed: any) {
   if (!observed || typeof observed !== "object") {
     throw new Error("Benchmark page did not expose its library source identity");
   }

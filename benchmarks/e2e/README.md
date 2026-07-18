@@ -23,7 +23,7 @@ The browser context is fixed to 1280×720, DPR 1, light color scheme, `en-CA`, `
 Full reference-versus-candidate run:
 
 ```sh
-node benchmarks/e2e/run.mjs \
+node benchmarks/e2e/run.ts \
   --baseline-root /absolute/path/to/reference-worktree \
   --candidate-root /absolute/path/to/candidate-worktree \
   --output /tmp/canvas-e2e
@@ -39,7 +39,7 @@ mid-run source edit from producing a false parity pass.
 Fast vertical slice:
 
 ```sh
-node benchmarks/e2e/run.mjs \
+node benchmarks/e2e/run.ts \
   --baseline-root /absolute/path/to/reference-worktree \
   --candidate-root /absolute/path/to/candidate-worktree \
   --scenarios static-home,pan \
@@ -49,7 +49,7 @@ node benchmarks/e2e/run.mjs \
 Stress the per-section render path:
 
 ```sh
-node benchmarks/e2e/run.mjs \
+node benchmarks/e2e/run.ts \
   --baseline-root /absolute/path/to/reference-worktree \
   --candidate-root /absolute/path/to/candidate-worktree \
   --sections 100 \

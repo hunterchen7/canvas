@@ -5,7 +5,7 @@ import test from "node:test";
 import {
   processTreeIsRunning,
   stopChildProcessTree,
-} from "./process-tree.mjs";
+} from "./process-tree.ts";
 
 const testOptions = {
   skip:

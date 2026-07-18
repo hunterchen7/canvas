@@ -6,10 +6,10 @@ import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 import { chromium } from "@playwright/test";
-import { compareScenario } from "./compare.mjs";
-import { installBrowserInstrumentation } from "./instrumentation.mjs";
-import { allScenarioNames, runScenarios } from "./scenarios.mjs";
-import { STRICT_PARITY_THRESHOLDS } from "./thresholds.mjs";
+import { compareScenario } from "./compare.ts";
+import { installBrowserInstrumentation } from "./instrumentation.ts";
+import { allScenarioNames, runScenarios } from "./scenarios.ts";
+import { STRICT_PARITY_THRESHOLDS } from "./thresholds.ts";
 import { resolveLibraryTarget } from "../runtime/scripts/library-target.ts";
 import { createPortAllocator } from "../runtime/scripts/run-paired.ts";
 import {
@@ -18,19 +18,19 @@ import {
   evaluateRunOutcome,
   sourceIdentitySummary,
   validateSourceSelection,
-} from "./runner-helpers.mjs";
-import { stopChildProcessTree } from "./process-tree.mjs";
+} from "./runner-helpers.ts";
+import { stopChildProcessTree } from "./process-tree.ts";
 
 const e2eRoot = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(e2eRoot, "../..");
 const viteBin = path.join(repositoryRoot, "node_modules/vite/bin/vite.js");
-const viteConfig = path.join(e2eRoot, "vite.config.mjs");
+const viteConfig = path.join(e2eRoot, "vite.config.ts");
 
 function printHelp() {
   console.log(`Canvas browser parity/performance runner
 
 Usage:
-  node benchmarks/e2e/run.mjs [options]
+  node benchmarks/e2e/run.ts [options]
 
 Options:
   --baseline-root PATH       Reference library worktree (required for local runs)
@@ -298,7 +298,7 @@ async function runTarget({
 async function main() {
   const options = parseArguments(process.argv.slice(2));
   const sourceSelection = validateSourceSelection(options);
-  const servers = new Set();
+  const servers = new Set<any>();
   const sourceChecks = [];
   let startupTargets = null;
   let browser = null;

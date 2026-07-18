@@ -3,7 +3,7 @@ import test from "node:test";
 import {
   collectForcedGcLiveHeap,
   summarizeForcedGcLiveHeap,
-} from "./scenarios.mjs";
+} from "./scenarios.ts";
 
 test("forced-GC live heap collects before reading and preserves byte fields", async () => {
   const commands = [];

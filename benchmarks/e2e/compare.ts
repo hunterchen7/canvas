@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import pixelmatch from "pixelmatch";
 import { PNG } from "pngjs";
-import { STRICT_PARITY_THRESHOLDS } from "./thresholds.mjs";
+import { STRICT_PARITY_THRESHOLDS } from "./thresholds.ts";
 
 const sortValue = (value) => {
   if (Array.isArray(value)) return value.map(sortValue);
@@ -68,8 +68,12 @@ async function compareScreenshots(baselinePath, candidatePath, diffPath, thresho
 function compareContracts(baseline, candidate, geometryTolerance) {
   const failures = [];
   const geometryDifferences = [];
-  const baselineByName = new Map(baseline.elements.map((entry) => [entry.name, entry]));
-  const candidateByName = new Map(candidate.elements.map((entry) => [entry.name, entry]));
+  const baselineByName = new Map<string, any>(
+    baseline.elements.map((entry) => [entry.name, entry]),
+  );
+  const candidateByName = new Map<string, any>(
+    candidate.elements.map((entry) => [entry.name, entry]),
+  );
   const names = new Set([...baselineByName.keys(), ...candidateByName.keys()]);
 
   if (stableStringify(baseline.viewport) !== stableStringify(candidate.viewport)) {
@@ -591,7 +595,7 @@ export async function compareScenario({
           ...rawTrajectory,
           pass: true,
           gated: false,
-          advisoryFailures: rawTrajectory.failures ?? [],
+          advisoryFailures: (rawTrajectory as any).failures ?? [],
           reason:
             "Raw rAF timing is advisory because browser scheduling differs between identical runs; exact config, stage order, endpoints, checkpoints, and settled visuals remain gating.",
         }

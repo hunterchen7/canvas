@@ -27,7 +27,7 @@ async function waitForProcessTreeExit(child, timeoutMs) {
 
 async function taskkillProcessTree(child, force = false) {
   if (!child?.pid) return;
-  await new Promise((resolve) => {
+  await new Promise<void>((resolve) => {
     const arguments_ = ["/PID", String(child.pid), "/T"];
     if (force) arguments_.push("/F");
     const killer = spawn("taskkill", arguments_, {

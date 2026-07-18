@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { captureDomContract } from "./contracts.mjs";
+import { captureDomContract } from "./contracts.ts";
 
 const sleep = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
 
@@ -118,9 +118,9 @@ async function waitForFixture(page, { requireStageTwo = true } = {}) {
     await document.fonts.ready;
     await Promise.all(
       Array.from(document.images, (image) =>
-        image.complete ? image.decode().catch(() => undefined) : new Promise((resolve) => {
-          image.addEventListener("load", resolve, { once: true });
-          image.addEventListener("error", resolve, { once: true });
+        image.complete ? image.decode().catch(() => undefined) : new Promise<void>((resolve) => {
+          image.addEventListener("load", () => resolve(), { once: true });
+          image.addEventListener("error", () => resolve(), { once: true });
         }),
       ),
     );
@@ -137,7 +137,7 @@ async function waitForFixture(page, { requireStageTwo = true } = {}) {
 async function waitFrames(page, count = 4) {
   await page.evaluate(
     (frameCount) =>
-      new Promise((resolve) => {
+      new Promise<void>((resolve) => {
         let remaining = frameCount;
         const frame = () => {
           remaining -= 1;
@@ -153,7 +153,7 @@ async function waitFrames(page, count = 4) {
 async function waitForMotionSettled(page, { consecutiveFrames = 24, timeoutMs = 4_000 } = {}) {
   await page.evaluate(
     ({ requiredFrames, timeout }) =>
-      new Promise((resolve, reject) => {
+      new Promise<void>((resolve, reject) => {
         const started = performance.now();
         let stableFrames = 0;
         let previous = null;
@@ -562,7 +562,7 @@ const scenarioDefinitions = [
         if (descriptor) Object.defineProperty(window, "innerWidth", descriptor);
         else delete window.innerWidth;
         window.dispatchEvent(new Event("resize"));
-        await new Promise((resolve) => requestAnimationFrame(() => resolve()));
+        await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 
         const sameSizeStarted = performance.now();
         for (let index = 0; index < sameSizeIterations; index += 1) {
@@ -686,7 +686,7 @@ const scenarioDefinitions = [
         window.__CANVAS_PROFILE_BURST__(iterations);
       }, Math.max(1, Math.round(500_000 * workloadScale)));
     },
-    async profileCleanup(page, cdp, { profileState } = {}) {
+    async profileCleanup(page, cdp, { profileState }: any = {}) {
       if (cdp && profileState?.secondTouch) {
         await cdp
           .send("Input.dispatchTouchEvent", {
@@ -1220,7 +1220,7 @@ export async function runProfileScenario({
     );
   }
 
-  const scenario = scenarioDefinitions.find((entry) => entry.name === name);
+  const scenario: any = scenarioDefinitions.find((entry) => entry.name === name);
   if (typeof scenario.profileAct !== "function") {
     throw new Error(`Deep-profile scenario ${name} does not define profileAct()`);
   }

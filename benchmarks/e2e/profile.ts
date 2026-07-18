@@ -6,12 +6,12 @@ import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 import { chromium } from "@playwright/test";
-import { compareScenario } from "./compare.mjs";
-import { installBrowserInstrumentation } from "./instrumentation.mjs";
+import { compareScenario } from "./compare.ts";
+import { installBrowserInstrumentation } from "./instrumentation.ts";
 import {
   deepProfileScenarioNames,
   runProfileScenario,
-} from "./scenarios.mjs";
+} from "./scenarios.ts";
 import { startDeepProfile } from "../runtime/scripts/deep-profile.ts";
 import { resolveLibraryTarget } from "../runtime/scripts/library-target.ts";
 import { comparePairedSamples } from "../runtime/scripts/profile-compare.ts";
@@ -19,7 +19,7 @@ import { comparePairedSamples } from "../runtime/scripts/profile-compare.ts";
 const e2eRoot = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(e2eRoot, "../..");
 const viteBin = path.join(repositoryRoot, "node_modules/vite/bin/vite.js");
-const viteConfig = path.join(e2eRoot, "vite.config.mjs");
+const viteConfig = path.join(e2eRoot, "vite.config.ts");
 const profileKinds = Object.freeze(["cpu", "trace", "allocations"]);
 let signalCleanup = null;
 let signalCleanupPromise = null;
@@ -30,7 +30,7 @@ function printHelp() {
     "Canvas paired deep-profile runner",
     "",
     "Usage:",
-    "  node benchmarks/e2e/profile.mjs [options]",
+    "  node benchmarks/e2e/profile.ts [options]",
     "",
     "Options:",
     "  --baseline-root PATH       Reference library worktree (required)",
@@ -69,8 +69,12 @@ function positiveInteger(value, name, { allowZero = false } = {}) {
   return value;
 }
 
-function parseList(value) {
-  return [...new Set(value.split(",").map((entry) => entry.trim()).filter(Boolean))];
+function parseList(value): string[] {
+  return [
+    ...new Set<string>(
+      value.split(",").map((entry: string) => entry.trim()).filter(Boolean),
+    ),
+  ];
 }
 
 function parseArguments(argv) {
@@ -381,7 +385,7 @@ function numericProfileMetrics(
   actionDurationMs,
   forcedGcLiveHeap,
 ) {
-  const metrics = { actionDurationMs };
+  const metrics: Record<string, any> = { actionDurationMs };
   if (forcedGcLiveHeap) {
     metrics["forcedGcLiveHeap.beforeBytes"] =
       forcedGcLiveHeap.before?.usedSizeBytes;
@@ -406,11 +410,11 @@ function numericProfileMetrics(
     metrics["trace.tasks.activeTimeMs"] = source.tasks?.activeTimeMs ?? null;
     metrics["trace.tasks.blockingTimeOver50Ms"] =
       source.tasks?.blockingTimeOver50Ms ?? null;
-    for (const [name, values] of Object.entries(source.mainThreadActivity ?? {})) {
+    for (const [name, values] of Object.entries(source.mainThreadActivity ?? {}) as Array<[string, any]>) {
       metrics["trace." + name + ".activeTimeMs"] = values.activeTimeMs;
       metrics["trace." + name + ".eventCount"] = values.eventCount;
     }
-    for (const [name, values] of Object.entries(source.crossThreadActivity ?? {})) {
+    for (const [name, values] of Object.entries(source.crossThreadActivity ?? {}) as Array<[string, any]>) {
       metrics["trace." + name + ".threadActiveTimeMs"] = values.threadActiveTimeMs;
       metrics["trace." + name + ".wallTimeMs"] = values.wallTimeMs;
     }
@@ -446,7 +450,7 @@ function summarizeNumbers(values) {
 }
 
 function aggregatePairs(pairs) {
-  const names = new Set();
+  const names = new Set<string>();
   for (const pair of pairs) {
     for (const target of ["baseline", "candidate"]) {
       for (const name of Object.keys(pair.targets?.[target]?.metrics ?? {})) names.add(name);
@@ -657,7 +661,7 @@ async function comparePair({ scenario, pairDirectory, targets }) {
   if (!targets.baseline?.result || !targets.candidate?.result) return null;
   const diffDirectory = path.join(pairDirectory, "diffs");
   await fs.mkdir(diffDirectory, { recursive: true });
-  const comparison = await compareScenario({
+  const comparison: any = await compareScenario({
     name: scenario,
     baseline: targets.baseline.result,
     candidate: targets.candidate.result,
@@ -813,12 +817,12 @@ async function main() {
   let browserLaunch = null;
   let cleanupPromise = Promise.resolve();
   const cleanup = () => {
-    cleanupPromise = cleanupPromise.then(() =>
-      Promise.all([
+    cleanupPromise = cleanupPromise.then(async () => {
+      await Promise.all([
         browser?.close().catch(() => undefined),
         ...servers.map((server) => server.stop().catch(() => undefined)),
-      ]),
-    );
+      ]);
+    });
     return cleanupPromise;
   };
   signalCleanup = async (signal) => {
@@ -830,7 +834,7 @@ async function main() {
       throw new Error("Profile run interrupted by " + receivedSignal);
     }
   };
-  const environment = {
+  const environment: any = {
     host: {
       node: process.version,
       platform: process.platform,
@@ -1076,11 +1080,11 @@ async function main() {
     const captureFailures = [
       ...groups.flatMap((group) =>
         group.warmups.flatMap((warmup) =>
-          Object.values(warmup.targets).filter((target) => target.status !== "complete"),
+          (Object.values(warmup.targets) as any[]).filter((target) => target.status !== "complete"),
         ),
       ),
       ...allPairs.flatMap((pair) =>
-        Object.values(pair.targets).filter(
+        (Object.values(pair.targets) as any[]).filter(
           (target) =>
             target.status !== "complete" || target.captureStatus !== "complete",
         ),
