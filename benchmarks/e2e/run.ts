@@ -43,6 +43,7 @@ Options:
   --browser chromium|chrome  Bundled Chromium or system Chrome (default: chromium)
   --headed                   Show the browser
   --trace                    Record Playwright screenshots and DOM snapshots
+  --allow-identical-sources  Harness smoke mode for distinct worktrees with identical source
   --fail-on-perf-regression  Fail in addition to reporting noisy performance regressions
   --help                     Show this help
 `);
@@ -63,6 +64,7 @@ function parseArguments(argv) {
     browser: "chromium",
     headed: false,
     trace: false,
+    allowIdenticalSources: false,
     failOnPerfRegression: false,
   };
 
@@ -91,6 +93,7 @@ function parseArguments(argv) {
     else if (argument === "--browser") options.browser = value();
     else if (argument === "--headed") options.headed = true;
     else if (argument === "--trace") options.trace = true;
+    else if (argument === "--allow-identical-sources") options.allowIdenticalSources = true;
     else if (argument === "--fail-on-perf-regression") options.failOnPerfRegression = true;
     else throw new Error(`Unknown argument: ${argument}`);
   }
@@ -365,7 +368,9 @@ async function main() {
         libraryLabel: "candidate",
       }),
     ]);
-    assertDistinctSourceTargets(baseline, candidate);
+    assertDistinctSourceTargets(baseline, candidate, {
+      allowIdenticalSources: options.allowIdenticalSources,
+    });
     return { baseline, candidate };
   };
   const recordSourceCheck = async (checkpoint) => {
@@ -498,6 +503,10 @@ async function main() {
       },
       inputs: {
         sourceMode: sourceSelection.mode,
+        comparisonIntent: options.allowIdenticalSources
+          ? "harness-smoke-identical-source"
+          : "baseline-candidate-parity",
+        allowIdenticalSources: options.allowIdenticalSources,
         baselineRoot:
           sourceSelection.mode === "local" ? startupTargets.baseline.root : null,
         candidateRoot:
@@ -540,6 +549,11 @@ async function main() {
     await fs.writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`);
 
     console.log(`Report: ${reportPath}`);
+    if (options.allowIdenticalSources) {
+      console.log(
+        "HARNESS-SMOKE identical source hashes were explicitly allowed; this is runner validation, not before/after product evidence.",
+      );
+    }
     for (const comparison of comparisons) {
       const parity = comparison.pass ? "PASS" : "REVIEW";
       const perf = comparison.performancePass ? "perf-ok" : "perf-regression";

@@ -17,6 +17,11 @@ export function validateSourceSelection(options) {
   const hasAnyUrl = hasBaselineUrl || hasCandidateUrl;
 
   if (hasAnyUrl) {
+    if (options.allowIdenticalSources) {
+      throw new Error(
+        "--allow-identical-sources is only valid for local source roots",
+      );
+    }
     if (!hasBaselineUrl || !hasCandidateUrl) {
       throw new Error(
         "--baseline-url and --candidate-url must be supplied together",
@@ -43,15 +48,24 @@ export function validateSourceSelection(options) {
   return { mode: "local", baselineUrl: null, candidateUrl: null };
 }
 
-export function assertDistinctSourceTargets(baseline, candidate) {
+export function assertDistinctSourceTargets(
+  baseline,
+  candidate,
+  { allowIdenticalSources = false } = {},
+) {
   const baselineHash = baseline?.identity?.source?.hash;
   const candidateHash = candidate?.identity?.source?.hash;
   if (!baselineHash || !candidateHash) {
     throw new Error("Both local source targets must have a source SHA-256");
   }
-  if (baselineHash === candidateHash) {
+  if (baselineHash === candidateHash && !allowIdenticalSources) {
     throw new Error(
       `Baseline and candidate source hashes are identical (${baselineHash}); select a distinct historical baseline`,
+    );
+  }
+  if (baselineHash !== candidateHash && allowIdenticalSources) {
+    throw new Error(
+      "--allow-identical-sources requires matching local source hashes",
     );
   }
 }

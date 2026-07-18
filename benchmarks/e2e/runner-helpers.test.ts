@@ -87,6 +87,17 @@ test("URL parity requires two distinct explicit URLs and no root flags", () => {
       }),
     /cannot be combined/,
   );
+  assert.throws(
+    () =>
+      validateSourceSelection({
+        baselineRootProvided: false,
+        candidateRootProvided: false,
+        baselineUrl: "http://127.0.0.1:4100",
+        candidateUrl: "http://127.0.0.1:4200",
+        allowIdenticalSources: true,
+      }),
+    /only valid for local source roots/,
+  );
 });
 
 test("local targets must be distinct and remain stable", () => {
@@ -96,6 +107,18 @@ test("local targets must be distinct and remain stable", () => {
   );
   assert.doesNotThrow(() =>
     assertDistinctSourceTargets(target("baseline"), target("candidate")),
+  );
+  assert.throws(
+    () =>
+      assertDistinctSourceTargets(target("baseline"), target("candidate"), {
+        allowIdenticalSources: true,
+      }),
+    /requires matching local source hashes/,
+  );
+  assert.doesNotThrow(() =>
+    assertDistinctSourceTargets(target("same"), target("same"), {
+      allowIdenticalSources: true,
+    }),
   );
 
   const startup = {
