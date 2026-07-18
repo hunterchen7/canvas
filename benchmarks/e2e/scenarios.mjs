@@ -137,6 +137,31 @@ async function resetBrowserMetrics(page) {
   await page.evaluate(() => window.__CANVAS_PERF__?.reset());
 }
 
+async function assertLoadedSourceIdentity(page, expectedIdentity) {
+  const loadedIdentity = await page.evaluate(
+    () => window.__CANVAS_LIBRARY_IDENTITY__ ?? null,
+  );
+  if (!loadedIdentity?.proof || !loadedIdentity?.source?.hash) {
+    throw new Error("Fixture did not expose a durable loaded-source identity");
+  }
+  if (
+    expectedIdentity &&
+    (loadedIdentity.proof !== expectedIdentity.proof ||
+      loadedIdentity.source.hash !== expectedIdentity.source?.hash)
+  ) {
+    throw new Error(
+      "Fixture loaded source identity does not match the resolved target: " +
+        JSON.stringify({
+          expectedProof: expectedIdentity.proof,
+          expectedSourceHash: expectedIdentity.source?.hash,
+          loadedProof: loadedIdentity.proof,
+          loadedSourceHash: loadedIdentity.source.hash,
+        }),
+    );
+  }
+  return loadedIdentity;
+}
+
 async function captureCheckpoint(page, label) {
   return page.evaluate((checkpointLabel) => {
     const state = window.__CANVAS_HARNESS__?.read();
@@ -272,6 +297,7 @@ const scenarioDefinitions = [
     name: "wheel-hot-path",
     trajectoryMode: "checkpoints",
     anchorTypes: ["wheel"],
+    profileQuery: ({ sections }) => `?intro=0&sections=${sections}`,
     query: ({ sections }) =>
       `?intro=0&sections=${sections}&instrumentMotion=1`,
     async prepare(page, url) {
@@ -279,6 +305,41 @@ const scenarioDefinitions = [
       await waitForFixture(page);
       await waitForVisualIdle(page);
       await resetBrowserMetrics(page);
+    },
+    async profilePrepare(page) {
+      await page.evaluate(() => {
+        const viewport = document.querySelector(
+          "[data-benchmark-viewport='true']",
+        );
+        if (!(viewport instanceof HTMLElement)) {
+          throw new Error("Canvas viewport was not found");
+        }
+        const rect = viewport.getBoundingClientRect();
+        const event = new WheelEvent("wheel", {
+          bubbles: true,
+          cancelable: true,
+          clientX: rect.left + rect.width / 2,
+          clientY: rect.top + rect.height / 2,
+          deltaX: 0,
+          deltaY: 0,
+        });
+        window.__CANVAS_PROFILE_BURST__ = (iterations) => {
+          for (let index = 0; index < iterations; index += 1) {
+            viewport.dispatchEvent(event);
+          }
+        };
+      });
+    },
+    async profileAct(page, _cdp, { workloadScale = 1 } = {}) {
+      await page.evaluate((iterations) => {
+        if (typeof window.__CANVAS_PROFILE_BURST__ !== "function") {
+          throw new Error("Wheel profile burst was not prepared");
+        }
+        window.__CANVAS_PROFILE_BURST__(iterations);
+      }, Math.max(1, Math.round(100_000 * workloadScale)));
+    },
+    async profileCleanup(page) {
+      await page.evaluate(() => delete window.__CANVAS_PROFILE_BURST__);
     },
     async act(page, _cdp, { workloadScale = 1 } = {}) {
       await waitFrames(page, 2);
@@ -354,6 +415,61 @@ const scenarioDefinitions = [
       await waitForVisualIdle(page);
       await resetBrowserMetrics(page);
     },
+    async profilePrepare(page) {
+      await page.evaluate(() => {
+        const originalWidth = window.innerWidth;
+        const descriptor = Object.getOwnPropertyDescriptor(window, "innerWidth");
+        let syntheticWidth = originalWidth;
+        const resizeEvent = new Event("resize");
+        Object.defineProperty(window, "innerWidth", {
+          configurable: true,
+          get: () => syntheticWidth,
+        });
+        window.__CANVAS_PROFILE_BURST__ = ({
+          changingIterations,
+          sameSizeIterations,
+        }) => {
+          for (let index = 0; index < changingIterations; index += 1) {
+            syntheticWidth = index % 2 === 0 ? originalWidth - 1 : originalWidth;
+            window.dispatchEvent(resizeEvent);
+          }
+          syntheticWidth = originalWidth;
+          for (let index = 0; index < sameSizeIterations; index += 1) {
+            window.dispatchEvent(resizeEvent);
+          }
+        };
+        window.__CANVAS_PROFILE_CLEANUP__ = () => {
+          if (descriptor) Object.defineProperty(window, "innerWidth", descriptor);
+          else delete window.innerWidth;
+          delete window.__CANVAS_PROFILE_BURST__;
+          delete window.__CANVAS_PROFILE_CLEANUP__;
+          window.dispatchEvent(new Event("resize"));
+        };
+      });
+    },
+    async profileAct(page, _cdp, { workloadScale = 1 } = {}) {
+      await page.evaluate(
+        (iterations) => {
+          if (typeof window.__CANVAS_PROFILE_BURST__ !== "function") {
+            throw new Error("Resize profile burst was not prepared");
+          }
+          window.__CANVAS_PROFILE_BURST__(iterations);
+        },
+        {
+          changingIterations: Math.max(
+            1,
+            Math.round(2_000 * workloadScale),
+          ),
+          sameSizeIterations: Math.max(
+            1,
+            Math.round(5_000 * workloadScale),
+          ),
+        },
+      );
+    },
+    async profileCleanup(page) {
+      await page.evaluate(() => window.__CANVAS_PROFILE_CLEANUP__?.());
+    },
     async act(page, _cdp, { workloadScale = 1 } = {}) {
       const checkpoints = [await captureCheckpoint(page, "before-input")];
       await page.evaluate(async ({ changingIterations, sameSizeIterations }) => {
@@ -410,6 +526,115 @@ const scenarioDefinitions = [
       await waitForFixture(page);
       await waitForVisualIdle(page);
       await resetBrowserMetrics(page);
+    },
+    async profilePrepare(page, cdp) {
+      if (!cdp) throw new Error("Pinch benchmark requires a CDP session");
+      const viewport = page.locator("[data-benchmark-viewport='true']");
+      const box = await viewport.boundingBox();
+      if (!box) throw new Error("Canvas viewport was not found");
+      await page.evaluate(() => {
+        const element = document.querySelector(
+          "[data-benchmark-viewport='true']",
+        );
+        if (!(element instanceof HTMLElement)) {
+          throw new Error("Canvas viewport was not found");
+        }
+        const pointerIds = [];
+        const recordPointerId = (event) => {
+          if (!pointerIds.includes(event.pointerId)) {
+            pointerIds.push(event.pointerId);
+          }
+        };
+        element.addEventListener("pointerdown", recordPointerId);
+        window.__CANVAS_PROFILE_POINTER_IDS__ = pointerIds;
+        window.__CANVAS_PROFILE_POINTER_CLEANUP__ = () => {
+          element.removeEventListener("pointerdown", recordPointerId);
+          delete window.__CANVAS_PROFILE_POINTER_IDS__;
+          delete window.__CANVAS_PROFILE_POINTER_CLEANUP__;
+          delete window.__CANVAS_PROFILE_BURST__;
+        };
+      });
+
+      const centerX = box.x + box.width / 2;
+      const centerY = box.y + box.height / 2;
+      const firstTouch = { id: 1, x: centerX - 80, y: centerY };
+      const secondTouch = { id: 2, x: centerX + 80, y: centerY };
+      await cdp.send("Input.dispatchTouchEvent", {
+        type: "touchStart",
+        touchPoints: [firstTouch],
+      });
+      await waitFrames(page, 2);
+      await cdp.send("Input.dispatchTouchEvent", {
+        type: "touchStart",
+        touchPoints: [firstTouch, secondTouch],
+      });
+      await waitFrames(page, 2);
+      const pointerIds = await page.evaluate(
+        () => window.__CANVAS_PROFILE_POINTER_IDS__ ?? [],
+      );
+      if (pointerIds.length !== 2) {
+        throw new Error(
+          `Expected two trusted pointer IDs, received ${pointerIds.length}`,
+        );
+      }
+      await page.evaluate(
+        ({ x, y, pointerId }) => {
+          const element = document.querySelector(
+            "[data-benchmark-viewport='true']",
+          );
+          if (!(element instanceof HTMLElement)) {
+            throw new Error("Canvas viewport was not found");
+          }
+          const events = [0, 1].map(
+            (offset) =>
+              new PointerEvent("pointermove", {
+                bubbles: true,
+                cancelable: true,
+                pointerId,
+                pointerType: "touch",
+                buttons: 1,
+                clientX: x + offset,
+                clientY: y + offset,
+              }),
+          );
+          window.__CANVAS_PROFILE_BURST__ = (iterations) => {
+            for (let index = 0; index < iterations; index += 1) {
+              element.dispatchEvent(events[index % events.length]);
+            }
+          };
+        },
+        { x: secondTouch.x, y: secondTouch.y, pointerId: pointerIds[1] },
+      );
+      return { firstTouch, secondTouch };
+    },
+    async profileAct(page, _cdp, { workloadScale = 1 } = {}) {
+      await page.evaluate((iterations) => {
+        if (typeof window.__CANVAS_PROFILE_BURST__ !== "function") {
+          throw new Error("Pinch profile burst was not prepared");
+        }
+        window.__CANVAS_PROFILE_BURST__(iterations);
+      }, Math.max(1, Math.round(500_000 * workloadScale)));
+    },
+    async profileCleanup(page, cdp, { profileState } = {}) {
+      if (cdp && profileState?.secondTouch) {
+        await cdp
+          .send("Input.dispatchTouchEvent", {
+            type: "touchEnd",
+            touchPoints: [profileState.secondTouch],
+          })
+          .catch(() => undefined);
+      }
+      if (cdp && profileState?.firstTouch) {
+        await cdp
+          .send("Input.dispatchTouchEvent", {
+            type: "touchEnd",
+            touchPoints: [profileState.firstTouch],
+          })
+          .catch(() => undefined);
+      }
+      await page
+        .evaluate(() => window.__CANVAS_PROFILE_POINTER_CLEANUP__?.())
+        .catch(() => undefined);
     },
     async act(page, cdp, { workloadScale = 1 } = {}) {
       if (!cdp) throw new Error("Pinch benchmark requires a CDP session");
@@ -764,6 +989,38 @@ const scenarioDefinitions = [
       await waitForVisualIdle(page, 900);
       await resetBrowserMetrics(page);
     },
+    async profilePrepare(page) {
+      await page.evaluate(() => {
+        const image = document.querySelector(
+          "img[alt='Benchmark draggable shape']",
+        );
+        if (!(image instanceof HTMLImageElement)) {
+          throw new Error("Draggable benchmark image is not visible");
+        }
+        const rect = image.getBoundingClientRect();
+        const event = new MouseEvent("mousemove", {
+          bubbles: true,
+          clientX: rect.left + rect.width / 2,
+          clientY: rect.top + rect.height / 2,
+        });
+        window.__CANVAS_PROFILE_BURST__ = (iterations) => {
+          for (let index = 0; index < iterations; index += 1) {
+            window.dispatchEvent(event);
+          }
+        };
+      });
+    },
+    async profileAct(page, _cdp, { workloadScale = 1 } = {}) {
+      await page.evaluate((iterations) => {
+        if (typeof window.__CANVAS_PROFILE_BURST__ !== "function") {
+          throw new Error("Drag-hover profile burst was not prepared");
+        }
+        window.__CANVAS_PROFILE_BURST__(iterations);
+      }, Math.max(1, Math.round(500_000 * workloadScale)));
+    },
+    async profileCleanup(page) {
+      await page.evaluate(() => delete window.__CANVAS_PROFILE_BURST__);
+    },
     async act(page, _cdp, { workloadScale = 1 } = {}) {
       const image = page.locator("img[alt='Benchmark draggable shape']");
       const box = await image.boundingBox();
@@ -856,18 +1113,19 @@ export const deepProfileScenarioNames = Object.freeze([
 ]);
 
 /**
- * Runs one amplified scenario with an optional capture factory. The capture is
- * started only after prepare() has settled and is stopped immediately after
- * act() returns, before browser metrics, raster stabilization, contracts, or
- * screenshots are collected.
+ * Profiles an isolated, instrumentation-free hot-path burst, then reruns the
+ * complete scenario in a separate instrumented context for scenario-local
+ * visual and behavioral parity artifacts.
  */
 export async function runProfileScenario({
   context,
+  parityContext = null,
   baseUrl,
   outputDirectory = null,
   name,
   sections = 0,
   workloadScale = 1,
+  expectedSourceIdentity = null,
   createCapture = null,
   captureArtifacts = true,
 }) {
@@ -885,116 +1143,177 @@ export async function runProfileScenario({
   if (captureArtifacts && !outputDirectory) {
     throw new Error("outputDirectory is required when captureArtifacts is enabled");
   }
+  if (captureArtifacts && !parityContext) {
+    throw new Error(
+      "parityContext is required so parity runs outside the profiling context",
+    );
+  }
 
   const scenario = scenarioDefinitions.find((entry) => entry.name === name);
-  const page = await context.newPage();
-  const cdp = await context.newCDPSession(page);
-  await cdp.send("Performance.enable");
-  const beforeNavigation = await cdp.send("Performance.getMetrics");
-  const url = new URL(scenario.query({ sections }), baseUrl).href;
+  if (typeof scenario.profileAct !== "function") {
+    throw new Error(`Deep-profile scenario ${name} does not define profileAct()`);
+  }
+  const profileUrl = new URL(
+    (scenario.profileQuery ?? scenario.query)({ sections }),
+    baseUrl,
+  ).href;
+  const parityUrl = new URL(scenario.query({ sections }), baseUrl).href;
+  let profilePage = await context.newPage();
+  let profileCdp = await context.newCDPSession(profilePage);
+  let parityPage = null;
+  let parityCdp = null;
   let capture = null;
   let captureResult = null;
-  let actionError = null;
-  let interactionCheckpoints = [];
-  let actionStartedAtMs = null;
-  let actionDurationMs = null;
+  let profileError = null;
+  let profilePrepared = false;
+  let profileCleaned = false;
+  let profileState = null;
+  let loadedSourceIdentity = null;
+  let profileActionDurationMs = null;
 
   try {
-    await scenario.prepare(page, url);
-    const beforeAction = scenario.includeNavigationMetrics
-      ? beforeNavigation
-      : await cdp.send("Performance.getMetrics");
+    await scenario.prepare(profilePage, profileUrl);
+    loadedSourceIdentity = await assertLoadedSourceIdentity(
+      profilePage,
+      expectedSourceIdentity,
+    );
+    profilePrepared = true;
+    profileState =
+      (await scenario.profilePrepare?.(profilePage, profileCdp, {
+        workloadScale,
+      })) ?? null;
 
     if (createCapture) {
       capture = await createCapture({
-        page,
+        page: profilePage,
         scenario: {
           name: scenario.name,
           anchorTypes: [...scenario.anchorTypes],
           trajectoryMode: scenario.trajectoryMode,
         },
-        url,
+        url: profileUrl,
+        loadedSourceIdentity,
       });
       await capture.mark?.("canvas:phase:action:start");
     }
 
-    actionStartedAtMs = performance.now();
+    const actionStartedAtMs = performance.now();
     try {
-      interactionCheckpoints =
-        (await scenario.act(page, cdp, { workloadScale })) ?? [];
+      await scenario.profileAct(profilePage, profileCdp, {
+        workloadScale,
+        profileState,
+      });
     } catch (error) {
-      actionError = error;
+      profileError = error;
     } finally {
-      actionDurationMs = performance.now() - actionStartedAtMs;
-      if (capture) {
-        await capture.mark?.("canvas:phase:action:end");
-        await capture.measure?.(
-          "canvas:phase:action",
-          "canvas:phase:action:start",
-          "canvas:phase:action:end",
-        );
-        captureResult = await capture.stop({
-          status: actionError ? "error" : "complete",
-          error: actionError,
-          benchmarkResult: {
-            schemaVersion: 1,
-            kind: "canvas-e2e-profile-action",
-            status: actionError ? "error" : "complete",
-            scenario: scenario.name,
-            url: `${new URL(url).pathname}${new URL(url).search}`,
-            sections,
-            workloadScale,
-            actionDurationMs,
-            interactionCheckpointCount: interactionCheckpoints.length,
-            captureBoundary: {
-              startsAfterPrepare: true,
-              endsBeforeRasterStabilization: true,
+      profileActionDurationMs = performance.now() - actionStartedAtMs;
+      try {
+        if (capture) {
+          await capture.mark?.("canvas:phase:action:end");
+          await capture.measure?.(
+            "canvas:phase:action",
+            "canvas:phase:action:start",
+            "canvas:phase:action:end",
+          );
+          captureResult = await capture.stop({
+            status: profileError ? "error" : "complete",
+            error: profileError,
+            benchmarkResult: {
+              schemaVersion: 1,
+              kind: "canvas-e2e-profile-action",
+              status: profileError ? "error" : "complete",
+              scenario: scenario.name,
+              url: `${new URL(profileUrl).pathname}${new URL(profileUrl).search}`,
+              sections,
+              workloadScale,
+              actionDurationMs: profileActionDurationMs,
+              loadedSourceIdentity,
+              captureBoundary: {
+                startsAfterProfilePrepare: true,
+                containsOnlyProfileAct: true,
+                checkpoints: false,
+                sleeps: false,
+                settling: false,
+                browserInstrumentation: false,
+              },
             },
-          },
+          });
+        }
+      } finally {
+        await scenario.profileCleanup?.(profilePage, profileCdp, {
+          workloadScale,
+          profileState,
         });
+        profileCleaned = true;
       }
     }
-    if (actionError) throw actionError;
+    if (profileError) throw profileError;
 
     if (!captureArtifacts) {
       return {
         result: {
           name: scenario.name,
-          url: `${new URL(url).pathname}${new URL(url).search}`,
-          interactionCheckpoints,
-          actionDurationMs,
+          url: `${new URL(profileUrl).pathname}${new URL(profileUrl).search}`,
+          interactionCheckpoints: [],
+          actionDurationMs: profileActionDurationMs,
+          profileActionDurationMs,
           workloadScale,
+          loadedSourceIdentity,
         },
         capture: captureResult,
+        loadedSourceIdentity,
       };
     }
 
-    const afterAction = await cdp.send("Performance.getMetrics");
-    const browserPerformance = await page.evaluate(
+    await profileCdp.detach().catch(() => undefined);
+    profileCdp = null;
+    await profilePage.close();
+    profilePage = null;
+
+    parityPage = await parityContext.newPage();
+    parityCdp = await parityContext.newCDPSession(parityPage);
+    await parityCdp.send("Performance.enable");
+    const beforeNavigation = await parityCdp.send("Performance.getMetrics");
+    await scenario.prepare(parityPage, parityUrl);
+    const parityLoadedSourceIdentity = await assertLoadedSourceIdentity(
+      parityPage,
+      expectedSourceIdentity,
+    );
+    const beforeAction = scenario.includeNavigationMetrics
+      ? beforeNavigation
+      : await parityCdp.send("Performance.getMetrics");
+    const parityActionStartedAtMs = performance.now();
+    const interactionCheckpoints =
+      (await scenario.act(parityPage, parityCdp, { workloadScale })) ?? [];
+    const parityActionDurationMs = performance.now() - parityActionStartedAtMs;
+    const afterAction = await parityCdp.send("Performance.getMetrics");
+    const browserPerformance = await parityPage.evaluate(
       () => window.__CANVAS_PERF__?.snapshot(),
     );
     if (!browserPerformance) {
       throw new Error("Browser instrumentation was not installed");
     }
 
-    await stabilizeRasterForCapture(page);
+    await stabilizeRasterForCapture(parityPage);
     await fs.mkdir(outputDirectory, { recursive: true });
     const screenshotPath = path.join(outputDirectory, "screenshot.png");
-    await page.screenshot({
+    await parityPage.screenshot({
       path: screenshotPath,
       fullPage: true,
       animations: "allow",
     });
-    const contract = await page.evaluate(captureDomContract);
-    const finalHarnessState = await page.evaluate(
+    const contract = await parityPage.evaluate(captureDomContract);
+    const finalHarnessState = await parityPage.evaluate(
       () => window.__CANVAS_HARNESS__?.read(),
     );
-    const animationContract = await page.evaluate(
+    const animationContract = await parityPage.evaluate(
       () => window.__CANVAS_HARNESS__?.animationContract,
     );
     const result = {
       name: scenario.name,
-      url: `${new URL(url).pathname}${new URL(url).search}`,
+      parityLabel: scenario.name + ":parity",
+      url: `${new URL(parityUrl).pathname}${new URL(parityUrl).search}`,
+      profileUrl: `${new URL(profileUrl).pathname}${new URL(profileUrl).search}`,
       anchorTypes: scenario.anchorTypes,
       trajectoryMode: scenario.trajectoryMode,
       interactionCheckpoints,
@@ -1003,10 +1322,15 @@ export async function runProfileScenario({
       finalHarnessState,
       animationContract,
       workloadScale,
-      actionDurationMs,
+      actionDurationMs: profileActionDurationMs,
+      profileActionDurationMs,
+      parityActionDurationMs,
+      loadedSourceIdentity,
+      parityLoadedSourceIdentity,
       captureBoundary: {
-        startsAfterPrepare: true,
-        endsBeforeRasterStabilization: true,
+        startsAfterProfilePrepare: true,
+        containsOnlyProfileAct: true,
+        parityActRunsInSeparateInstrumentedContext: true,
       },
       performance: {
         browser: browserPerformance,
@@ -1017,15 +1341,25 @@ export async function runProfileScenario({
       path.join(outputDirectory, "scenario-result.json"),
       `${JSON.stringify(result, null, 2)}\n`,
     );
-    return { result, capture: captureResult };
+    return { result, capture: captureResult, loadedSourceIdentity };
   } finally {
     if (capture && !captureResult) {
       await capture
-        .stop({ status: "error", error: actionError ?? new Error("Scenario aborted") })
+        .stop({ status: "error", error: profileError ?? new Error("Scenario aborted") })
         .catch(() => undefined);
     }
-    await cdp.detach().catch(() => undefined);
-    await page.close();
+    if (profilePrepared && !profileCleaned && profilePage && profileCdp) {
+      await scenario
+        .profileCleanup?.(profilePage, profileCdp, {
+          workloadScale,
+          profileState,
+        })
+        .catch(() => undefined);
+    }
+    await profileCdp?.detach().catch(() => undefined);
+    await parityCdp?.detach().catch(() => undefined);
+    await profilePage?.close().catch(() => undefined);
+    await parityPage?.close().catch(() => undefined);
   }
 }
 

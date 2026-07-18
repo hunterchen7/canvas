@@ -11,6 +11,9 @@ const libraryRoot = path.resolve(
   process.env.CANVAS_LIBRARY_ROOT || repositoryRoot,
 );
 const serverId = process.env.CANVAS_E2E_SERVER_ID || "local";
+const libraryIdentity = JSON.parse(
+  process.env.CANVAS_LIBRARY_IDENTITY_JSON || "null",
+);
 
 export default defineConfig({
   root: fixtureRoot,
@@ -18,6 +21,9 @@ export default defineConfig({
   cacheDir: path.join(os.tmpdir(), `canvas-e2e-vite-${serverId}`),
   esbuild: {
     jsx: "automatic",
+  },
+  define: {
+    __CANVAS_LIBRARY_IDENTITY__: JSON.stringify(libraryIdentity),
   },
   resolve: {
     alias: {

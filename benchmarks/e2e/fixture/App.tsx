@@ -26,8 +26,22 @@ type HarnessSnapshot = {
   sceneTransform: string;
 };
 
+type LibraryIdentity = {
+  proof: string;
+  source: {
+    algorithm: string;
+    hash: string;
+    fileCount: number;
+    bytes: number;
+  };
+  [key: string]: unknown;
+};
+
+declare const __CANVAS_LIBRARY_IDENTITY__: LibraryIdentity | null;
+
 declare global {
   interface Window {
+    __CANVAS_LIBRARY_IDENTITY__?: LibraryIdentity | null;
     __CANVAS_PERF__?: {
       incrementProbe: (name: string, amount?: number) => void;
     };
@@ -98,6 +112,7 @@ function HarnessBridge() {
   });
 
   useEffect(() => {
+    window.__CANVAS_LIBRARY_IDENTITY__ = __CANVAS_LIBRARY_IDENTITY__;
     window.__CANVAS_HARNESS__ = {
       ready: true,
       read: () => {
@@ -134,6 +149,7 @@ function HarnessBridge() {
 
     return () => {
       delete window.__CANVAS_HARNESS__;
+      delete window.__CANVAS_LIBRARY_IDENTITY__;
     };
   }, [animationStage, navigateToSection, scale, x, y]);
 
