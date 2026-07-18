@@ -10,13 +10,19 @@ import {
   stat,
   writeFile,
 } from "node:fs/promises";
-import net from "node:net";
 import os from "node:os";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { assertBrowserErrorFree } from "./browser-errors.mjs";
 import { resolveLibraryTarget } from "./library-target.mjs";
 import { buildPairedProfileReport } from "./profile-compare.mjs";
+import {
+  allocateEphemeralPort,
+  portIsAvailable,
+} from "./runtime-safety.mjs";
+
+export { assertBrowserErrorFree };
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const runtimeRoot = path.resolve(scriptDirectory, "..");
@@ -46,7 +52,7 @@ Sampling:
   --warmups NUMBER           Even count of unprofiled warmup pairs (default: 2)
   --repetitions NUMBER       Even count of measured pairs (default: 6)
   --profile-kind KIND        none, cpu, trace, or allocations (default: none)
-  --port-base NUMBER         First port to probe (default: process-specific)
+  --port-base NUMBER         First port to probe (default: OS-assigned ports)
   --child-timeout-ms NUMBER  Per-invocation process timeout (default: 300000)
 
 Runtime fixture:
@@ -115,7 +121,6 @@ export function parseArguments(
     repositoryRoot = defaultRepositoryRoot,
     cwd = process.cwd(),
     now = new Date(),
-    processId = process.pid,
   } = {},
 ) {
   const timestamp = now.toISOString().replace(/[:.]/g, "-");
@@ -127,7 +132,7 @@ export function parseArguments(
     warmups: 2,
     repetitions: 6,
     profileKind: "none",
-    portBase: 46_000 + (Math.abs(processId) % 4_000),
+    portBase: null,
     childTimeoutMs: 300_000,
     mode: "high",
     sections: 24,
@@ -435,52 +440,71 @@ async function readJsonIfPresent(filename) {
   }
 }
 
-async function prepareOutputDirectory(output) {
+export async function prepareOutputDirectory(output) {
   await mkdir(path.dirname(output), { recursive: true });
+  let created = false;
   try {
     await mkdir(output);
-    return;
+    created = true;
   } catch (error) {
     if (error?.code !== "EEXIST") throw error;
   }
-  const details = await stat(output);
-  if (!details.isDirectory()) {
-    throw new Error(`Output path is not a directory: ${output}`);
+  if (!created) {
+    const details = await stat(output);
+    if (!details.isDirectory()) {
+      throw new Error(`Output path is not a directory: ${output}`);
+    }
+    const entries = await readdir(output);
+    if (entries.length > 0) {
+      throw new Error(
+        `Output directory is not empty; refusing to overwrite captures: ${output}`,
+      );
+    }
   }
-  const entries = await readdir(output);
-  if (entries.length > 0) {
-    throw new Error(
-      `Output directory is not empty; refusing to overwrite captures: ${output}`,
+  const claim = path.join(output, ".canvas-runtime-capture");
+  try {
+    await writeFile(
+      claim,
+      `${JSON.stringify({
+        startedAtIso: new Date().toISOString(),
+        pid: process.pid,
+      })}\n`,
+      { encoding: "utf8", flag: "wx" },
     );
+  } catch (error) {
+    if (error?.code === "EEXIST") {
+      throw new Error(
+        `Output directory was claimed by another capture: ${output}`,
+      );
+    }
+    throw error;
   }
 }
 
-async function portIsAvailable(port) {
-  return new Promise((resolve, reject) => {
-    const server = net.createServer();
-    server.unref();
-    server.once("error", (error) => {
-      if (error?.code === "EADDRINUSE") {
-        resolve(false);
-      } else {
-        reject(error);
-      }
-    });
-    server.listen({ host: "127.0.0.1", port, exclusive: true }, () => {
-      server.close(() => resolve(true));
-    });
-  });
-}
-
-export function createPortAllocator(portBase) {
+export function createPortAllocator(
+  portBase,
+  {
+    allocateEphemeral = allocateEphemeralPort,
+    isAvailable = portIsAvailable,
+  } = {},
+) {
   const used = new Set();
   let next = portBase;
   return async function allocatePort() {
+    if (next == null) {
+      for (let attempts = 0; attempts < 1_024; attempts += 1) {
+        const candidate = await allocateEphemeral();
+        if (used.has(candidate)) continue;
+        used.add(candidate);
+        return candidate;
+      }
+      throw new Error("Unable to allocate a distinct local runtime port");
+    }
     for (let attempts = 0; attempts < 64_512; attempts += 1) {
       const candidate = next;
       next = candidate === 65_535 ? 1_024 : candidate + 1;
       if (used.has(candidate)) continue;
-      if (!(await portIsAvailable(candidate))) continue;
+      if (!(await isAvailable(candidate))) continue;
       used.add(candidate);
       return candidate;
     }
@@ -721,6 +745,10 @@ async function runInvocation({
     child = spawn(process.execPath, arguments_, {
       cwd: defaultRepositoryRoot,
       detached: process.platform !== "win32",
+      env: {
+        ...process.env,
+        CANVAS_BENCHMARK_PARENT_PROCESS_GROUP: "1",
+      },
       stdio: ["ignore", stdoutHandle.fd, stderrHandle.fd],
     });
     supervisor.add(child);
@@ -783,6 +811,7 @@ async function runInvocation({
     assertObservedLibraryIdentity(target.identity, observedLibrary);
     libraryIdentityVerified = true;
     if (!result) throw new Error("Runtime invocation did not write result.json");
+    assertBrowserErrorFree(result);
     if (result.status !== "complete") {
       throw new Error(`Runtime result status was ${result.status ?? "missing"}`);
     }
@@ -923,6 +952,7 @@ async function runInvocation({
     libraryIdentityEvidence,
     benchmarkStatus: result?.status ?? null,
     execution: result?.execution ?? null,
+    browserErrors: result?.execution?.browserErrors ?? null,
     artifacts: {
       invocation: relativeArtifact(options.output, invocationPath),
       result: result ? relativeArtifact(options.output, resultPath) : null,

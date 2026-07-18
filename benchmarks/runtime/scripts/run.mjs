@@ -1,19 +1,37 @@
 #!/usr/bin/env node
 import { spawn } from "node:child_process";
-import { cp, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { cp, mkdtemp, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "@playwright/test";
+import { stopChildProcessTree } from "../../e2e/process-tree.mjs";
 import { startDeepProfile } from "./deep-profile.mjs";
+import {
+  browserErrorFailure,
+  createBrowserErrorCollector,
+  emptyBrowserErrorProvenance,
+  failResultForBrowserErrors,
+} from "./browser-errors.mjs";
 import {
   assertMatchingLibraryIdentity,
   resolveLibraryTarget,
 } from "./library-target.mjs";
+import {
+  allocateEphemeralPort,
+  assertFreshOutputFile,
+  assertSeparateArtifactPaths,
+  claimFreshDirectory,
+  writeFileExclusive,
+} from "./runtime-safety.mjs";
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const runtimeRoot = path.resolve(scriptDirectory, "..");
 const repositoryRoot = path.resolve(runtimeRoot, "../..");
+const parentOwnsProcessGroup =
+  process.env.CANVAS_BENCHMARK_PARENT_PROCESS_GROUP === "1";
+const detachChildProcesses =
+  process.platform !== "win32" && !parentOwnsProcessGroup;
 
 function parseArguments(argv) {
   const values = new Map();
@@ -37,6 +55,17 @@ function integer(values, key, fallback, minimum, maximum) {
   const parsed = Number.parseInt(values.get(key) ?? "", 10);
   if (!Number.isFinite(parsed)) return fallback;
   return Math.min(maximum, Math.max(minimum, parsed));
+}
+
+function explicitInteger(values, key, minimum, maximum) {
+  const value = values.get(key);
+  const parsed = Number(value);
+  if (!Number.isSafeInteger(parsed) || parsed < minimum || parsed > maximum) {
+    throw new Error(
+      `--${key} must be an integer between ${minimum} and ${maximum}`,
+    );
+  }
+  return parsed;
 }
 
 function boolean(values, key, fallback) {
@@ -110,7 +139,19 @@ async function waitForServer(url, processHandle, timeoutMs) {
   throw new Error(`Vite did not become ready at ${url} within ${timeoutMs}ms`);
 }
 
-async function stopServer(processHandle) {
+function assertProcessRunning(processHandle, description) {
+  if (
+    !processHandle ||
+    processHandle.exitCode != null ||
+    processHandle.signalCode != null
+  ) {
+    throw new Error(
+      `${description} is not running (${processHandle?.exitCode ?? processHandle?.signalCode ?? "missing process"})`,
+    );
+  }
+}
+
+async function stopDirectChild(processHandle) {
   if (
     !processHandle ||
     processHandle.exitCode != null ||
@@ -137,6 +178,14 @@ async function stopServer(processHandle) {
       new Promise((resolve) => setTimeout(resolve, 2_000)),
     ]);
   }
+}
+
+async function stopSpawnedProcess(processHandle) {
+  if (parentOwnsProcessGroup) {
+    await stopDirectChild(processHandle);
+    return;
+  }
+  await stopChildProcessTree(processHandle);
 }
 
 function pipeProcessOutput(processHandle) {
@@ -232,7 +281,11 @@ async function main() {
   const complexity = integer(values, "complexity", 24, 1, 200);
   const seed = integer(values, "seed", 42, 0, 2_147_483_647);
   const timeoutMs = integer(values, "timeout", 45_000, 5_000, 180_000);
-  const port = integer(values, "port", 4173, 1024, 65_535);
+  const port = suppliedUrl
+    ? null
+    : values.has("port")
+      ? explicitInteger(values, "port", 1_024, 65_535)
+      : await allocateEphemeralPort();
   const viewport = viewportFor(mode, values);
   const runId =
     values.get("run-id") ??
@@ -256,6 +309,14 @@ async function main() {
     1_024,
     16_777_216,
   );
+  const outputPath = values.has("output")
+    ? path.resolve(process.cwd(), values.get("output"))
+    : null;
+  assertSeparateArtifactPaths(outputPath, deepProfileDirectory);
+  if (outputPath) await assertFreshOutputFile(outputPath);
+  if (deepProfileDirectory) {
+    await claimFreshDirectory(deepProfileDirectory, "Profile directory");
+  }
   const query = new URLSearchParams({
     sections: String(sections),
     navItems: String(navItems),
@@ -282,8 +343,81 @@ async function main() {
   let buildProcess = null;
   let observedLibraryIdentity = null;
   let libraryIdentityVerified = false;
+  let browserErrorCollector = null;
+  let browserErrors = emptyBrowserErrorProvenance();
+  let cleanupPromise = null;
+  let receivedSignal = null;
+  let signalCleanupError = null;
+  let signalKeepAlive = null;
+
+  const cleanupResources = () => {
+    cleanupPromise ??= (async () => {
+      try {
+        let firstError = null;
+        const recordCleanupError = (cleanupError) => {
+          process.stderr.write(
+            `[cleanup] ${cleanupError instanceof Error ? cleanupError.stack ?? cleanupError.message : cleanupError}\n`,
+          );
+          firstError ??= cleanupError;
+        };
+        const processResults = await Promise.allSettled([
+          stopSpawnedProcess(server),
+          stopSpawnedProcess(buildProcess),
+        ]);
+        for (const outcome of processResults) {
+          if (outcome.status === "rejected") {
+            recordCleanupError(outcome.reason);
+          }
+        }
+        for (const cleanup of [
+          () =>
+            productionWorkspace
+              ? rm(productionWorkspace, { recursive: true, force: true })
+              : viteCacheDirectory
+                ? rm(viteCacheDirectory, { recursive: true, force: true })
+                : undefined,
+          () => browser?.close(),
+        ]) {
+          try {
+            await cleanup();
+          } catch (cleanupError) {
+            recordCleanupError(cleanupError);
+          }
+        }
+        if (firstError) throw firstError;
+      } finally {
+        cleanupPromise = null;
+      }
+    })();
+    return cleanupPromise;
+  };
+
+  const throwIfInterrupted = () => {
+    if (receivedSignal) throw new Error(`Received ${receivedSignal}`);
+  };
+
+  const signalHandlers = new Map();
+  for (const signal of ["SIGINT", "SIGTERM"]) {
+    const handler = () => {
+      if (receivedSignal) return;
+      receivedSignal = signal;
+      signalKeepAlive = setInterval(() => undefined, 1_000);
+      void cleanupResources()
+        .catch((error) => {
+          signalCleanupError = error;
+        })
+        .finally(() => {
+          clearInterval(signalKeepAlive);
+          signalKeepAlive = null;
+          process.exitCode = signal === "SIGINT" ? 130 : 143;
+        });
+    };
+    signalHandlers.set(signal, handler);
+    process.on(signal, handler);
+  }
 
   try {
+    throwIfInterrupted();
     if (!suppliedUrl) {
       if (production) {
         productionWorkspace = await mkdtemp(
@@ -314,6 +448,7 @@ async function main() {
       };
 
       if (production) {
+        throwIfInterrupted();
         buildProcess = spawn(
           process.execPath,
           [
@@ -328,10 +463,12 @@ async function main() {
             cwd: repositoryRoot,
             env: viteEnvironment,
             stdio: ["ignore", "pipe", "pipe"],
+            detached: detachChildProcesses,
           },
         );
         pipeProcessOutput(buildProcess);
         await waitForSuccessfulExit(buildProcess, "Vite production build");
+        throwIfInterrupted();
 
         const postBuildTarget = await resolveLibraryTarget({
           repositoryRoot,
@@ -351,20 +488,19 @@ async function main() {
         }
 
         if (profilingEnabled) {
-          await mkdir(deepProfileDirectory, { recursive: true });
           const preservedBuildDirectory = path.join(
             deepProfileDirectory,
             "production-build",
           );
-          await rm(preservedBuildDirectory, { recursive: true, force: true });
           await cp(
             productionBuildDirectory,
             preservedBuildDirectory,
-            { recursive: true, force: true },
+            { recursive: true, errorOnExist: true, force: false },
           );
         }
       }
 
+      throwIfInterrupted();
       server = spawn(
         process.execPath,
         [
@@ -385,23 +521,20 @@ async function main() {
           cwd: repositoryRoot,
           env: viteEnvironment,
           stdio: ["ignore", "pipe", "pipe"],
+          detached: detachChildProcesses,
         },
       );
       pipeProcessOutput(server);
       await waitForServer(baseUrl, server, timeoutMs);
+      throwIfInterrupted();
     }
 
+    throwIfInterrupted();
     browser = await chromium.launch({ headless: !boolean(values, "headed", false) });
+    throwIfInterrupted();
     const context = await browser.newContext({ viewport });
     page = await context.newPage();
-    page.on("pageerror", (error) => {
-      process.stderr.write(`[pageerror] ${error.stack ?? error.message}\n`);
-    });
-    page.on("console", (message) => {
-      if (message.type() === "error") {
-        process.stderr.write(`[console.error] ${message.text()}\n`);
-      }
-    });
+    browserErrorCollector = createBrowserErrorCollector(page);
 
     if (profilingEnabled) {
       deepProfile = await startDeepProfile({
@@ -449,6 +582,7 @@ async function main() {
     observedLibraryIdentity = await page.evaluate(
       () => window.__CANVAS_BENCHMARK_LIBRARY__,
     );
+    if (!suppliedUrl) assertProcessRunning(server, "Vite server");
     assertMatchingLibraryIdentity(
       libraryTarget?.identity ?? null,
       observedLibraryIdentity,
@@ -545,6 +679,7 @@ async function main() {
       await page.waitForTimeout(500);
     }, deepProfile);
 
+    if (!suppliedUrl) assertProcessRunning(server, "Vite server");
     result = await page.evaluate(() => window.__CANVAS_BENCHMARK__.finalize());
   } catch (error) {
     runnerError = error;
@@ -559,8 +694,22 @@ async function main() {
       }
     }
     if (!result) throw error;
-    process.exitCode = 1;
+    if (!process.exitCode) process.exitCode = 1;
   } finally {
+    if (browserErrorCollector && page && !page.isClosed()) {
+      try {
+        await page.waitForTimeout(0);
+      } catch {
+        // Cleanup or interruption may have already closed the page.
+      }
+    }
+    browserErrors =
+      browserErrorCollector?.stop() ?? emptyBrowserErrorProvenance();
+    if (browserErrors.eventCount > 0) {
+      result = failResultForBrowserErrors(result, browserErrors);
+      runnerError ??= browserErrorFailure(browserErrors);
+      if (!receivedSignal) process.exitCode = 1;
+    }
     result = attachRunnerProvenance(result, {
       expected: libraryTarget?.identity ?? null,
       observed: observedLibraryIdentity,
@@ -578,6 +727,7 @@ async function main() {
             ? "production-profiling"
             : "development",
         sourceMaps: production,
+        browserErrors,
       },
     });
     if (deepProfile) {
@@ -594,37 +744,28 @@ async function main() {
         if (!runnerError) deferredCleanupError = profileError;
       }
     }
-    for (const cleanup of [
-      () => browser?.close(),
-      () => stopServer(server),
-      () => stopServer(buildProcess),
-      () =>
-        productionWorkspace
-          ? rm(productionWorkspace, { recursive: true, force: true })
-          : viteCacheDirectory
-            ? rm(viteCacheDirectory, { recursive: true, force: true })
-            : undefined,
-    ]) {
-      try {
-        await cleanup();
-      } catch (cleanupError) {
-        process.stderr.write(
-          `[cleanup] ${cleanupError instanceof Error ? cleanupError.stack ?? cleanupError.message : cleanupError}\n`,
-        );
-        if (!runnerError && !deferredCleanupError) {
-          deferredCleanupError = cleanupError;
-        }
+    try {
+      await cleanupResources();
+    } catch (cleanupError) {
+      if (!runnerError && !deferredCleanupError) {
+        deferredCleanupError = cleanupError;
       }
+    } finally {
+      for (const [signal, handler] of signalHandlers) {
+        process.off(signal, handler);
+      }
+    }
+    if (signalCleanupError && !runnerError && !deferredCleanupError) {
+      deferredCleanupError = signalCleanupError;
     }
     if (deferredCleanupError) throw deferredCleanupError;
   }
 
+  if (receivedSignal) throw new Error(`Received ${receivedSignal}`);
+
   const serialized = `${JSON.stringify(result, null, 2)}\n`;
-  const output = values.get("output");
-  if (output) {
-    const outputPath = path.resolve(process.cwd(), output);
-    await mkdir(path.dirname(outputPath), { recursive: true });
-    await writeFile(outputPath, serialized, "utf8");
+  if (outputPath) {
+    await writeFileExclusive(outputPath, serialized);
     process.stderr.write(`Wrote ${outputPath}\n`);
   }
   if (deepProfileResult) {
@@ -635,5 +776,5 @@ async function main() {
 
 main().catch((error) => {
   process.stderr.write(`${error instanceof Error ? error.stack ?? error.message : error}\n`);
-  process.exitCode = 1;
+  if (!process.exitCode) process.exitCode = 1;
 });

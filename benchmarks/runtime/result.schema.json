@@ -101,6 +101,18 @@
     "library": { "$ref": "#/$defs/libraryProvenance" },
     "execution": { "$ref": "#/$defs/executionProvenance" }
   },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "runner": { "const": "playwright" }
+        }
+      },
+      "then": {
+        "required": ["library", "execution"]
+      }
+    }
+  ],
   "$defs": {
     "config": {
       "type": "object",
@@ -246,7 +258,12 @@
     },
     "executionProvenance": {
       "type": "object",
-      "required": ["serverMode", "reactRuntime", "sourceMaps"],
+      "required": [
+        "serverMode",
+        "reactRuntime",
+        "sourceMaps",
+        "browserErrors"
+      ],
       "properties": {
         "serverMode": {
           "enum": ["development-server", "production-bundle", "external-url"]
@@ -254,7 +271,62 @@
         "reactRuntime": {
           "enum": ["development", "production-profiling", "external-unknown"]
         },
-        "sourceMaps": { "type": "boolean" }
+        "sourceMaps": { "type": "boolean" },
+        "browserErrors": { "$ref": "#/$defs/browserErrorProvenance" }
+      },
+      "additionalProperties": false
+    },
+    "browserErrorProvenance": {
+      "type": "object",
+      "required": [
+        "policy",
+        "eventCount",
+        "pageErrorCount",
+        "consoleErrorCount",
+        "events"
+      ],
+      "properties": {
+        "policy": { "const": "fail-on-any" },
+        "eventCount": { "type": "integer", "minimum": 0 },
+        "pageErrorCount": { "type": "integer", "minimum": 0 },
+        "consoleErrorCount": { "type": "integer", "minimum": 0 },
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "sequence",
+              "type",
+              "name",
+              "message",
+              "stack",
+              "location"
+            ],
+            "properties": {
+              "sequence": { "type": "integer", "minimum": 1 },
+              "type": { "enum": ["pageerror", "console.error"] },
+              "name": { "type": ["string", "null"] },
+              "message": { "type": "string" },
+              "stack": { "type": ["string", "null"] },
+              "location": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "required": ["url", "lineNumber", "columnNumber"],
+                    "properties": {
+                      "url": { "type": "string" },
+                      "lineNumber": { "type": ["integer", "null"] },
+                      "columnNumber": { "type": ["integer", "null"] }
+                    },
+                    "additionalProperties": false
+                  },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        }
       },
       "additionalProperties": false
     }

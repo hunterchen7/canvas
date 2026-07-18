@@ -40,6 +40,9 @@ Useful options:
 - `--intro 0|1`
 - `--seed N`
 - `--headed`
+- `--port N` to request a specific loopback port; without it the runner asks the
+  operating system for an available port and still starts Vite with strict-port
+  enforcement
 - `--url http://127.0.0.1:4173` to reuse an existing server
 - `--width` and `--height` to override the mode viewport preset
 - `--library-root /absolute/path/to/worktree` to load another checkout's
@@ -51,6 +54,26 @@ Useful options:
 `--url` cannot be combined with `--library-root`, and `--production` cannot be
 used with an external `--url`. The development server remains the default for
 compatibility and interactive debugging.
+
+Locally spawned build and Vite processes are supervised through normal exit and
+`SIGINT`/`SIGTERM`. The standalone runner owns their process groups; paired
+captures keep them in the paired runner's group so either layer can await a
+graceful stop and escalate without orphaning Vite descendants.
+
+A standalone `--output` file and any enabled `--profile-dir` must not already
+exist. The runner claims profile directories before capture and creates result
+files exclusively, so a retry cannot silently mix with or overwrite stale
+artifacts. Result files and profile directories must not contain one another.
+
+## Browser error policy
+
+The Playwright runner records every unhandled `pageerror` and every
+`console.error` from navigation through scenario finalization under
+`execution.browserErrors`. Its policy is `fail-on-any`: any recorded event sets
+the benchmark result status to `error` and makes the process exit nonzero. The
+fixture has no expected browser errors, so there is no allowlist. The paired
+runner requires this provenance to be present and rejects any capture containing
+an event even if another field incorrectly claims the capture completed.
 
 ## Source identity and production bundles
 
@@ -101,11 +124,16 @@ then candidate; even-numbered pairs reverse the order. Warmups are retained for
 auditability but excluded from the comparison. Each target invocation gets a
 fresh server, browser, and optional profiler. The runner rejects identical
 baseline/candidate source hashes and revalidates both sources around capture
-checkpoints.
+checkpoints. Ports are OS-assigned by default; use `--port-base N` only when a
+fixed range is operationally necessary. Strict-port startup prevents silent
+port changes, and the runner verifies both source identity and that its Vite
+process remains alive through scenario finalization.
 
 The output directory must be new or empty; the runner refuses to overwrite an
 existing capture. It writes `report.json`, progress-safe `checkpoint.json`, raw
-per-invocation results and logs, and `comparison.json`. The comparison contains:
+per-invocation results and logs, and `comparison.json`. An exclusive
+`.canvas-runtime-capture` marker prevents two paired runners from claiming the
+same initially empty directory. The comparison contains:
 
 - baseline, candidate, absolute-delta, and percent-delta distributions;
 - median, p25/p75, IQR, MAD, mean, and sample standard deviation;
@@ -174,7 +202,7 @@ Useful controls:
 - `--cpu-sampling-interval-us N` (default `1000`)
 - `--allocation-sampling-interval-bytes N` (default `32768`)
 - `--profile-dir PATH`; if omitted, the runner uses a sibling of `--output` or
-  a temporary directory when no result output path was supplied
+  a fresh temporary directory when no result output path was supplied
 
 For baseline/candidate evidence, capture only one profiler kind per paired run:
 
@@ -236,6 +264,7 @@ Results conform to [`result.schema.json`](./result.schema.json), currently schem
 - raw rAF-sampled `x`, `y`, `scale`, and animation-stage trajectories;
 - animation-stage transition timestamps and per-phase motion path summaries/hashes;
 - phase-boundary snapshots of mounted section IDs, draggable transforms, toolbar text, and navbar button state;
+- fail-closed Playwright `pageerror` and `console.error` provenance;
 - environment, navigation timing, heap snapshot when exposed, warnings, and errors.
 
 The raw trajectory and phase timestamps are intentional: performance changes should also be checked for animation timing/path equivalence. A different trajectory hash is a signal to inspect the normalized raw samples; it is not by itself a failure because frame sampling cadence can vary.

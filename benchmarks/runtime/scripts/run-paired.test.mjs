@@ -1,12 +1,17 @@
 import assert from "node:assert/strict";
+import { mkdir, mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import {
+  assertBrowserErrorFree,
   assertObservedLibraryIdentity,
   createPairSchedule,
+  createPortAllocator,
   observedLibraryIdentityFromResult,
   parseArguments,
   parseObservedLibraryIdentity,
+  prepareOutputDirectory,
   targetOrder,
 } from "./run-paired.mjs";
 
@@ -150,4 +155,87 @@ test("durable result identity is normalized for paired verification", () => {
     { label: "candidate", proof, sourceHash },
   );
   assert.equal(observedLibraryIdentityFromResult({ library: {} }), null);
+});
+
+test("paired acceptance requires explicit zero-error browser provenance", () => {
+  const browserErrors = {
+    policy: "fail-on-any",
+    eventCount: 0,
+    pageErrorCount: 0,
+    consoleErrorCount: 0,
+    events: [],
+  };
+  assert.equal(
+    assertBrowserErrorFree({ execution: { browserErrors } }),
+    true,
+  );
+  assert.throws(
+    () => assertBrowserErrorFree({ execution: {} }),
+    /missing fail-closed/,
+  );
+  assert.throws(
+    () =>
+      assertBrowserErrorFree({
+        execution: {
+          browserErrors: {
+            ...browserErrors,
+            eventCount: 1,
+            consoleErrorCount: 1,
+            events: [
+              {
+                sequence: 1,
+                type: "console.error",
+                message: "fixture failed",
+              },
+            ],
+          },
+        },
+      }),
+    /Browser emitted 1 unhandled error event.*fixture failed/,
+  );
+});
+
+test("paired output directory is exclusively claimed", async () => {
+  const temporary = await mkdtemp(
+    path.join(os.tmpdir(), "canvas-runtime-paired-"),
+  );
+  try {
+    const empty = path.join(temporary, "empty");
+    await mkdir(empty);
+    await prepareOutputDirectory(empty);
+    assert.deepEqual(await readdir(empty), [".canvas-runtime-capture"]);
+    await assert.rejects(prepareOutputDirectory(empty), /not empty/);
+
+    const stale = path.join(temporary, "stale");
+    await mkdir(stale);
+    await writeFile(path.join(stale, "result.json"), "{}\n", "utf8");
+    await assert.rejects(prepareOutputDirectory(stale), /not empty/);
+
+    const raced = path.join(temporary, "raced");
+    const outcomes = await Promise.allSettled([
+      prepareOutputDirectory(raced),
+      prepareOutputDirectory(raced),
+    ]);
+    assert.equal(
+      outcomes.filter((outcome) => outcome.status === "fulfilled").length,
+      1,
+    );
+    assert.equal(
+      outcomes.filter((outcome) => outcome.status === "rejected").length,
+      1,
+    );
+  } finally {
+    await rm(temporary, { recursive: true, force: true });
+  }
+});
+
+test("paired ports use distinct OS assignments by default", async () => {
+  const assigned = [41_000, 41_000, 41_001];
+  const allocate = createPortAllocator(null, {
+    allocateEphemeral: async () => assigned.shift(),
+  });
+  const first = await allocate();
+  const second = await allocate();
+  assert.equal(first, 41_000);
+  assert.equal(second, 41_001);
 });
