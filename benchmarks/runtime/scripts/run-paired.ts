@@ -17,7 +17,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { assertBrowserErrorFree } from "./browser-errors.ts";
 import { resolveLibraryTarget } from "./library-target.ts";
 import { buildPairedProfileReport } from "./profile-compare.ts";
-import { compareNativeBatch } from "../../analyzer/native.ts";
+import { compareNativeBatches } from "../../analyzer/native.ts";
 import {
   allocateEphemeralPort,
   portIsAvailable,
@@ -1097,7 +1097,40 @@ async function checkpoint(state) {
   );
 }
 
-async function buildComparison(state) {
+export async function applyNativeAnalysis(
+  comparison,
+  nativeRequests,
+  {
+    compareBatches = compareNativeBatches,
+    timeoutMs = 300_000,
+    signal = null,
+  }: any = {},
+) {
+  const nativeAnalysis = await compareBatches(nativeRequests, {
+    timeoutMs,
+    signal,
+  });
+  if (nativeAnalysis.comparisons.length !== nativeRequests.length) {
+    throw new Error(
+      `Native analysis returned ${nativeAnalysis.comparisons.length} comparisons for ${nativeRequests.length} requests`,
+    );
+  }
+  let resultIndex = 0;
+  for (const caseReport of comparison.cases) {
+    for (const metric of caseReport.metrics) {
+      metric.comparison = nativeAnalysis.comparisons[resultIndex];
+      resultIndex += 1;
+    }
+    caseReport.classifications = caseReport.metrics.reduce((counts, metric) => {
+      const classification = metric.comparison.classification;
+      counts[classification] = (counts[classification] ?? 0) + 1;
+      return counts;
+    }, {});
+  }
+  return nativeAnalysis.batchCount;
+}
+
+async function buildComparison(state, abortSignal = null) {
   const runs = [];
   const execution = state.settings.expectedExecution;
   const caseName = `${execution.reactRuntime}-${state.settings.mode}-${state.settings.measuredProfileKind}`;
@@ -1168,28 +1201,19 @@ async function buildComparison(state) {
         }
       : undefined,
   });
+  let nativeBatchCount = 0;
   if (useNativeAnalyzer && nativeRequests.length > 0) {
-    const nativeResults: any = await compareNativeBatch(nativeRequests, {
+    nativeBatchCount = await applyNativeAnalysis(comparison, nativeRequests, {
       timeoutMs: state.settings.childTimeoutMs,
+      signal: abortSignal,
     });
-    let resultIndex = 0;
-    for (const caseReport of comparison.cases) {
-      for (const metric of caseReport.metrics) {
-        metric.comparison = nativeResults[resultIndex];
-        resultIndex += 1;
-      }
-      caseReport.classifications = caseReport.metrics.reduce((counts, metric) => {
-        const classification = metric.comparison.classification;
-        counts[classification] = (counts[classification] ?? 0) + 1;
-        return counts;
-      }, {});
-    }
   }
   comparison.settings.comparisonEngine = useNativeAnalyzer
     ? {
         implementation: "go",
-        transport: "single batched subprocess",
+        transport: "bounded sequential batch subprocesses",
         comparisonCount: nativeRequests.length,
+        batchCount: nativeBatchCount,
       }
     : {
         implementation: "typescript",
@@ -1334,7 +1358,7 @@ export async function runPairedCapture(
       await checkpoint(state);
     }
 
-    state.comparison = await buildComparison(state);
+    state.comparison = await buildComparison(state, abortSignal);
     state.status = "complete";
     state.completedAtIso = new Date().toISOString();
     state.current = null;

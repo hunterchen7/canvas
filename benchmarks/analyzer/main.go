@@ -186,6 +186,7 @@ func run(arguments []string) error {
 			return fmt.Errorf("validate batch request: comparisons must contain at most %d entries", maxBatchComparisons)
 		}
 		results := make([]comparison, 0, len(payload.Comparisons))
+		normalized := make([]request, len(payload.Comparisons))
 		var totalWork int64
 		for index, entry := range payload.Comparisons {
 			if entry.Options == nil {
@@ -195,9 +196,15 @@ func run(arguments []string) error {
 			if totalWork > maxBatchWork {
 				return fmt.Errorf("validate batch request: comparisons exceed the %d total work limit", maxBatchWork)
 			}
+			if validateError := validateRequest(entry); validateError != nil {
+				return fmt.Errorf("validate batch request comparison %d: %w", index, validateError)
+			}
+			normalized[index] = entry
+		}
+		for index, entry := range normalized {
 			analyzed, analyzeError := analyzeRequest(entry)
 			if analyzeError != nil {
-				return fmt.Errorf("validate batch request comparison %d: %w", index, analyzeError)
+				return fmt.Errorf("analyze batch request comparison %d: %w", index, analyzeError)
 			}
 			results = append(results, analyzed)
 		}

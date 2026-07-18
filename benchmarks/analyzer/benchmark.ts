@@ -1,10 +1,9 @@
-import { execFileSync } from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { performance } from "node:perf_hooks";
-import { fileURLToPath } from "node:url";
 import { comparePairedSamples } from "../runtime/scripts/profile-compare.ts";
+import { compareNativeBatch } from "./native.ts";
 
 const baseline = Array.from({ length: 64 }, (_, index) => 100 + (index % 13));
 const candidate = baseline.map((value, index) => value - 2 + (index % 5) / 10);
@@ -63,36 +62,38 @@ measurements.push({
   ),
 });
 
-const analyzerRoot = path.dirname(fileURLToPath(import.meta.url));
 const temporaryDirectory = mkdtempSync(path.join(os.tmpdir(), "canvas-analyzer-benchmark-"));
-const binaryPath = path.join(temporaryDirectory, "canvas-profile-analyzer");
 try {
-  execFileSync("go", ["build", "-o", binaryPath, "."], {
-    cwd: analyzerRoot,
-    stdio: "pipe",
-  });
-  const nativeStartedAt = performance.now();
-  const nativeOutput = execFileSync(binaryPath, ["--batch"], {
-    encoding: "utf8",
-    input: requestJson,
-    maxBuffer: 64 * 1024 * 1024,
-  });
-  const nativeResult = JSON.parse(nativeOutput);
-  const nativeDurationMs = performance.now() - nativeStartedAt;
-  measurements.push({
-    implementation: "go-batch-end-to-end",
-    bootstrapIterations: options.bootstrapIterations,
-    pairsPerComparison: baseline.length,
-    repetitions,
-    totalDurationMs: nativeDurationMs,
-    millisecondsPerComparison: nativeDurationMs / repetitions,
-    checksum: nativeResult.comparisons.reduce(
-      (sum, result) => sum + result.pairCount,
-      0,
-    ),
-    includes: ["JSON input", "process startup", "analysis", "JSON output"],
-    excludes: ["one-time go build"],
-  });
+  const nativeEnvironment = {
+    ...process.env,
+    GOCACHE: temporaryDirectory,
+  };
+  for (const cacheState of ["cold", "warm"]) {
+    const nativeStartedAt = performance.now();
+    const nativeResult: any = await compareNativeBatch(comparisons, {
+      env: nativeEnvironment,
+    });
+    const nativeDurationMs = performance.now() - nativeStartedAt;
+    measurements.push({
+      implementation: "go-run-batch-end-to-end",
+      cacheState,
+      bootstrapIterations: options.bootstrapIterations,
+      pairsPerComparison: baseline.length,
+      repetitions,
+      totalDurationMs: nativeDurationMs,
+      millisecondsPerComparison: nativeDurationMs / repetitions,
+      checksum: nativeResult.reduce(
+        (sum, result) => sum + result.pairCount,
+        0,
+      ),
+      includes: [
+        "JSON input",
+        "go run startup/build/link",
+        "analysis",
+        "JSON output",
+      ],
+    });
+  }
 } finally {
   rmSync(temporaryDirectory, { recursive: true, force: true });
 }

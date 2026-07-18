@@ -3,10 +3,11 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { performance } from "node:perf_hooks";
 import { after, before, test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { comparePairedSamples } from "../runtime/scripts/profile-compare.ts";
-import { compareNativeBatch } from "./native.ts";
+import { compareNativeBatch, compareNativeBatches } from "./native.ts";
 
 type AnalyzerRequest = {
   baseline: Array<number | null | string>;
@@ -151,4 +152,36 @@ test("Go batch transport and TypeScript bridge preserve comparison order", async
     cwd: analyzerRoot,
   });
   assertEquivalent(bridged, expected, "bridgedBatch");
+});
+
+test("TypeScript bridge aborts and awaits the complete subprocess tree", async () => {
+  const controller = new AbortController();
+  const childScript = [
+    "const { spawn } = require('node:child_process');",
+    "spawn(process.execPath, ['-e', 'setInterval(() => {}, 1000)'], { stdio: 'ignore' });",
+    "setInterval(() => {}, 1000);",
+  ].join("");
+  const startedAt = performance.now();
+  const pending = compareNativeBatch([edgeCases[0]], {
+    executable: process.execPath,
+    arguments: ["-e", childScript],
+    cwd: analyzerRoot,
+    timeoutMs: 10_000,
+    signal: controller.signal,
+  });
+  setTimeout(() => controller.abort(new Error("test abort")), 100);
+  await assert.rejects(pending, /test abort/);
+  assert.ok(performance.now() - startedAt < 3_000, "abort did not await prompt tree cleanup");
+});
+
+test("TypeScript bridge chunks large workloads without reordering results", async () => {
+  const expected = edgeCases.map(referenceComparison);
+  const chunked = await compareNativeBatches(edgeCases, {
+    executable: binaryPath,
+    arguments: ["--batch"],
+    cwd: analyzerRoot,
+    maximumBatchWork: 7_000,
+  });
+  assert.ok(chunked.batchCount > 1, "test workload did not exercise chunking");
+  assertEquivalent(chunked.comparisons, expected, "chunkedBatch");
 });

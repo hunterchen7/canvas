@@ -118,6 +118,9 @@ func finiteNumber(value any) (float64, bool) {
 	default:
 		return 0, false
 	}
+	if number == 0 {
+		number = 0
+	}
 	return number, !math.IsNaN(number) && !math.IsInf(number, 0)
 }
 
@@ -180,6 +183,10 @@ func validateRequest(input request) error {
 			return fmt.Errorf("options.zeroTolerance must be a finite number")
 		}
 	}
+	baselineValues := []float64{}
+	candidateValues := []float64{}
+	absoluteValues := []float64{}
+	percentValues := []float64{}
 	for index := 0; index < min(len(input.Baseline), len(input.Candidate)); index++ {
 		baseline, baselineOK := finiteNumber(input.Baseline[index])
 		candidate, candidateOK := finiteNumber(input.Candidate[index])
@@ -190,11 +197,27 @@ func validateRequest(input request) error {
 		if math.IsNaN(delta) || math.IsInf(delta, 0) {
 			return fmt.Errorf("pair %d produces a non-finite absolute delta", index)
 		}
+		baselineValues = append(baselineValues, baseline)
+		candidateValues = append(candidateValues, candidate)
+		absoluteValues = append(absoluteValues, delta)
 		if baseline != 0 {
 			percentage := (delta / math.Abs(baseline)) * 100
 			if math.IsNaN(percentage) || math.IsInf(percentage, 0) {
 				return fmt.Errorf("pair %d produces a non-finite percent delta", index)
 			}
+			percentValues = append(percentValues, percentage)
+		} else if candidate == 0 {
+			percentValues = append(percentValues, 0)
+		}
+	}
+	for name, values := range map[string][]float64{
+		"baseline":      baselineValues,
+		"candidate":     candidateValues,
+		"absoluteDelta": absoluteValues,
+		"percentDelta":  percentValues,
+	} {
+		if _, err := json.Marshal(summarizeDistribution(values, len(values))); err != nil {
+			return fmt.Errorf("%s distribution is not finite: %w", name, err)
 		}
 	}
 	return nil

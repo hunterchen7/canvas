@@ -6,6 +6,7 @@ import path from "node:path";
 import test from "node:test";
 import {
   assertBrowserErrorFree,
+  applyNativeAnalysis,
   assertObservedLibraryIdentity,
   createPairSchedule,
   createPortAllocator,
@@ -113,6 +114,42 @@ test("arguments accept the opt-in Go analysis engine", () => {
         { repositoryRoot, cwd },
       ),
     /analysis-engine must be one of typescript, go/,
+  );
+});
+
+test("native analysis replaces pending metrics and recomputes classifications", async () => {
+  const comparison = {
+    cases: [
+      {
+        classifications: { "pending-native-analysis": 2 },
+        metrics: [
+          { comparison: { classification: "pending-native-analysis" } },
+          { comparison: { classification: "pending-native-analysis" } },
+        ],
+      },
+    ],
+  };
+  const requests = [{ baseline: [1], candidate: [2] }, { baseline: [2], candidate: [1] }];
+  const batchCount = await applyNativeAnalysis(comparison, requests, {
+    compareBatches: async () => ({
+      batchCount: 2,
+      comparisons: [
+        { classification: "regression", pairCount: 1 },
+        { classification: "improvement", pairCount: 1 },
+      ],
+    }),
+  });
+  assert.equal(batchCount, 2);
+  assert.deepEqual(comparison.cases[0].classifications, {
+    regression: 1,
+    improvement: 1,
+  });
+  assert.equal((comparison.cases[0].metrics[0].comparison as any).pairCount, 1);
+  await assert.rejects(
+    applyNativeAnalysis(comparison, requests, {
+      compareBatches: async () => ({ batchCount: 1, comparisons: [] }),
+    }),
+    /returned 0 comparisons for 2 requests/,
   );
 });
 

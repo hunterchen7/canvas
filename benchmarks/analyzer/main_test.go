@@ -111,3 +111,23 @@ func TestRunAnalyzesBatches(t *testing.T) {
 		t.Fatalf("unexpected batch output: %s", output)
 	}
 }
+
+func TestRunNormalizesSignedZeroLikeJSONStringify(t *testing.T) {
+	directory := t.TempDir()
+	inputPath := filepath.Join(directory, "request.json")
+	outputPath := filepath.Join(directory, "result.json")
+	input := `{"baseline":[0,0,0,0,0],"candidate":[-0,-0,-0,-0,-0],"options":{"bootstrapIterations":10}}`
+	if err := os.WriteFile(inputPath, []byte(input), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := run([]string{"--input", inputPath, "--output", outputPath}); err != nil {
+		t.Fatal(err)
+	}
+	output, err := os.ReadFile(outputPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bytes.Contains(output, []byte("-0")) {
+		t.Fatalf("signed zero escaped normalization: %s", output)
+	}
+}

@@ -322,6 +322,36 @@ test("buildPairedProfileReport constructs case metrics and preserves display fra
   assert.equal(functionMetric.displayFrames.baseline[0].lineNumber, 10);
   assert.equal(functionMetric.displayFrames.candidate[0].lineNumber, 200);
   assert.equal(functionMetric.function.module, "/packages/canvas/src/render.ts");
+
+  const capturedComparisons = [];
+  const pendingReport = buildPairedProfileReport({
+    targets: {
+      baseline: { label: "old", root: "/work/baseline" },
+      candidate: { label: "new", root: "/work/candidate" },
+    },
+    cases: [{ name: "high", sections: 24 }],
+    runs,
+    settings: {
+      bootstrapIterations: 500,
+      bootstrapSeed: 7,
+      minimumPairs: 3,
+    },
+    compareSamples: (baseline, candidate, options) => {
+      capturedComparisons.push({ baseline, candidate, options });
+      return { classification: "pending-native-analysis" };
+    },
+  });
+  assert.equal(
+    capturedComparisons.length,
+    pendingReport.cases[0].metrics.length,
+  );
+  assert.ok(capturedComparisons.length > 0);
+  assert.equal(capturedComparisons[0].baseline.length, 3);
+  assert.equal(capturedComparisons[0].candidate.length, 3);
+  assert.equal(capturedComparisons[0].options.bootstrapIterations, 500);
+  assert.deepEqual(pendingReport.cases[0].classifications, {
+    "pending-native-analysis": capturedComparisons.length,
+  });
 });
 
 test("production source maps join differently hashed target bundles", (context) => {
