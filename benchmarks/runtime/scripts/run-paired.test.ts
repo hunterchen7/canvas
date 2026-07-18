@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { existsSync } from "node:fs";
 import { mkdir, mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -12,11 +13,17 @@ import {
   parseArguments,
   parseObservedLibraryIdentity,
   prepareOutputDirectory,
+  RUNTIME_RUNNER_PATH,
   targetOrder,
 } from "./run-paired.ts";
 
 const repositoryRoot = "/workspace/candidate";
 const cwd = "/workspace";
+
+test("paired captures spawn the TypeScript runtime entry point", () => {
+  assert.equal(path.basename(RUNTIME_RUNNER_PATH), "run.ts");
+  assert.equal(existsSync(RUNTIME_RUNNER_PATH), true);
+});
 
 test("paired order counterbalances baseline and candidate within each phase", () => {
   assert.deepEqual(targetOrder(1), ["baseline", "candidate"]);

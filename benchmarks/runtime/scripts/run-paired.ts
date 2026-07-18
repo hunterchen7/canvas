@@ -27,7 +27,7 @@ export { assertBrowserErrorFree };
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const runtimeRoot = path.resolve(scriptDirectory, "..");
 const defaultRepositoryRoot = path.resolve(runtimeRoot, "../..");
-const runtimeRunner = path.join(scriptDirectory, "run.mjs");
+export const RUNTIME_RUNNER_PATH = path.join(scriptDirectory, "run.ts");
 
 export const PAIRED_CAPTURE_SCHEMA_VERSION = "1.0.0";
 export const PROFILE_KINDS = Object.freeze([
@@ -682,7 +682,7 @@ async function runInvocation({
     invocation.label,
   ].join("-");
   const arguments_ = [
-    runtimeRunner,
+    RUNTIME_RUNNER_PATH,
     "--library-root",
     target.root,
     "--library-label",
