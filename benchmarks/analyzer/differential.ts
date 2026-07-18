@@ -180,8 +180,27 @@ test("TypeScript bridge chunks large workloads without reordering results", asyn
     executable: binaryPath,
     arguments: ["--batch"],
     cwd: analyzerRoot,
-    maximumBatchWork: 7_000,
+    maximumBatchComparisons: 3,
   });
   assert.ok(chunked.batchCount > 1, "test workload did not exercise chunking");
   assertEquivalent(chunked.comparisons, expected, "chunkedBatch");
+});
+
+test("TypeScript bridge rejects impossible batch ceilings before spawning", async () => {
+  await assert.rejects(
+    compareNativeBatches([edgeCases[0]], { maximumBatchComparisons: 0 }),
+    /maximumBatchComparisons must be a positive safe integer/,
+  );
+  await assert.rejects(
+    compareNativeBatches([edgeCases[0]], { maximumBatchWork: 1 }),
+    /exceeds maximumBatchWork/,
+  );
+  await assert.rejects(
+    compareNativeBatches([edgeCases[0]], { maximumBatchBytes: 18 }),
+    /exceeds maximumBatchBytes/,
+  );
+  await assert.rejects(
+    compareNativeBatches([edgeCases[0]], { timeoutMs: Number.NaN }),
+    /timeoutMs must be a positive finite number/,
+  );
 });

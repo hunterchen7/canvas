@@ -147,6 +147,18 @@ export async function compareNativeBatches(comparisons, {
   if (!Array.isArray(comparisons) || comparisons.length === 0) {
     throw new Error("Native analyzer requires at least one comparison");
   }
+  for (const [name, value] of Object.entries({
+    maximumBatchWork,
+    maximumBatchBytes,
+    maximumBatchComparisons,
+  })) {
+    if (!Number.isSafeInteger(value) || (value as number) <= 0) {
+      throw new Error(`${name} must be a positive safe integer`);
+    }
+  }
+  if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
+    throw new Error("timeoutMs must be a positive finite number");
+  }
   const batches = [];
   let current = [];
   let currentWork = 0;
@@ -154,6 +166,16 @@ export async function compareNativeBatches(comparisons, {
   for (const entry of comparisons) {
     const work = comparisonWork(entry);
     const bytes = Buffer.byteLength(JSON.stringify(entry)) + 1;
+    if (work > maximumBatchWork) {
+      throw new Error(
+        `Native analyzer comparison work ${work} exceeds maximumBatchWork ${maximumBatchWork}`,
+      );
+    }
+    if (18 + bytes > maximumBatchBytes) {
+      throw new Error(
+        `Native analyzer comparison size ${18 + bytes} exceeds maximumBatchBytes ${maximumBatchBytes}`,
+      );
+    }
     if (
       current.length > 0 &&
       (currentWork + work > maximumBatchWork ||
