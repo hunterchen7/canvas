@@ -6,7 +6,6 @@ import (
 	"math"
 	"sort"
 	"strconv"
-	"strings"
 	"unicode/utf16"
 )
 
@@ -14,6 +13,9 @@ const (
 	defaultBootstrapIterations = 10_000
 	defaultBootstrapSeed       = uint32(0x5eedc0de)
 	defaultMinimumPairs        = 5
+	maxSamplesPerSide          = 100_000
+	maxBootstrapIterations     = 1_000_000
+	maxWorkPerComparison       = 100_000_000
 )
 
 type request struct {
@@ -120,19 +122,34 @@ func finiteNumber(value any) (float64, bool) {
 }
 
 func validateRequest(input request) error {
+	if input.Baseline == nil || input.Candidate == nil {
+		return fmt.Errorf("baseline and candidate arrays are required")
+	}
+	if len(input.Baseline) > maxSamplesPerSide || len(input.Candidate) > maxSamplesPerSide {
+		return fmt.Errorf("baseline and candidate arrays must contain at most %d samples each", maxSamplesPerSide)
+	}
+	allowedOptions := map[string]bool{
+		"bootstrapIterations": true,
+		"lowerIsBetter":       true,
+		"minimumPairs":        true,
+		"seed":                true,
+		"zeroTolerance":       true,
+	}
+	for name := range input.Options {
+		if !allowedOptions[name] {
+			return fmt.Errorf("unknown option %q", name)
+		}
+	}
 	if value, exists := input.Options["lowerIsBetter"]; exists && value != nil {
 		if _, ok := value.(bool); !ok {
 			return fmt.Errorf("options.lowerIsBetter must be a boolean or null")
 		}
 	}
 	if value, exists := input.Options["seed"]; exists && value != nil {
-		switch typed := value.(type) {
+		switch value.(type) {
 		case string:
-			if strings.ContainsRune(typed, utf8ReplacementCharacter) {
-				return fmt.Errorf("options.seed must contain valid Unicode scalar values")
-			}
 		case json.Number:
-			if _, ok := finiteNumber(typed); !ok {
+			if _, ok := finiteNumber(value); !ok {
 				return fmt.Errorf("options.seed must be a finite number or string")
 			}
 		default:
@@ -146,15 +163,42 @@ func validateRequest(input request) error {
 			}
 		}
 	}
+	iterations := defaultBootstrapIterations
+	if value, exists := input.Options["bootstrapIterations"]; exists && value != nil {
+		parsed, _ := safeInteger(value)
+		iterations = max(1, int(parsed))
+	}
+	if iterations > maxBootstrapIterations {
+		return fmt.Errorf("options.bootstrapIterations must be at most %d", maxBootstrapIterations)
+	}
+	pairSlots := max(len(input.Baseline), len(input.Candidate), 1)
+	if int64(pairSlots)*int64(iterations) > maxWorkPerComparison {
+		return fmt.Errorf("comparison exceeds the %d sample-iteration work limit", maxWorkPerComparison)
+	}
 	if value, exists := input.Options["zeroTolerance"]; exists && value != nil {
 		if _, ok := finiteNumber(value); !ok {
 			return fmt.Errorf("options.zeroTolerance must be a finite number")
 		}
 	}
+	for index := 0; index < min(len(input.Baseline), len(input.Candidate)); index++ {
+		baseline, baselineOK := finiteNumber(input.Baseline[index])
+		candidate, candidateOK := finiteNumber(input.Candidate[index])
+		if !baselineOK || !candidateOK {
+			continue
+		}
+		delta := candidate - baseline
+		if math.IsNaN(delta) || math.IsInf(delta, 0) {
+			return fmt.Errorf("pair %d produces a non-finite absolute delta", index)
+		}
+		if baseline != 0 {
+			percentage := (delta / math.Abs(baseline)) * 100
+			if math.IsNaN(percentage) || math.IsInf(percentage, 0) {
+				return fmt.Errorf("pair %d produces a non-finite percent delta", index)
+			}
+		}
+	}
 	return nil
 }
-
-const utf8ReplacementCharacter = '\uFFFD'
 
 func safeInteger(value any) (int64, bool) {
 	number, ok := finiteNumber(value)

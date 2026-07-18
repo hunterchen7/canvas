@@ -34,6 +34,13 @@ Omit the paths, or pass `-`, to use stdin and stdout. A request has this shape:
 
 `baseline` and `candidate` must be arrays; non-numeric entries are treated as missing samples. `lowerIsBetter` accepts a boolean or `null`. The bootstrap seed accepts a finite JSON number or a string containing Unicode scalar values. Iteration and minimum-pair counts must be safe integers, and the zero tolerance must be finite. The CLI rejects other option types instead of applying JavaScript-specific coercions that cannot be represented portably in Go.
 
+For one process boundary across many metrics, pass `--batch` with
+`{"comparisons":[...requests]}`. The paired runtime runner uses this mode when
+invoked with `--analysis-engine go`. The CLI rejects unknown/missing fields,
+unpaired surrogate escapes, non-finite derived deltas, inputs over 16 MiB,
+more than 100,000 samples per side, more than 1,000,000 bootstrap iterations,
+or requests that exceed the documented sample-iteration work limits.
+
 ## Verify compatibility
 
 ```sh
@@ -50,4 +57,4 @@ node benchmarks/analyzer/benchmark.ts
 go -C benchmarks/analyzer test -run '^$' -bench BenchmarkComparePairedSamples -benchmem -count=5
 ```
 
-The TypeScript harness reports milliseconds per comparison. Go's standard benchmark reports nanoseconds per operation and allocation counts for the same 64-pair, 10,000-bootstrap workload. The command above collects five native samples. Compare medians across repeated runs on an otherwise idle machine; process startup is intentionally excluded from both measurements.
+The TypeScript harness reports both an in-process reference and a JSON batch path, then builds the Go binary outside the timed region and reports a full Go batch measurement that includes JSON input, process startup, analysis, and JSON output. Go's standard benchmark separately reports native nanoseconds per operation and allocation counts for the same 64-pair, 10,000-bootstrap workload. The command above collects five native in-process samples. Compare medians across repeated runs on an otherwise idle machine.

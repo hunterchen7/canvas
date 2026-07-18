@@ -6,6 +6,7 @@ import path from "node:path";
 import { after, before, test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { comparePairedSamples } from "../runtime/scripts/profile-compare.ts";
+import { compareNativeBatch } from "./native.ts";
 
 type AnalyzerRequest = {
   baseline: Array<number | null | string>;
@@ -133,4 +134,21 @@ test("Go analyzer output is byte-stable for identical inputs", () => {
   const first = execFileSync(binaryPath, [], { encoding: "utf8", input });
   const second = execFileSync(binaryPath, [], { encoding: "utf8", input });
   assert.equal(first, second);
+});
+
+test("Go batch transport and TypeScript bridge preserve comparison order", async () => {
+  const expected = edgeCases.map(referenceComparison);
+  const directOutput = execFileSync(binaryPath, ["--batch"], {
+    encoding: "utf8",
+    input: JSON.stringify({ comparisons: edgeCases }),
+  });
+  const direct = JSON.parse(directOutput).comparisons;
+  assertEquivalent(direct, expected, "directBatch");
+
+  const bridged = await compareNativeBatch(edgeCases, {
+    executable: binaryPath,
+    arguments: ["--batch"],
+    cwd: analyzerRoot,
+  });
+  assertEquivalent(bridged, expected, "bridgedBatch");
 });
