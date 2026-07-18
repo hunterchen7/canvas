@@ -27,6 +27,7 @@ function About() {
               <DraggableImage
                 className="absolute -bottom-[200px] -left-[600px] w-36"
                 key="pencils"
+                hoverScale={1.05}
                 src="/pencils.png"
                 alt="Pencils"
                 animate={{
@@ -42,6 +43,7 @@ function About() {
               <DraggableImage
                 className="absolute -right-[300px] bottom-[190px] w-24"
                 key="lightbulb"
+                hoverScale={1.05}
                 src="/lightbulb.png"
                 alt="Lightbulb"
                 animate={{
@@ -57,6 +59,7 @@ function About() {
               <DraggableImage
                 className="absolute -bottom-[400px] -right-[650px] w-24"
                 key="paintbrush"
+                hoverScale={1.05}
                 src="/paintbrush.png"
                 alt="Paintbrush"
                 animate={{
