@@ -32,6 +32,8 @@ Omit the paths, or pass `-`, to use stdin and stdout. A request has this shape:
 }
 ```
 
+`baseline` and `candidate` must be arrays; non-numeric entries are treated as missing samples. `lowerIsBetter` accepts a boolean or `null`. The bootstrap seed accepts a finite JSON number or a string containing Unicode scalar values. Iteration and minimum-pair counts must be safe integers, and the zero tolerance must be finite. The CLI rejects other option types instead of applying JavaScript-specific coercions that cannot be represented portably in Go.
+
 ## Verify compatibility
 
 ```sh

@@ -6,6 +6,7 @@ import (
 	"math"
 	"sort"
 	"strconv"
+	"strings"
 	"unicode/utf16"
 )
 
@@ -117,6 +118,43 @@ func finiteNumber(value any) (float64, bool) {
 	}
 	return number, !math.IsNaN(number) && !math.IsInf(number, 0)
 }
+
+func validateRequest(input request) error {
+	if value, exists := input.Options["lowerIsBetter"]; exists && value != nil {
+		if _, ok := value.(bool); !ok {
+			return fmt.Errorf("options.lowerIsBetter must be a boolean or null")
+		}
+	}
+	if value, exists := input.Options["seed"]; exists && value != nil {
+		switch typed := value.(type) {
+		case string:
+			if strings.ContainsRune(typed, utf8ReplacementCharacter) {
+				return fmt.Errorf("options.seed must contain valid Unicode scalar values")
+			}
+		case json.Number:
+			if _, ok := finiteNumber(typed); !ok {
+				return fmt.Errorf("options.seed must be a finite number or string")
+			}
+		default:
+			return fmt.Errorf("options.seed must be a finite number or string")
+		}
+	}
+	for _, name := range []string{"bootstrapIterations", "minimumPairs"} {
+		if value, exists := input.Options[name]; exists && value != nil {
+			if _, ok := safeInteger(value); !ok {
+				return fmt.Errorf("options.%s must be a safe integer", name)
+			}
+		}
+	}
+	if value, exists := input.Options["zeroTolerance"]; exists && value != nil {
+		if _, ok := finiteNumber(value); !ok {
+			return fmt.Errorf("options.zeroTolerance must be a finite number")
+		}
+	}
+	return nil
+}
+
+const utf8ReplacementCharacter = '\uFFFD'
 
 func safeInteger(value any) (int64, bool) {
 	number, ok := finiteNumber(value)

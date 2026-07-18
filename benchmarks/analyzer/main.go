@@ -78,6 +78,9 @@ func run(arguments []string) error {
 	if payload.Options == nil {
 		payload.Options = map[string]any{}
 	}
+	if err := validateRequest(payload); err != nil {
+		return fmt.Errorf("validate request: %w", err)
+	}
 
 	output, err := openOutput(*outputPath)
 	if err != nil {

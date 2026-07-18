@@ -39,3 +39,23 @@ func TestRunRejectsTrailingJSON(t *testing.T) {
 		t.Fatalf("error = %v, want trailing JSON rejection", err)
 	}
 }
+
+func TestRunRejectsNonPortableOptions(t *testing.T) {
+	for _, input := range []string{
+		`{"baseline":[1],"candidate":[2],"options":{"seed":[1,2]}}`,
+		`{"baseline":[1],"candidate":[2],"options":{"seed":{"a":1}}}`,
+		`{"baseline":[1],"candidate":[2],"options":{"seed":"\ud800"}}`,
+		`{"baseline":[1],"candidate":[2],"options":{"seed":1e400}}`,
+		`{"baseline":[1],"candidate":[2],"options":{"lowerIsBetter":1e400}}`,
+	} {
+		directory := t.TempDir()
+		inputPath := filepath.Join(directory, "request.json")
+		if err := os.WriteFile(inputPath, []byte(input), 0o600); err != nil {
+			t.Fatal(err)
+		}
+		err := run([]string{"--input", inputPath, "--output", filepath.Join(directory, "result.json")})
+		if err == nil || !strings.Contains(err.Error(), "validate request") {
+			t.Errorf("input %s: error = %v, want validation failure", input, err)
+		}
+	}
+}
