@@ -1,5 +1,51 @@
 # Changelog
 
+## [0.12.1](https://github.com/hunterchen7/canvas/compare/canvas-v0.12.0...canvas-v0.12.1) (2026-07-18)
+
+This release reduces rendering, subscription, and interaction hot-path overhead while adding reproducible before/after performance and strict visual-parity tooling. The public API and import paths are unchanged, so no migration is required. The complete work landed in [PR #49](https://github.com/hunterchen7/canvas/pull/49).
+
+### Performance improvements
+
+* Reduced unnecessary React work by sharing window-size updates, removing duplicate internal dimension subscriptions, skipping unused high-mode visibility subscriptions, stopping loading-state updates after the intro, and avoiding toolbar React renders unless custom formatters need them.
+* Reduced wheel and pan property reads, removed per-event pinch arrays and midpoint allocations, and reused draggable-image geometry for bounds and alpha hit-testing.
+* Improved consumer tree-shaking by marking only CSS as side-effectful and removed Framer Motion overhead from the already-static default intro logo.
+
+### Benchmark evidence
+
+Against `0.12.0`, two independent 10-pair production-profiling fixture runs produced:
+
+| Metric | Replication A | Replication B |
+| --- | ---: | ---: |
+| Total React Profiler work | 65.05 → 22.35 ms | 63.85 → 21.15 ms |
+| React commits | 754 → 20 | 789 → 20 |
+| Active listeners | 273 → 221 | 273 → 221 |
+| Active resize listeners | 79 → 27 | 79 → 27 |
+
+The primary React-work metrics improved in every measured pair: about 66% less total React Profiler work and 97.3–97.5% fewer commits. These are fixture-specific React Profiler and listener measurements, not whole-application CPU-cycle or FPS guarantees.
+
+Pinned-toolchain consumer fixture bundles all became smaller. Focused-import gzip bundles shrank 10.9–89.5%, the `Draggable` fixture shrank 21.3%, and the full `Canvas` fixture shrank 0.18%; generated CSS was byte-identical. The packed npm artifact instead grew from 99,302 to 101,288 bytes (+2.000%), with the same 95 files, and remained within the explicitly reviewed package-size gate.
+
+A fail-closed 14-scenario Chromium comparison at 1280×720/DPR 1 detected 0 differing pixels across 12,902,400 compared pixels, 0 px maximum geometry difference, and 0 numeric difference across 160 interaction checkpoints. Animation semantics and sampled trajectories also matched in the fixed benchmark environment.
+
+### Fixes and examples
+
+* Made shared window-dimension snapshots deterministic and hydration-safe.
+* Restored the HackWestern example's 1.05× draggable-image hover expansion by opting that demo into the existing `hoverScale` behavior; this is not a new library default.
+
+### Benchmarking and CI
+
+* Added paired production-runtime benchmarks for React commits and render work, listeners, frame pacing, Long Tasks, Long Animation Frames, heap usage, and motion trajectories.
+* Added opt-in CPU, browser-trace, allocation, and forced-GC profiling, plus exact screenshot, DOM, style, SVG, geometry, interaction, and animation-parity comparisons.
+* Added Node 24 CI checks for dependency auditing, package and fixture types, tests, builds, consumer bundle/package budgets, fail-closed browser capture, and strict parity.
+
+### Measurement scope and disclosed tradeoffs
+
+* Final-head frame-time signals were noisy or inconclusive, so this release does not claim universally higher FPS or smoother frames. A single report-only dynamic-toolbar p99 warning did not reproduce in six focused repeats.
+* Two forced-GC studies found about 1.1–1.4% more incremental live-heap growth even though absolute post-capture live heap decreased by roughly 257–305 KB and sampled allocation traffic improved. This release therefore does not claim uniformly lower memory use.
+* CPU, trace, and allocation profiles remain diagnostic: they were captured on a near-final source revision before the final hydration-only change and are not presented as release-head guarantees.
+
+See the [full benchmark evidence and interpretation limits](https://github.com/hunterchen7/canvas/blob/8740f0c356cc252bea0b0457ee9384afd0df17c2/benchmarks/results/pr-49/README.md).
+
 ## [0.12.0](https://github.com/hunterchen7/canvas/compare/canvas-v0.11.1...canvas-v0.12.0) (2026-02-25)
 
 
