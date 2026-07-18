@@ -14,6 +14,8 @@ const serverId = process.env.CANVAS_E2E_SERVER_ID || "local";
 const libraryIdentity = JSON.parse(
   process.env.CANVAS_LIBRARY_IDENTITY_JSON || "null",
 );
+const virtualLibraryIdentityId = "virtual:canvas-library-identity";
+const resolvedVirtualLibraryIdentityId = `\0${virtualLibraryIdentityId}`;
 
 export default defineConfig({
   root: fixtureRoot,
@@ -22,9 +24,21 @@ export default defineConfig({
   esbuild: {
     jsx: "automatic",
   },
-  define: {
-    __CANVAS_LIBRARY_IDENTITY__: JSON.stringify(libraryIdentity),
-  },
+  plugins: [
+    {
+      name: "canvas-library-identity",
+      resolveId(source) {
+        return source === virtualLibraryIdentityId
+          ? resolvedVirtualLibraryIdentityId
+          : null;
+      },
+      load(id) {
+        return id === resolvedVirtualLibraryIdentityId
+          ? `export default ${JSON.stringify(libraryIdentity)};`
+          : null;
+      },
+    },
+  ],
   resolve: {
     alias: {
       "@canvas-source": path.join(libraryRoot, "src/index.ts"),

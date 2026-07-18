@@ -1,4 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useState } from "react";
+// @ts-expect-error -- virtual module supplied by benchmarks/e2e/vite.config.mjs
+import libraryIdentity from "virtual:canvas-library-identity";
 import {
   Canvas,
   CanvasComponent,
@@ -36,8 +38,6 @@ type LibraryIdentity = {
   };
   [key: string]: unknown;
 };
-
-declare const __CANVAS_LIBRARY_IDENTITY__: LibraryIdentity | null;
 
 declare global {
   interface Window {
@@ -112,7 +112,7 @@ function HarnessBridge() {
   });
 
   useEffect(() => {
-    window.__CANVAS_LIBRARY_IDENTITY__ = __CANVAS_LIBRARY_IDENTITY__;
+    window.__CANVAS_LIBRARY_IDENTITY__ = libraryIdentity as LibraryIdentity | null;
     window.__CANVAS_HARNESS__ = {
       ready: true,
       read: () => {
