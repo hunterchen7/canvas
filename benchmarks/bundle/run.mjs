@@ -42,6 +42,8 @@ Options:
   --write-baseline <file>           Write current results as a JSON baseline
   --output <file>                   Write current results to a JSON file
   --byte-tolerance-percent <value>  Allowed byte growth (default: 0)
+  --package-byte-tolerance-percent <value>
+                                    Allowed npm package byte growth (default: byte tolerance)
   --module-tolerance <value>        Allowed module-count growth (default: 0)
   --file-tolerance <value>          Allowed package file-count growth (default: 0)
   --skip-build                      Reuse the existing dist directory
@@ -67,6 +69,7 @@ function parseArguments(argv) {
     writeBaseline: undefined,
     output: undefined,
     byteTolerancePercent: 0,
+    packageByteTolerancePercent: undefined,
     moduleTolerance: 0,
     fileTolerance: 0,
     skipBuild: false,
@@ -100,6 +103,12 @@ function parseArguments(argv) {
           argument,
         );
         break;
+      case "--package-byte-tolerance-percent":
+        options.packageByteTolerancePercent = parseNumberOption(
+          nextValue(),
+          argument,
+        );
+        break;
       case "--module-tolerance":
         options.moduleTolerance = parseNumberOption(nextValue(), argument);
         break;
@@ -120,6 +129,8 @@ function parseArguments(argv) {
         throw new Error(`Unknown option: ${argument}`);
     }
   }
+
+  options.packageByteTolerancePercent ??= options.byteTolerancePercent;
 
   return options;
 }
@@ -604,7 +615,7 @@ function compareResults(current, baseline, options) {
         baseline.package[metric],
         allowedByteValue(
           baseline.package[metric],
-          options.byteTolerancePercent,
+          options.packageByteTolerancePercent,
         ),
       );
     }

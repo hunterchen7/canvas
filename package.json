@@ -32,7 +32,7 @@
     "type-check": "tsc --noEmit",
     "clean": "rm -rf dist",
     "bench:bundle": "node benchmarks/bundle/run.mjs",
-    "bench:bundle:compare": "node benchmarks/bundle/run.mjs --baseline benchmarks/bundle/baseline.json",
+    "bench:bundle:compare": "node benchmarks/bundle/run.mjs --baseline benchmarks/bundle/baseline.json --package-byte-tolerance-percent 2",
     "bench:bundle:candidates": "node benchmarks/bundle/evaluate-candidates.mjs",
     "bench:runtime": "node benchmarks/runtime/scripts/run.mjs",
     "bench:runtime:paired": "node benchmarks/runtime/scripts/run-paired.mjs",

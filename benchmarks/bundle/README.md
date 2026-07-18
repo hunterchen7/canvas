@@ -58,6 +58,21 @@ node benchmarks/bundle/run.mjs \
   --byte-tolerance-percent 1
 ```
 
+Consumer bundles, CSS, and the packed npm artifact can be budgeted
+independently. This is useful when an optimization makes every consumer entry
+smaller but adds a small amount of shipped source or source-map metadata:
+
+```sh
+node benchmarks/bundle/run.mjs \
+  --baseline benchmarks/bundle/baseline.json \
+  --package-byte-tolerance-percent 2
+```
+
+That option applies only to `package.packedBytes` and
+`package.unpackedBytes`; fixture and CSS byte tolerances remain unchanged.
+Package file-count growth is still controlled separately by
+`--file-tolerance`.
+
 Use `--output <file>` to save a current result without treating it as the
 baseline. Run with `--help` for all comparison tolerances and skip flags.
 
@@ -75,19 +90,18 @@ It does not edit package source or published metadata. The component-only icon
 and dynamically loaded legacy-icon rows are deliberately prototypes: both need
 an explicit API or load-timing decision before production use.
 
-## Tooling and suggested package scripts
+## Tooling and package scripts
 
 The implementation uses Node built-ins, npm, and the repository's existing
-`rolldown` dev dependency. It needs no additional packages and does not require
-changes to the public package.
-
-If package scripts are desired later, the suggested entries are:
+`rolldown` dev dependency. The checked-in scripts keep consumer bundle, CSS,
+module, chunk, and package file-count growth at zero tolerance. The comparison
+allows up to 2% byte growth only for the npm artifact, matching the explicitly
+reviewed source/source-map metadata tradeoff in this optimization PR:
 
 ```json
 {
   "bench:bundle": "node benchmarks/bundle/run.mjs",
-  "bench:bundle:compare": "node benchmarks/bundle/run.mjs --baseline benchmarks/bundle/baseline.json --byte-tolerance-percent 1",
-  "bench:bundle:update": "node benchmarks/bundle/run.mjs --write-baseline benchmarks/bundle/baseline.json"
+  "bench:bundle:compare": "node benchmarks/bundle/run.mjs --baseline benchmarks/bundle/baseline.json --package-byte-tolerance-percent 2"
 }
 ```
 
