@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { spawn } from "node:child_process";
-import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -94,8 +94,10 @@ function viewportFor(mode, values) {
 async function waitForServer(url, processHandle, timeoutMs) {
   const startedAt = Date.now();
   while (Date.now() - startedAt < timeoutMs) {
-    if (processHandle?.exitCode != null) {
-      throw new Error(`Vite exited before becoming ready (${processHandle.exitCode})`);
+    if (processHandle?.exitCode != null || processHandle?.signalCode != null) {
+      throw new Error(
+        `Vite exited before becoming ready (${processHandle.exitCode ?? processHandle.signalCode})`,
+      );
     }
     try {
       const response = await fetch(url);
@@ -109,15 +111,68 @@ async function waitForServer(url, processHandle, timeoutMs) {
 }
 
 async function stopServer(processHandle) {
-  if (!processHandle || processHandle.exitCode != null) return;
+  if (
+    !processHandle ||
+    processHandle.exitCode != null ||
+    processHandle.signalCode != null
+  ) {
+    return;
+  }
   const exited = new Promise((resolve) => {
     processHandle.once("exit", resolve);
   });
   processHandle.kill("SIGTERM");
-  await Promise.race([
-    exited,
-    new Promise((resolve) => setTimeout(resolve, 2_000)),
+  const stopped = await Promise.race([
+    exited.then(() => true),
+    new Promise((resolve) => setTimeout(() => resolve(false), 2_000)),
   ]);
+  if (
+    !stopped &&
+    processHandle.exitCode == null &&
+    processHandle.signalCode == null
+  ) {
+    processHandle.kill("SIGKILL");
+    await Promise.race([
+      exited,
+      new Promise((resolve) => setTimeout(resolve, 2_000)),
+    ]);
+  }
+}
+
+function pipeProcessOutput(processHandle) {
+  processHandle.stdout.on("data", (chunk) => process.stderr.write(chunk));
+  processHandle.stderr.on("data", (chunk) => process.stderr.write(chunk));
+}
+
+async function waitForSuccessfulExit(processHandle, description) {
+  const { code, signal } = await new Promise((resolve, reject) => {
+    processHandle.once("error", reject);
+    processHandle.once("exit", (code, signal) => resolve({ code, signal }));
+  });
+  if (code !== 0) {
+    throw new Error(
+      `${description} failed (${signal ? `signal ${signal}` : `exit ${code}`})`,
+    );
+  }
+}
+
+function attachRunnerProvenance(
+  benchmarkResult,
+  { expected, observed, verified, source, execution },
+) {
+  if (!benchmarkResult || typeof benchmarkResult !== "object") {
+    return benchmarkResult;
+  }
+  return {
+    ...benchmarkResult,
+    library: {
+      source,
+      expected,
+      observed,
+      verified,
+    },
+    execution,
+  };
 }
 
 async function phase(page, name, action, deepProfile) {
@@ -147,12 +202,18 @@ async function waitForMotion(page, timeoutMs = 7000) {
 async function main() {
   const values = parseArguments(process.argv.slice(2));
   const suppliedUrl = values.get("url");
+  const production = boolean(values, "production", false);
   const requestedLibraryRoot = values.get("library-root");
   const explicitLibrarySelection =
     requestedLibraryRoot != null || values.has("library-label");
   if (suppliedUrl && requestedLibraryRoot != null) {
     throw new Error(
       "--url and --library-root cannot be combined because an external server's source cannot be selected locally",
+    );
+  }
+  if (suppliedUrl && production) {
+    throw new Error(
+      "--url and --production cannot be combined because an external server cannot be built locally",
     );
   }
   const libraryTarget = suppliedUrl
@@ -212,23 +273,103 @@ async function main() {
   let page = null;
   let result = null;
   let runnerError = null;
+  let deferredCleanupError = null;
   let deepProfile = null;
   let deepProfileResult = null;
   let viteCacheDirectory = null;
+  let productionWorkspace = null;
+  let productionBuildDirectory = null;
+  let buildProcess = null;
   let observedLibraryIdentity = null;
+  let libraryIdentityVerified = false;
 
   try {
     if (!suppliedUrl) {
-      if (explicitLibrarySelection) {
+      if (production) {
+        productionWorkspace = await mkdtemp(
+          path.join(os.tmpdir(), "canvas-runtime-production-"),
+        );
+        productionBuildDirectory = path.join(productionWorkspace, "dist");
+        viteCacheDirectory = path.join(productionWorkspace, "vite-cache");
+      } else if (explicitLibrarySelection) {
         viteCacheDirectory = await mkdtemp(
           path.join(os.tmpdir(), "canvas-runtime-vite-"),
         );
       }
       const viteBin = path.join(repositoryRoot, "node_modules/vite/bin/vite.js");
+      const viteEnvironment = {
+        ...process.env,
+        CANVAS_BENCHMARK_LIBRARY_ROOT: libraryTarget.root,
+        CANVAS_BENCHMARK_LIBRARY_LABEL: libraryTarget.identity.label,
+        ...(viteCacheDirectory
+          ? { CANVAS_BENCHMARK_VITE_CACHE_DIR: viteCacheDirectory }
+          : {}),
+        ...(productionBuildDirectory
+          ? {
+              CANVAS_BENCHMARK_BUILD_OUT_DIR: productionBuildDirectory,
+              CANVAS_BENCHMARK_BUILD_SOURCEMAP: "true",
+              CANVAS_BENCHMARK_REACT_PROFILING: "true",
+            }
+          : {}),
+      };
+
+      if (production) {
+        buildProcess = spawn(
+          process.execPath,
+          [
+            viteBin,
+            "build",
+            "--config",
+            path.join(runtimeRoot, "vite.config.ts"),
+            "--configLoader",
+            "runner",
+          ],
+          {
+            cwd: repositoryRoot,
+            env: viteEnvironment,
+            stdio: ["ignore", "pipe", "pipe"],
+          },
+        );
+        pipeProcessOutput(buildProcess);
+        await waitForSuccessfulExit(buildProcess, "Vite production build");
+
+        const postBuildTarget = await resolveLibraryTarget({
+          repositoryRoot,
+          libraryRoot: requestedLibraryRoot,
+          libraryLabel: values.get("library-label"),
+        });
+        try {
+          assertMatchingLibraryIdentity(
+            libraryTarget.identity,
+            postBuildTarget.identity,
+          );
+        } catch (error) {
+          throw new Error(
+            "Library source identity changed while the production bundle was being built; refusing to benchmark a stale bundle",
+            { cause: error },
+          );
+        }
+
+        if (profilingEnabled) {
+          await mkdir(deepProfileDirectory, { recursive: true });
+          const preservedBuildDirectory = path.join(
+            deepProfileDirectory,
+            "production-build",
+          );
+          await rm(preservedBuildDirectory, { recursive: true, force: true });
+          await cp(
+            productionBuildDirectory,
+            preservedBuildDirectory,
+            { recursive: true, force: true },
+          );
+        }
+      }
+
       server = spawn(
         process.execPath,
         [
           viteBin,
+          ...(production ? ["preview"] : []),
           "--config",
           path.join(runtimeRoot, "vite.config.ts"),
           "--host",
@@ -236,25 +377,17 @@ async function main() {
           "--port",
           String(port),
           "--strictPort",
-          ...(explicitLibrarySelection
+          ...(explicitLibrarySelection || production
             ? ["--configLoader", "runner"]
             : []),
         ],
         {
           cwd: repositoryRoot,
-          env: {
-            ...process.env,
-            CANVAS_BENCHMARK_LIBRARY_ROOT: libraryTarget.root,
-            CANVAS_BENCHMARK_LIBRARY_LABEL: libraryTarget.identity.label,
-            ...(viteCacheDirectory
-              ? { CANVAS_BENCHMARK_VITE_CACHE_DIR: viteCacheDirectory }
-              : {}),
-          },
+          env: viteEnvironment,
           stdio: ["ignore", "pipe", "pipe"],
         },
       );
-      server.stdout.on("data", (chunk) => process.stderr.write(chunk));
-      server.stderr.on("data", (chunk) => process.stderr.write(chunk));
+      pipeProcessOutput(server);
       await waitForServer(baseUrl, server, timeoutMs);
     }
 
@@ -286,6 +419,14 @@ async function main() {
           seed,
           viewport,
           url: baseUrl,
+          execution: {
+            serverMode: production
+              ? "production-bundle"
+              : "development-server",
+            sourceMaps: production,
+            preservedBuildDirectory:
+              production && profilingEnabled ? "production-build" : null,
+          },
           library: libraryTarget?.identity ?? {
             label: values.get("library-label") ?? "external-url",
             externalUrl: baseUrl,
@@ -312,6 +453,7 @@ async function main() {
       libraryTarget?.identity ?? null,
       observedLibraryIdentity,
     );
+    libraryIdentityVerified = true;
     process.stderr.write(
       `[library] ${observedLibraryIdentity.label} ${observedLibraryIdentity.proof} (${observedLibraryIdentity.source.hash})\n`,
     );
@@ -419,6 +561,25 @@ async function main() {
     if (!result) throw error;
     process.exitCode = 1;
   } finally {
+    result = attachRunnerProvenance(result, {
+      expected: libraryTarget?.identity ?? null,
+      observed: observedLibraryIdentity,
+      verified: libraryIdentityVerified,
+      source: suppliedUrl ? "external-url" : "local-source",
+      execution: {
+        serverMode: suppliedUrl
+          ? "external-url"
+          : production
+            ? "production-bundle"
+            : "development-server",
+        reactRuntime: suppliedUrl
+          ? "external-unknown"
+          : production
+            ? "production-profiling"
+            : "development",
+        sourceMaps: production,
+      },
+    });
     if (deepProfile) {
       try {
         deepProfileResult = await deepProfile.stop({
@@ -430,14 +591,32 @@ async function main() {
         process.stderr.write(
           `[profile] ${profileError instanceof Error ? profileError.stack ?? profileError.message : profileError}\n`,
         );
-        if (!runnerError) throw profileError;
+        if (!runnerError) deferredCleanupError = profileError;
       }
     }
-    await browser?.close();
-    await stopServer(server);
-    if (viteCacheDirectory) {
-      await rm(viteCacheDirectory, { recursive: true, force: true });
+    for (const cleanup of [
+      () => browser?.close(),
+      () => stopServer(server),
+      () => stopServer(buildProcess),
+      () =>
+        productionWorkspace
+          ? rm(productionWorkspace, { recursive: true, force: true })
+          : viteCacheDirectory
+            ? rm(viteCacheDirectory, { recursive: true, force: true })
+            : undefined,
+    ]) {
+      try {
+        await cleanup();
+      } catch (cleanupError) {
+        process.stderr.write(
+          `[cleanup] ${cleanupError instanceof Error ? cleanupError.stack ?? cleanupError.message : cleanupError}\n`,
+        );
+        if (!runnerError && !deferredCleanupError) {
+          deferredCleanupError = cleanupError;
+        }
+      }
     }
+    if (deferredCleanupError) throw deferredCleanupError;
   }
 
   const serialized = `${JSON.stringify(result, null, 2)}\n`;

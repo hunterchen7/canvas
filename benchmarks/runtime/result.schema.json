@@ -97,7 +97,9 @@
     "profilerSamples": {
       "type": "array",
       "items": { "type": "object" }
-    }
+    },
+    "library": { "$ref": "#/$defs/libraryProvenance" },
+    "execution": { "$ref": "#/$defs/executionProvenance" }
   },
   "$defs": {
     "config": {
@@ -184,6 +186,75 @@
         "maxPanStepPx": { "type": "number", "minimum": 0 },
         "maxScaleStep": { "type": "number", "minimum": 0 },
         "trajectoryHash": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "libraryIdentity": {
+      "type": "object",
+      "required": [
+        "schemaVersion",
+        "label",
+        "package",
+        "root",
+        "sourceEntry",
+        "source",
+        "git",
+        "proof"
+      ],
+      "properties": {
+        "schemaVersion": { "type": "string" },
+        "label": { "type": "string" },
+        "package": { "type": "object" },
+        "root": { "type": "string" },
+        "sourceEntry": { "type": "string" },
+        "source": {
+          "type": "object",
+          "required": ["algorithm", "hash", "fileCount", "bytes"],
+          "properties": {
+            "algorithm": { "const": "sha256" },
+            "hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+            "fileCount": { "type": "integer", "minimum": 1 },
+            "bytes": { "type": "integer", "minimum": 1 }
+          },
+          "additionalProperties": false
+        },
+        "git": { "type": "object" },
+        "proof": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      },
+      "additionalProperties": false
+    },
+    "libraryProvenance": {
+      "type": "object",
+      "required": ["source", "expected", "observed", "verified"],
+      "properties": {
+        "source": { "enum": ["local-source", "external-url"] },
+        "expected": {
+          "anyOf": [
+            { "$ref": "#/$defs/libraryIdentity" },
+            { "type": "null" }
+          ]
+        },
+        "observed": {
+          "anyOf": [
+            { "$ref": "#/$defs/libraryIdentity" },
+            { "type": "null" }
+          ]
+        },
+        "verified": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "executionProvenance": {
+      "type": "object",
+      "required": ["serverMode", "reactRuntime", "sourceMaps"],
+      "properties": {
+        "serverMode": {
+          "enum": ["development-server", "production-bundle", "external-url"]
+        },
+        "reactRuntime": {
+          "enum": ["development", "production-profiling", "external-unknown"]
+        },
+        "sourceMaps": { "type": "boolean" }
       },
       "additionalProperties": false
     }
