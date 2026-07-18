@@ -6,24 +6,31 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "@playwright/test";
 import { stopChildProcessTree } from "../../e2e/process-tree.mjs";
-import { startDeepProfile } from "./deep-profile.mjs";
+import { startDeepProfile } from "./deep-profile.ts";
 import {
   browserErrorFailure,
   createBrowserErrorCollector,
   emptyBrowserErrorProvenance,
   failResultForBrowserErrors,
-} from "./browser-errors.mjs";
+} from "./browser-errors.ts";
 import {
   assertMatchingLibraryIdentity,
   resolveLibraryTarget,
-} from "./library-target.mjs";
+} from "./library-target.ts";
 import {
   allocateEphemeralPort,
   assertFreshOutputFile,
   assertSeparateArtifactPaths,
   claimFreshDirectory,
   writeFileExclusive,
-} from "./runtime-safety.mjs";
+} from "./runtime-safety.ts";
+
+declare global {
+  interface Window {
+    __CANVAS_BENCHMARK__: any;
+    __CANVAS_BENCHMARK_LIBRARY__: any;
+  }
+}
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const runtimeRoot = path.resolve(scriptDirectory, "..");
@@ -194,7 +201,10 @@ function pipeProcessOutput(processHandle) {
 }
 
 async function waitForSuccessfulExit(processHandle, description) {
-  const { code, signal } = await new Promise((resolve, reject) => {
+  const { code, signal } = await new Promise<{
+    code: number | null;
+    signal: NodeJS.Signals | null;
+  }>((resolve, reject) => {
     processHandle.once("error", reject);
     processHandle.once("exit", (code, signal) => resolve({ code, signal }));
   });

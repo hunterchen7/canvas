@@ -4,7 +4,7 @@ import {
   summarizeCpuProfile,
   summarizeHeapProfile,
   summarizeTrace,
-} from "./profile-summary.mjs";
+} from "./profile-summary.ts";
 
 test("summarizeCpuProfile attributes self and recursive inclusive time", () => {
   const profile = {

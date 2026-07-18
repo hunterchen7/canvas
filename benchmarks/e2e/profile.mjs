@@ -12,9 +12,9 @@ import {
   deepProfileScenarioNames,
   runProfileScenario,
 } from "./scenarios.mjs";
-import { startDeepProfile } from "../runtime/scripts/deep-profile.mjs";
-import { resolveLibraryTarget } from "../runtime/scripts/library-target.mjs";
-import { comparePairedSamples } from "../runtime/scripts/profile-compare.mjs";
+import { startDeepProfile } from "../runtime/scripts/deep-profile.ts";
+import { resolveLibraryTarget } from "../runtime/scripts/library-target.ts";
+import { comparePairedSamples } from "../runtime/scripts/profile-compare.ts";
 
 const e2eRoot = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(e2eRoot, "../..");

@@ -7,7 +7,7 @@ export async function portIsAvailable(port) {
     const server = net.createServer();
     server.unref();
     server.once("error", (error) => {
-      if (error?.code === "EADDRINUSE") resolve(false);
+      if ((error as NodeJS.ErrnoException).code === "EADDRINUSE") resolve(false);
       else reject(error);
     });
     server.listen({ host: "127.0.0.1", port, exclusive: true }, () => {

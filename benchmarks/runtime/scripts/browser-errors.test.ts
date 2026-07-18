@@ -5,13 +5,13 @@ import {
   createBrowserErrorCollector,
   emptyBrowserErrorProvenance,
   failResultForBrowserErrors,
-} from "./browser-errors.mjs";
+} from "./browser-errors.ts";
 
 test("browser error collector records page and console errors until stopped", () => {
   const page = new EventEmitter();
   const stderr = [];
   const collector = createBrowserErrorCollector(page, {
-    stderr: { write: (value) => stderr.push(value) },
+    stderr: { write: (value) => Boolean(stderr.push(value)) },
   });
 
   page.emit("console", {

@@ -23,7 +23,7 @@ Use **Run in page** to execute the synthetic browser scenario and download its J
 The runner starts and stops Vite itself, drives Chromium, prints one JSON result to stdout, and can also write a result file:
 
 ```sh
-node benchmarks/runtime/scripts/run.mjs \
+node benchmarks/runtime/scripts/run.ts \
   --sections 24 \
   --nav-items 8 \
   --complexity 24 \

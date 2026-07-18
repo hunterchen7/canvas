@@ -14,7 +14,7 @@ import {
   summarizeCpuProfile,
   summarizeHeapProfile,
   summarizeTrace,
-} from "./profile-summary.mjs";
+} from "./profile-summary.ts";
 
 const gunzipAsync = promisify(gunzip);
 
@@ -235,6 +235,24 @@ function extractReactSummary(benchmarkResult) {
 }
 
 class DeepProfileController {
+  declare page: any;
+  declare outputDirectory: string;
+  declare kinds: string[];
+  declare cpuSamplingIntervalUs: number;
+  declare allocationSamplingIntervalBytes: number;
+  declare runMetadata: any;
+  declare manifestKind: string;
+  declare session: any;
+  declare browserMetadata: any;
+  declare cpuStarted: boolean;
+  declare traceStarted: boolean;
+  declare allocationsStarted: boolean;
+  declare startedAtIso: string | null;
+  declare stoppedAtIso: string | null;
+  declare warnings: string[];
+  declare captureErrors: any[];
+  declare stopPromise: Promise<any> | null;
+
   constructor({
     page,
     outputDirectory,
@@ -243,7 +261,7 @@ class DeepProfileController {
     allocationSamplingIntervalBytes,
     runMetadata,
     manifestKind,
-  }) {
+  }: any) {
     if (!page || typeof page.context !== "function") {
       throw new Error("startDeepProfile requires a Playwright Page");
     }
@@ -345,7 +363,7 @@ class DeepProfileController {
       );
       try {
         await this.session.send("Tracing.end");
-        const completion = await waiter.promise;
+        const completion: any = await waiter.promise;
         if (completion?.stream) {
           await this.session.send("IO.close", { handle: completion.stream });
         }
@@ -424,12 +442,12 @@ class DeepProfileController {
     }
   }
 
-  async stop(options = {}) {
+  async stop(options: any = {}) {
     if (!this.stopPromise) this.stopPromise = this.stopOnce(options);
     return this.stopPromise;
   }
 
-  async stopOnce({ benchmarkResult = null, status, error = null } = {}) {
+  async stopOnce({ benchmarkResult = null, status, error = null }: any = {}) {
     const benchmarkStatus =
       status ??
       (benchmarkResult && typeof benchmarkResult === "object"
@@ -442,7 +460,7 @@ class DeepProfileController {
       this.outputDirectory,
       "allocations.heapprofile",
     );
-    const artifacts = {};
+    const artifacts: Record<string, any> = {};
     let cpuProfile = null;
     let heapProfile = null;
 
@@ -478,7 +496,7 @@ class DeepProfileController {
               waiter.cancel();
               throw traceEndError;
             }
-            const completion = await waiter.promise;
+            const completion: any = await waiter.promise;
             if (!completion?.stream) {
               throw new Error("Tracing completed without an IO stream handle");
             }

@@ -14,13 +14,13 @@ import os from "node:os";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { assertBrowserErrorFree } from "./browser-errors.mjs";
-import { resolveLibraryTarget } from "./library-target.mjs";
-import { buildPairedProfileReport } from "./profile-compare.mjs";
+import { assertBrowserErrorFree } from "./browser-errors.ts";
+import { resolveLibraryTarget } from "./library-target.ts";
+import { buildPairedProfileReport } from "./profile-compare.ts";
 import {
   allocateEphemeralPort,
   portIsAvailable,
-} from "./runtime-safety.mjs";
+} from "./runtime-safety.ts";
 
 export { assertBrowserErrorFree };
 
@@ -41,7 +41,7 @@ function printHelp() {
   process.stdout.write(`Canvas paired runtime capture runner
 
 Usage:
-  node benchmarks/runtime/scripts/run-paired.mjs [options]
+  node benchmarks/runtime/scripts/run-paired.ts [options]
 
 Source and output:
   --baseline-root PATH       Reference library worktree (required)
@@ -121,7 +121,7 @@ export function parseArguments(
     repositoryRoot = defaultRepositoryRoot,
     cwd = process.cwd(),
     now = new Date(),
-  } = {},
+  }: any = {},
 ) {
   const timestamp = now.toISOString().replace(/[:.]/g, "-");
   const options = {
@@ -576,6 +576,9 @@ async function waitForProcessTreeExit(child, timeoutMs) {
 }
 
 class ChildSupervisor {
+  declare children: Set<any>;
+  declare terminations: Map<any, Promise<any>>;
+
   constructor() {
     this.children = new Set();
     this.terminations = new Map();
@@ -1028,16 +1031,16 @@ function publicSettings(options) {
     order:
       "Odd pairs run baseline then candidate; even pairs run candidate then baseline.",
     captureIsolation:
-      "Every target invocation starts a fresh run.mjs, Vite server, browser, and optional single-kind profiler.",
+      "Every target invocation starts a fresh run.ts, Vite server, browser, and optional single-kind profiler.",
     sourceVerification:
-      "Source-only SHA-256/Git provenance is resolved before capture and run.mjs verifies the page-exposed proof after navigation.",
+      "Source-only SHA-256/Git provenance is resolved before capture and run.ts verifies the page-exposed proof after navigation.",
     performanceGate: false,
   };
 }
 
 function reportDocument(state) {
   const completed = [...state.warmups, ...state.pairs].flatMap((pair) =>
-    Object.values(pair.targets),
+    Object.values(pair.targets) as any[],
   );
   const completeCount = completed.filter(
     (invocation) => invocation.status === "complete",

@@ -884,7 +884,7 @@ function correlatePhaseActivity(
   rasterIntervals,
   compositorIntervals,
 ) {
-  const phases = {};
+  const phases: Record<string, any> = {};
   for (const [phaseName, phaseWindows] of phaseData.intervalsByPhase) {
     const clipped = clipIntervalsToWindows(mainThreadIntervals, phaseWindows);
     phases[phaseName] = {

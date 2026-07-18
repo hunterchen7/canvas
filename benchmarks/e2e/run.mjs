@@ -10,8 +10,8 @@ import { compareScenario } from "./compare.mjs";
 import { installBrowserInstrumentation } from "./instrumentation.mjs";
 import { allScenarioNames, runScenarios } from "./scenarios.mjs";
 import { STRICT_PARITY_THRESHOLDS } from "./thresholds.mjs";
-import { resolveLibraryTarget } from "../runtime/scripts/library-target.mjs";
-import { createPortAllocator } from "../runtime/scripts/run-paired.mjs";
+import { resolveLibraryTarget } from "../runtime/scripts/library-target.ts";
+import { createPortAllocator } from "../runtime/scripts/run-paired.ts";
 import {
   assertDistinctSourceTargets,
   assertStableSourceTargets,

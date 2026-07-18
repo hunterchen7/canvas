@@ -13,7 +13,7 @@ import {
   parseObservedLibraryIdentity,
   prepareOutputDirectory,
   targetOrder,
-} from "./run-paired.mjs";
+} from "./run-paired.ts";
 
 const repositoryRoot = "/workspace/candidate";
 const cwd = "/workspace";

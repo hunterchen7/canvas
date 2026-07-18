@@ -76,7 +76,7 @@ function provenanceFor(events) {
 
 export function createBrowserErrorCollector(
   page,
-  { stderr = process.stderr } = {},
+  { stderr = process.stderr }: any = {},
 ) {
   if (!page || typeof page.on !== "function" || typeof page.off !== "function") {
     throw new Error("createBrowserErrorCollector requires a Playwright Page");

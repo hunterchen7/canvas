@@ -10,7 +10,7 @@ import {
   claimFreshDirectory,
   portIsAvailable,
   writeFileExclusive,
-} from "./runtime-safety.mjs";
+} from "./runtime-safety.ts";
 
 test("runtime artifacts are claimed without overwriting stale paths", async () => {
   const temporary = await mkdtemp(

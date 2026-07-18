@@ -9,7 +9,7 @@ import {
   comparePairedSamples,
   flattenProfileRun,
   summarizeDistribution,
-} from "./profile-compare.mjs";
+} from "./profile-compare.ts";
 
 test("summarizeDistribution reports robust and conventional statistics", () => {
   const summary = summarizeDistribution([0, 1, 2, 3, 100, null, NaN, Infinity]);

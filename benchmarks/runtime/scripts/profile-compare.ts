@@ -180,7 +180,7 @@ function classifyInterval(
 export function comparePairedSamples(
   baselineInput,
   candidateInput,
-  options = {},
+  options: any = {},
 ) {
   const baselineSupplied = valuesFrom(baselineInput);
   const candidateSupplied = valuesFrom(candidateInput);
@@ -354,7 +354,7 @@ function pathFromUrl(value, origins) {
 }
 
 /** Normalize origins and Vite /@fs URLs while making target roots comparable. */
-export function canonicalizeProfileUrl(value, options = {}) {
+export function canonicalizeProfileUrl(value, options: any = {}) {
   if (typeof value !== "string" || value.trim() === "") return "<anonymous>";
   const trimmed = value.trim();
   if (/^<[^>]+>$/u.test(trimmed)) return trimmed;
@@ -575,7 +575,7 @@ function metricDirection(key) {
   return true;
 }
 
-function addMetric(metrics, key, value, metadata = {}) {
+function addMetric(metrics, key, value, metadata: any = {}) {
   const number = finiteNumber(value);
   if (number == null) return;
   metrics.set(key, {
@@ -705,7 +705,7 @@ function groupedFrames(entries, canonicalOptions, symbolicateFrame = null) {
 }
 
 /** Flatten one deep-profile capture into joinable scalar metric records. */
-export function flattenProfileRun(run, options = {}) {
+export function flattenProfileRun(run, options: any = {}) {
   const summary = run?.profileSummary ?? run?.summary ?? {};
   const metrics = new Map();
   const runtimeResult = run?.runtimeResult ?? null;
@@ -931,7 +931,7 @@ function targetEntries(targets, runs) {
   if (targets && typeof targets === "object") {
     return Object.entries(targets).map(([key, target]) =>
       target && typeof target === "object"
-        ? { ...target, key, label: target.label ?? key }
+        ? { ...target, key, label: (target as any).label ?? key }
         : { key, label: String(target ?? key) },
     );
   }
@@ -989,7 +989,7 @@ export function buildPairedProfileReport({
   runs = [],
   settings = {},
   environment = null,
-} = {}) {
+}: any = {}) {
   const warnings = [MULTIPLE_COMPARISONS_WARNING];
   const normalizedTargets = targetEntries(targets, runs);
   const baselineKey = String(settings.baselineTarget ?? normalizedTargets[0]?.key ?? "baseline");
@@ -1050,7 +1050,7 @@ export function buildPairedProfileReport({
         candidate: flattenTarget(pair[candidateKey], candidateKey),
       };
     });
-    const metricKeys = new Set();
+    const metricKeys = new Set<string>();
     for (const pair of flattened) {
       for (const key of pair.baseline.keys()) metricKeys.add(key);
       for (const key of pair.candidate.keys()) metricKeys.add(key);
