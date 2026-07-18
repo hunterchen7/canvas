@@ -375,8 +375,21 @@ function targetOrder(pairNumber) {
     : ["candidate", "baseline"];
 }
 
-function numericProfileMetrics(summary, kind, actionDurationMs) {
+function numericProfileMetrics(
+  summary,
+  kind,
+  actionDurationMs,
+  forcedGcLiveHeap,
+) {
   const metrics = { actionDurationMs };
+  if (forcedGcLiveHeap) {
+    metrics["forcedGcLiveHeap.beforeBytes"] =
+      forcedGcLiveHeap.before?.usedSizeBytes;
+    metrics["forcedGcLiveHeap.afterBytes"] =
+      forcedGcLiveHeap.after?.usedSizeBytes;
+    metrics["forcedGcLiveHeap.deltaBytes"] =
+      forcedGcLiveHeap.delta?.usedSizeBytes;
+  }
   if (kind === "cpu" && summary?.cpu) {
     metrics.cpuDurationMs = summary.cpu.durationMs;
     metrics.cpuSampledTimeMs = summary.cpu.sampledTimeMs;
@@ -587,6 +600,7 @@ async function runTarget({
                   startsAfterProfilePrepare: true,
                   containsOnlyProfileAct: true,
                   parityActRunsInSeparateInstrumentedContext: true,
+                  forcedGcLiveHeapCollectedOutsideCapture: true,
                 },
               },
             }),
@@ -613,6 +627,7 @@ async function runTarget({
             execution.capture?.summary,
             kind,
             execution.result.actionDurationMs,
+            execution.result.forcedGcLiveHeap,
           ),
     };
   } catch (error) {
@@ -775,7 +790,7 @@ async function main() {
     targetOrder:
       "Even counts alternate baseline-first and candidate-first within every scenario/kind.",
     captureMode:
-      "One isolated cpu, trace, or allocations capture around profileAct only; parity reruns separately.",
+      "One isolated cpu, trace, or allocations capture around profileAct only; forced-GC live heap brackets the capture and cleanup; parity reruns separately.",
     sourceVerification:
       "Runner-started Vite servers use canonical roots with source-only SHA-256 and Git tree provenance.",
     performanceGate: false,

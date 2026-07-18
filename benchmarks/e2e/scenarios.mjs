@@ -39,6 +39,77 @@ function subtractMetrics(beforeResponse, afterResponse) {
   );
 }
 
+function normalizeHeapUsage(response, checkpoint) {
+  const requiredFields = {
+    usedSizeBytes: response?.usedSize,
+    totalSizeBytes: response?.totalSize,
+  };
+  for (const [name, value] of Object.entries(requiredFields)) {
+    if (!Number.isFinite(value) || value < 0) {
+      throw new Error(
+        `Runtime.getHeapUsage returned invalid ${name} at ${checkpoint}: ${String(value)}`,
+      );
+    }
+  }
+
+  const optionalFields = {
+    embedderHeapUsedSizeBytes: response?.embedderHeapUsedSize,
+    backingStorageSizeBytes: response?.backingStorageSize,
+  };
+  for (const [name, value] of Object.entries(optionalFields)) {
+    if (value != null && (!Number.isFinite(value) || value < 0)) {
+      throw new Error(
+        `Runtime.getHeapUsage returned invalid ${name} at ${checkpoint}: ${String(value)}`,
+      );
+    }
+  }
+
+  return {
+    ...requiredFields,
+    ...Object.fromEntries(
+      Object.entries(optionalFields).filter(([, value]) => value != null),
+    ),
+  };
+}
+
+/**
+ * Forces a major collection outside the action capture, then reads the live
+ * renderer-isolate heap. Exported so the protocol order and response contract
+ * can be validated without launching Chromium.
+ */
+export async function collectForcedGcLiveHeap(cdp, checkpoint) {
+  if (!cdp || typeof cdp.send !== "function") {
+    throw new Error("A CDP session is required to collect forced-GC live heap");
+  }
+  await cdp.send("HeapProfiler.collectGarbage");
+  return normalizeHeapUsage(
+    await cdp.send("Runtime.getHeapUsage"),
+    checkpoint,
+  );
+}
+
+export function summarizeForcedGcLiveHeap(before, after) {
+  return {
+    source: "Runtime.getHeapUsage after HeapProfiler.collectGarbage",
+    unit: "bytes",
+    before,
+    after,
+    delta: Object.fromEntries(
+      Object.keys(before)
+        .filter((name) => Number.isFinite(after[name]))
+        .map((name) => [name, after[name] - before[name]]),
+    ),
+  };
+}
+
+async function clearProfileCaptureEntries(page) {
+  await page.evaluate(() => {
+    performance.clearMarks("canvas:phase:action:start");
+    performance.clearMarks("canvas:phase:action:end");
+    performance.clearMeasures("canvas:phase:action");
+  });
+}
+
 async function waitForFixture(page, { requireStageTwo = true } = {}) {
   await page.waitForFunction(() => window.__CANVAS_HARNESS__?.ready === true, null, {
     timeout: 12_000,
@@ -1170,6 +1241,7 @@ export async function runProfileScenario({
   let profileState = null;
   let loadedSourceIdentity = null;
   let profileActionDurationMs = null;
+  let forcedGcLiveHeap = null;
 
   try {
     await scenario.prepare(profilePage, profileUrl);
@@ -1182,6 +1254,11 @@ export async function runProfileScenario({
       (await scenario.profilePrepare?.(profilePage, profileCdp, {
         workloadScale,
       })) ?? null;
+
+    const liveHeapBefore = await collectForcedGcLiveHeap(
+      profileCdp,
+      "before-profile-start",
+    );
 
     if (createCapture) {
       capture = await createCapture({
@@ -1235,6 +1312,7 @@ export async function runProfileScenario({
                 sleeps: false,
                 settling: false,
                 browserInstrumentation: false,
+                forcedGcLiveHeapCollectedOutsideCapture: true,
               },
             },
           });
@@ -1245,6 +1323,15 @@ export async function runProfileScenario({
           profileState,
         });
         profileCleaned = true;
+        await clearProfileCaptureEntries(profilePage);
+        const liveHeapAfter = await collectForcedGcLiveHeap(
+          profileCdp,
+          "after-profile-stop-and-cleanup",
+        );
+        forcedGcLiveHeap = summarizeForcedGcLiveHeap(
+          liveHeapBefore,
+          liveHeapAfter,
+        );
       }
     }
     if (profileError) throw profileError;
@@ -1259,6 +1346,7 @@ export async function runProfileScenario({
           profileActionDurationMs,
           workloadScale,
           loadedSourceIdentity,
+          forcedGcLiveHeap,
         },
         capture: captureResult,
         loadedSourceIdentity,
@@ -1327,10 +1415,12 @@ export async function runProfileScenario({
       parityActionDurationMs,
       loadedSourceIdentity,
       parityLoadedSourceIdentity,
+      forcedGcLiveHeap,
       captureBoundary: {
         startsAfterProfilePrepare: true,
         containsOnlyProfileAct: true,
         parityActRunsInSeparateInstrumentedContext: true,
+        forcedGcLiveHeapCollectedOutsideCapture: true,
       },
       performance: {
         browser: browserPerformance,

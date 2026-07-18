@@ -82,6 +82,17 @@ group. Warmups run the workload without recording a profile; every measured
 target gets an isolated context and exactly one CPU, trace, or allocation
 capture around the amplified action.
 
+Every target also records a forced-GC live-heap measurement in that same clean
+profile context. After scenario preparation, the runner calls
+`HeapProfiler.collectGarbage` and reads `Runtime.getHeapUsage` immediately
+before starting the profiler. It stops the capture and runs scenario cleanup
+before forcing GC and reading the heap again. The scenario result retains the
+full before/after/delta record, and target aggregates expose
+`forcedGcLiveHeap.beforeBytes`, `.afterBytes`, and `.deltaBytes` as
+lower-is-better paired metrics. Both collections are deliberately outside the
+action capture, so their CPU and GC work cannot contaminate the recorded hot
+path.
+
 `--kinds cpu,trace,allocations` is supported, but the kinds are still captured
 separately and the full matrix can be very large. Prefer three serial
 invocations with distinct output directories so failures and resource pressure
@@ -128,6 +139,16 @@ not proof of a causal improvement: profiler overhead, headless rendering,
 background load, thermal state, and a small number of pairs can all move the
 result. Inspect the raw profiles, parity artifacts, pair direction, and effect
 size, then reproduce important findings in another serial run.
+
+Forced-GC live-heap delta is retained JavaScript heap for the whole renderer
+isolate after scenario cleanup, not total allocation volume and not proof of a
+memory leak. Browser caches, GC compaction, and unrelated fixture state can
+move it or make a single delta negative. The profiler lifecycle also sits
+between the endpoints, although harness-owned User Timing entries are cleared
+before the second collection. Compare only the same profile kind under matching
+browser/settings, use the paired distribution rather than one run, and use
+allocation profiles when the question is which call sites allocate during the
+action.
 
 ## Artifacts
 
