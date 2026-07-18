@@ -29,7 +29,9 @@
     "build:css": "tailwindcss -i ./src/styles.css -o ./dist/styles.css --minify",
     "build:js": "rolldown -c",
     "build:types": "tsc --emitDeclarationOnly",
+    "test": "node --test",
     "type-check": "tsc --noEmit",
+    "type-check:benchmarks": "tsc -p benchmarks/runtime && tsc -p benchmarks/e2e && tsc -p tests",
     "clean": "rm -rf dist",
     "bench:bundle": "node benchmarks/bundle/run.mjs",
     "bench:bundle:compare": "node benchmarks/bundle/run.mjs --baseline benchmarks/bundle/baseline.json --package-byte-tolerance-percent 2",
@@ -52,7 +54,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",
-    "@types/node": "^25.0.6",
+    "@types/node": "^24.13.3",
     "@types/pixelmatch": "^5.2.6",
     "@types/pngjs": "^6.0.5",
     "@types/react": "19.0.12",

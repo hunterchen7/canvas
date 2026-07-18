@@ -29,6 +29,15 @@ The default command rebuilds `dist` before measuring it:
 node benchmarks/bundle/run.mjs
 ```
 
+Use the Node version pinned in the repository's `.nvmrc`. The JSON baseline
+records both Node and Rolldown versions, and comparison refuses a toolchain
+mismatch because gzip and npm tarball output can change across Node/npm releases.
+The baseline was regenerated under Node 24.18.0/npm 11.16.0 by backporting this
+suite to the recorded historical sources: `476f6c9` for the original fixtures
+and `f435142` for `DefaultIntroContent`, which was introduced later. Current
+candidate measurements were not promoted into the baseline. Changing the pin
+requires the same explicit historical remeasurement.
+
 Reuse an existing build when iterating on the benchmark itself:
 
 ```sh

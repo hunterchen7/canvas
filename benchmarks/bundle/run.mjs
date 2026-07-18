@@ -498,6 +498,12 @@ function compareResults(current, baseline, options) {
     );
   }
 
+  if (baseline.toolchain.node !== current.toolchain.node) {
+    throw new Error(
+      `Node.js version mismatch: baseline ${baseline.toolchain.node}, current ${current.toolchain.node}.`,
+    );
+  }
+
   if (baseline.toolchain.rolldown !== current.toolchain.rolldown) {
     throw new Error(
       `Rolldown version mismatch: baseline ${baseline.toolchain.rolldown}, current ${current.toolchain.rolldown}.`,

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "toolchain": {
-    "node": "25.5.0",
+    "node": "24.18.0",
     "rolldown": "1.0.0-rc.2"
   },
   "configuration": {
@@ -21,7 +21,7 @@
       "externalPeers": {
         "bytes": {
           "raw": 584206,
-          "gzip": 148748,
+          "gzip": 147799,
           "brotli": 118833
         },
         "chunks": 1,
@@ -39,7 +39,7 @@
           "initial": {
             "bytes": {
               "raw": 584206,
-              "gzip": 148748,
+              "gzip": 147799,
               "brotli": 118833
             },
             "chunks": 1,
@@ -73,7 +73,7 @@
       "bundled": {
         "bytes": {
           "raw": 716837,
-          "gzip": 190265,
+          "gzip": 190665,
           "brotli": 156604
         },
         "chunks": 1,
@@ -95,7 +95,7 @@
           "initial": {
             "bytes": {
               "raw": 716837,
-              "gzip": 190265,
+              "gzip": 190665,
               "brotli": 156604
             },
             "chunks": 1,
@@ -135,7 +135,7 @@
       "externalPeers": {
         "bytes": {
           "raw": 4272,
-          "gzip": 1963,
+          "gzip": 1962,
           "brotli": 1725
         },
         "chunks": 1,
@@ -149,7 +149,7 @@
           "initial": {
             "bytes": {
               "raw": 4272,
-              "gzip": 1963,
+              "gzip": 1962,
               "brotli": 1725
             },
             "chunks": 1,
@@ -179,7 +179,7 @@
       "bundled": {
         "bytes": {
           "raw": 128096,
-          "gzip": 41762,
+          "gzip": 41806,
           "brotli": 37324
         },
         "chunks": 1,
@@ -198,7 +198,7 @@
           "initial": {
             "bytes": {
               "raw": 128096,
-              "gzip": 41762,
+              "gzip": 41806,
               "brotli": 37324
             },
             "chunks": 1,
@@ -235,7 +235,7 @@
       "externalPeers": {
         "bytes": {
           "raw": 26204,
-          "gzip": 8502,
+          "gzip": 8538,
           "brotli": 7453
         },
         "chunks": 1,
@@ -252,7 +252,7 @@
           "initial": {
             "bytes": {
               "raw": 26204,
-              "gzip": 8502,
+              "gzip": 8538,
               "brotli": 7453
             },
             "chunks": 1,
@@ -285,7 +285,7 @@
       "bundled": {
         "bytes": {
           "raw": 143592,
-          "gzip": 46046,
+          "gzip": 46166,
           "brotli": 41068
         },
         "chunks": 1,
@@ -306,7 +306,7 @@
           "initial": {
             "bytes": {
               "raw": 143592,
-              "gzip": 46046,
+              "gzip": 46166,
               "brotli": 41068
             },
             "chunks": 1,
@@ -345,7 +345,7 @@
       "externalPeers": {
         "bytes": {
           "raw": 572154,
-          "gzip": 144102,
+          "gzip": 143336,
           "brotli": 114984
         },
         "chunks": 1,
@@ -363,7 +363,7 @@
           "initial": {
             "bytes": {
               "raw": 572154,
-              "gzip": 144102,
+              "gzip": 143336,
               "brotli": 114984
             },
             "chunks": 1,
@@ -397,7 +397,7 @@
       "bundled": {
         "bytes": {
           "raw": 702878,
-          "gzip": 185371,
+          "gzip": 185875,
           "brotli": 152548
         },
         "chunks": 1,
@@ -419,7 +419,7 @@
           "initial": {
             "bytes": {
               "raw": 702878,
-              "gzip": 185371,
+              "gzip": 185875,
               "brotli": 152548
             },
             "chunks": 1,
@@ -503,7 +503,7 @@
       "bundled": {
         "bytes": {
           "raw": 125757,
-          "gzip": 40859,
+          "gzip": 40905,
           "brotli": 36573
         },
         "chunks": 1,
@@ -522,7 +522,7 @@
           "initial": {
             "bytes": {
               "raw": 125757,
-              "gzip": 40859,
+              "gzip": 40905,
               "brotli": 36573
             },
             "chunks": 1,
@@ -603,7 +603,7 @@
       "bundled": {
         "bytes": {
           "raw": 125830,
-          "gzip": 40895,
+          "gzip": 40942,
           "brotli": 36605
         },
         "chunks": 1,
@@ -622,7 +622,7 @@
           "initial": {
             "bytes": {
               "raw": 125830,
-              "gzip": 40895,
+              "gzip": 40942,
               "brotli": 36605
             },
             "chunks": 1,
@@ -659,7 +659,7 @@
       "externalPeers": {
         "bytes": {
           "raw": 2186,
-          "gzip": 1095,
+          "gzip": 1096,
           "brotli": 964
         },
         "chunks": 1,
@@ -673,7 +673,7 @@
           "initial": {
             "bytes": {
               "raw": 2186,
-              "gzip": 1095,
+              "gzip": 1096,
               "brotli": 964
             },
             "chunks": 1,
@@ -703,7 +703,7 @@
       "bundled": {
         "bytes": {
           "raw": 125845,
-          "gzip": 40886,
+          "gzip": 40932,
           "brotli": 36538
         },
         "chunks": 1,
@@ -722,7 +722,7 @@
           "initial": {
             "bytes": {
               "raw": 125845,
-              "gzip": 40886,
+              "gzip": 40932,
               "brotli": 36538
             },
             "chunks": 1,
@@ -759,7 +759,7 @@
       "externalPeers": {
         "bytes": {
           "raw": 27360,
-          "gzip": 9042,
+          "gzip": 9088,
           "brotli": 7945
         },
         "chunks": 1,
@@ -776,7 +776,7 @@
           "initial": {
             "bytes": {
               "raw": 27360,
-              "gzip": 9042,
+              "gzip": 9088,
               "brotli": 7945
             },
             "chunks": 1,
@@ -809,7 +809,7 @@
       "bundled": {
         "bytes": {
           "raw": 151226,
-          "gzip": 48742,
+          "gzip": 48869,
           "brotli": 43358
         },
         "chunks": 1,
@@ -830,7 +830,7 @@
           "initial": {
             "bytes": {
               "raw": 151226,
-              "gzip": 48742,
+              "gzip": 48869,
               "brotli": 43358
             },
             "chunks": 1,
@@ -869,13 +869,13 @@
   "assets": {
     "styles": {
       "raw": 12786,
-      "gzip": 3383,
+      "gzip": 3374,
       "brotli": 2933
     }
   },
   "package": {
-    "packedBytes": 99130,
-    "unpackedBytes": 382945,
+    "packedBytes": 99302,
+    "unpackedBytes": 382417,
     "files": 95
   }
 }
