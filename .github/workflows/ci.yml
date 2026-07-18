@@ -28,6 +28,11 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
 
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version-file: benchmarks/analyzer/go.mod
+          cache-dependency-path: benchmarks/analyzer/go.mod
+
       - run: npm ci
 
       - name: Install browser runtime
@@ -44,6 +49,9 @@ jobs:
 
       - name: Run tests
         run: npm test
+
+      - name: Verify native analyzer parity
+        run: npm run test:analyzer
 
       - name: Build package
         run: npm run build
