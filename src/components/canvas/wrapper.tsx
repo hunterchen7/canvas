@@ -68,7 +68,7 @@ export const CanvasWrapper = ({
 
   // add up to 4 dots, then go back down to 2
   useEffect(() => {
-    if (skipIntro) return; // Don't animate dots if skipping intro
+    if (skipIntro || !stage1NotFinished) return;
 
     const interval = setInterval(() => {
       setDots((prevDots) => {
@@ -80,7 +80,7 @@ export const CanvasWrapper = ({
       });
     }, 500);
     return () => clearInterval(interval);
-  }, [skipIntro]);
+  }, [skipIntro, stage1NotFinished]);
 
   useEffect(() => {
     if (skipIntro) return; // Don't calculate dimensions if skipping intro

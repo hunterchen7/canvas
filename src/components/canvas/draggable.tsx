@@ -153,14 +153,12 @@ function getAlphaAtCoords(
   clientX: number,
   clientY: number,
   canvas: HTMLCanvasElement | null,
-  img: HTMLImageElement | null,
+  rect: DOMRect,
 ): number {
-  if (!canvas || !img) return 0;
+  if (!canvas) return 0;
 
   const ctx = canvas.getContext("2d");
   if (!ctx) return 0;
-
-  const rect = img.getBoundingClientRect();
 
   const x = ((clientX - rect.left) / rect.width) * canvas.width;
   const y = ((clientY - rect.top) / rect.height) * canvas.height;
@@ -172,10 +170,8 @@ function getAlphaAtCoords(
 function isMouseOverImage(
   clientX: number,
   clientY: number,
-  img: HTMLImageElement | null,
+  rect: DOMRect,
 ) {
-  if (!img) return false;
-  const rect = img.getBoundingClientRect();
   return (
     clientX >= rect.left &&
     clientX <= rect.right &&
@@ -234,22 +230,22 @@ export function DraggableImage(props: DraggableImageProps) {
   // handle global mouse move to update cursor and opacity
   useEffect(() => {
     const handleGlobalMouseMove = (e: MouseEvent) => {
-      if (
-        !isMouseDown.current &&
-        isMouseOverImage(e.clientX, e.clientY, imgRef.current)
-      ) {
+      const img = imgRef.current;
+      if (!isMouseDown.current && img) {
+        const rect = img.getBoundingClientRect();
+        if (!isMouseOverImage(e.clientX, e.clientY, rect)) return;
         const alpha = getAlphaAtCoords(
           e.clientX,
           e.clientY,
           canvasRef.current,
-          imgRef.current,
+          rect,
         );
 
         // checking alpha > n rather than 0 to not trigger on shadows and such
         const opaque = alpha > 128;
 
         setIsOpaque(opaque);
-        updateCursor(opaque, false, imgRef.current);
+        updateCursor(opaque, false, img);
       }
     };
     window.addEventListener("mousemove", handleGlobalMouseMove);

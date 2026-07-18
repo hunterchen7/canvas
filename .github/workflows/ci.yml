@@ -1,0 +1,110 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate package
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install browser runtime
+        run: npm exec -- playwright install --with-deps chromium
+
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
+
+      - name: Type-check package
+        run: npm run type-check
+
+      - name: Type-check benchmark fixtures
+        run: npm run type-check:benchmarks
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build package
+        run: npm run build
+
+  bundle-and-parity:
+    name: Bundle and strict parity gates
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Detect library source changes
+        id: source_changes
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if git diff --quiet "$BASE_SHA" "$GITHUB_SHA" -- src; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install browser runtime
+        if: steps.source_changes.outputs.changed == 'true'
+        run: npm exec -- playwright install --with-deps chromium
+
+      - name: Compare consumer bundles and package budget
+        run: npm run bench:bundle:compare
+
+      - name: Create untouched baseline worktree
+        if: steps.source_changes.outputs.changed == 'true'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: git worktree add --detach "$RUNNER_TEMP/canvas-baseline" "$BASE_SHA"
+
+      - name: Run strict browser parity
+        id: parity
+        if: steps.source_changes.outputs.changed == 'true'
+        run: >-
+          npm run bench:parity --
+          --baseline-root "$RUNNER_TEMP/canvas-baseline"
+          --candidate-root "$GITHUB_WORKSPACE"
+          --sections 100
+          --output "$RUNNER_TEMP/canvas-parity"
+
+      - name: Upload parity evidence
+        if: always() && steps.source_changes.outputs.changed == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: strict-parity-${{ github.sha }}
+          path: ${{ runner.temp }}/canvas-parity
+          if-no-files-found: error
+          retention-days: 30

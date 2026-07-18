@@ -3,7 +3,7 @@ import type { SectionCoordinates } from "../../types";
 import { useCanvasContext } from "../../contexts/CanvasContext";
 import { motion } from "framer-motion";
 import useWindowDimensions from "../../hooks/useWindowDimensions";
-import { usePerformanceMode } from "../../hooks/usePerformanceMode";
+import { usePerformanceModeForWidth } from "../../hooks/usePerformanceMode";
 import {
   VIEWPORT_HYSTERESIS_BUFFER,
   IMAGE_FALLBACK_WIDTH_THRESHOLD,
@@ -91,7 +91,7 @@ export const CanvasComponent: FC<CanvasProps> = ({
 }) => {
   const { x, y, scale, animationStage, nextTargetSection } = useCanvasContext();
   const { width } = useWindowDimensions();
-  const { mode } = usePerformanceMode();
+  const { mode } = usePerformanceModeForWidth(width);
 
   // Subscribe to motion value changes so we re-render while panning/zooming
   const [sceneX, setSceneX] = useState(() => x.get());
@@ -99,6 +99,8 @@ export const CanvasComponent: FC<CanvasProps> = ({
   const [sceneScale, setSceneScale] = useState(() => scale.get());
 
   useEffect(() => {
+    if (mode === "high") return;
+
     // rAF-batched subscription updates without pulling state vars into deps
     let frame: number | null = null;
     const next = { x: x.get(), y: y.get(), s: scale.get() };
@@ -124,13 +126,18 @@ export const CanvasComponent: FC<CanvasProps> = ({
       next.s = v;
       schedule();
     });
+
+    setSceneX(next.x);
+    setSceneY(next.y);
+    setSceneScale(next.s);
+
     return () => {
       unSubX();
       unSubY();
       unSubScale();
       if (frame != null) cancelAnimationFrame(frame);
     };
-  }, [x, y, scale]);
+  }, [x, y, scale, mode]);
 
   const margin = () => {
     if (!offset) {

@@ -23,6 +23,7 @@ function Hero() {
             />
             <DraggableImage
               key="hw-logo"
+              hoverScale={1.05}
               onDragStart={() => setHasBeenDragged(true)}
               animate={{
                 rotate: [2, -2],

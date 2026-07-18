@@ -4,7 +4,7 @@ import SingleButton from "./single-button";
 import type { NavItem, NavbarConfig, NavbarPosition } from "../../../types";
 import { useCanvasContext } from "../../../contexts/CanvasContext";
 import useWindowDimensions from "../../../hooks/useWindowDimensions";
-import { usePerformanceMode } from "../../../hooks/usePerformanceMode";
+import { usePerformanceModeForWidth } from "../../../hooks/usePerformanceMode";
 import {
   getScreenSizeEnum,
   getSectionPanCoordinates,
@@ -88,7 +88,7 @@ export default function Navbar({
   );
 
   const { height, width } = useWindowDimensions();
-  const { mode } = usePerformanceMode();
+  const { mode } = usePerformanceModeForWidth(width);
 
   const defaultZoom = responsiveZoomMap[getScreenSizeEnum(width)];
 

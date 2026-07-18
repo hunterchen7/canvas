@@ -1,0 +1,4042 @@
+{
+  "schemaVersion": "1.0.0",
+  "kind": "canvas-performance-selected-parity-evidence",
+  "notes": [
+    "The full final-head parity run is the behavior gate.",
+    "Performance thresholds in the parity runner are one-shot report-only diagnostics.",
+    "Six focused dynamic-toolbar replications were added after one noisy p99 warning in the full run."
+  ],
+  "fullFinalHeadRun": {
+    "schemaVersion": 1,
+    "generatedAt": "2026-07-18T04:45:16.979Z",
+    "inputs": {
+      "sourceMode": "local",
+      "scenarios": [
+        "wheel-hot-path",
+        "window-dimension-fanout",
+        "pinch-hot-path",
+        "default-intro-content",
+        "static-home",
+        "intro",
+        "pan",
+        "zoom",
+        "navbar",
+        "toolbar",
+        "toolbar-custom-format",
+        "toolbar-dynamic-format",
+        "drag-hover-hit-test",
+        "drag"
+      ],
+      "sections": 100
+    },
+    "thresholds": {
+      "visual": {
+        "maxDifferentPixels": 0,
+        "pixelmatchThreshold": 0
+      },
+      "geometry": {
+        "maxAbsoluteDifferencePx": 0.01
+      },
+      "interaction": {
+        "maxPositionDifferencePx": 0.01,
+        "maxScaleDifference": 0.000001
+      },
+      "trajectory": {
+        "sampleStepMs": 16.666666666666668,
+        "maxPositionDifferencePx": 0.25,
+        "maxScaleDifference": 0.00025,
+        "maxStageTimingDifferenceMs": 16.666666666666668
+      },
+      "performance": {
+        "maxRatio": 1.15,
+        "minimumAbsoluteRegressionMs": 2
+      }
+    },
+    "environment": {
+      "browser": "chromium",
+      "browserVersion": "149.0.7827.55",
+      "node": "v24.18.0",
+      "platform": "darwin",
+      "arch": "arm64",
+      "viewport": {
+        "width": 1280,
+        "height": 720,
+        "deviceScaleFactor": 1
+      },
+      "locale": "en-CA",
+      "timezone": "America/Toronto",
+      "reducedMotion": "no-preference"
+    },
+    "provenance": {
+      "baseline": {
+        "package": {
+          "name": "@hunterchen/canvas",
+          "version": "0.12.0"
+        },
+        "proof": "719eec68ae7cbacc0a26497c49645768e4c991b7a818b1d4b7455fcac6e0aee1",
+        "source": {
+          "algorithm": "sha256",
+          "hash": "326d96b9687797b30244c2e64ea3750e9cdb2f7e821617acbb226cbacba1dd1d",
+          "fileCount": 20,
+          "bytes": 101890
+        },
+        "git": {
+          "head": "476f6c939907849df9ecded77b0729ed84cf3833",
+          "sourceTree": "a7ba65afdd637ac6230949df3241f8e7a3f9f22b",
+          "sourceDirty": false
+        }
+      },
+      "candidate": {
+        "package": {
+          "name": "@hunterchen/canvas",
+          "version": "0.12.0"
+        },
+        "proof": "550e6648afe537718dff361bf668f782e68110cb9caba2aa8ee2da2087b1c61b",
+        "source": {
+          "algorithm": "sha256",
+          "hash": "1acb4e0419924730cd989a9f7943704bd14d03928a3b4f44b2920e89f5802034",
+          "fileCount": 20,
+          "bytes": 103693
+        },
+        "git": {
+          "head": "4b479bdb9fa08f0e04295f0f887d6a3169d73f62",
+          "sourceTree": "6666c3022f17610257a4c6236c22b191c76e6833",
+          "sourceDirty": false
+        }
+      },
+      "checkpoints": [
+        {
+          "checkpoint": "startup",
+          "checkedAt": "2026-07-18T04:43:46.695Z"
+        },
+        {
+          "checkpoint": "after-baseline",
+          "checkedAt": "2026-07-18T04:44:32.999Z"
+        },
+        {
+          "checkpoint": "after-candidate",
+          "checkedAt": "2026-07-18T04:45:16.168Z"
+        }
+      ]
+    },
+    "summary": {
+      "parityPass": true,
+      "comparisonParityPass": true,
+      "performancePass": false,
+      "pageErrors": 0,
+      "deferredUserDecisions": []
+    },
+    "aggregate": {
+      "scenarioCount": 14,
+      "parityFailureCount": 0,
+      "visual": {
+        "differentPixels": 0,
+        "totalPixels": 12902400,
+        "allPass": true
+      },
+      "geometry": {
+        "maxDifferencePx": 0,
+        "allPass": true
+      },
+      "interaction": {
+        "comparedCheckpoints": 160,
+        "maxNumericDifference": 0,
+        "allPass": true
+      },
+      "animationSemanticsPass": true,
+      "trajectoryPass": true
+    },
+    "comparisons": [
+      {
+        "name": "wheel-hot-path",
+        "pass": true,
+        "performancePass": true,
+        "parityFailures": [],
+        "visual": {
+          "pass": true,
+          "differentPixels": 0,
+          "totalPixels": 921600,
+          "ratio": 0,
+          "baselineSize": {
+            "width": 1280,
+            "height": 720
+          },
+          "candidateSize": {
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "contract": {
+          "pass": true,
+          "failures": [],
+          "maxGeometryDifferencePx": 0
+        },
+        "interaction": {
+          "pass": true,
+          "failures": [],
+          "comparedCheckpoints": 25,
+          "maxNumericDifference": 0
+        },
+        "animationSemantics": {
+          "pass": true,
+          "failures": [],
+          "baselineStageOrder": [
+            2
+          ],
+          "candidateStageOrder": [
+            2
+          ],
+          "baselineEndpoints": {
+            "initial": {
+              "t": 6.299999904632614,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            },
+            "final": {
+              "t": 1094.6999999046325,
+              "x": -5988.277503921714,
+              "y": -1894.7685290081945,
+              "scale": 2.0610315621647115,
+              "animationStage": 2,
+              "toolbarText": "(545, 329)|2.06x",
+              "toolbarOpacity": "1",
+              "sceneTransform": "matrix(2.06103, 0, 0, 2.06103, -5988.28, -1894.77)"
+            }
+          },
+          "candidateEndpoints": {
+            "initial": {
+              "t": 7.399999952316193,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            },
+            "final": {
+              "t": 1086.499999952316,
+              "x": -5988.277503921714,
+              "y": -1894.7685290081945,
+              "scale": 2.0610315621647115,
+              "animationStage": 2,
+              "toolbarText": "(545, 329)|2.06x",
+              "toolbarOpacity": "1",
+              "sceneTransform": "matrix(2.06103, 0, 0, 2.06103, -5988.28, -1894.77)"
+            }
+          }
+        },
+        "trajectory": {
+          "pass": true,
+          "gated": false,
+          "reason": "Direct input parity is gated by index-aligned post-input checkpoints; raw rAF samples remain in scenario artifacts.",
+          "baselineSamples": 115,
+          "candidateSamples": 115
+        },
+        "performance": {
+          "pass": true,
+          "measurements": [
+            {
+              "metric": "p95FrameIntervalMs",
+              "baseline": 9.200000000000125,
+              "candidate": 9.199999999999898,
+              "absoluteDifference": -2.2737367544323206e-13,
+              "ratio": 0.9999999999999752,
+              "regression": false
+            },
+            {
+              "metric": "p99FrameIntervalMs",
+              "baseline": 9.300000000000182,
+              "candidate": 9.299999999999955,
+              "absoluteDifference": -2.2737367544323206e-13,
+              "ratio": 0.9999999999999756,
+              "regression": false
+            },
+            {
+              "metric": "longTaskTotalMs",
+              "baseline": 159,
+              "candidate": 150,
+              "absoluteDifference": -9,
+              "ratio": 0.9433962264150944,
+              "regression": false
+            },
+            {
+              "metric": "loafBlockingTotalMs",
+              "baseline": 110,
+              "candidate": 100.9,
+              "absoluteDifference": -9.099999999999994,
+              "ratio": 0.9172727272727274,
+              "regression": false
+            },
+            {
+              "metric": "TaskDurationMs",
+              "baseline": 299.72999999999996,
+              "candidate": 194.64800000000002,
+              "absoluteDifference": -105.08199999999994,
+              "ratio": 0.6494111366896875,
+              "regression": false
+            },
+            {
+              "metric": "ScriptDurationMs",
+              "baseline": 173.966,
+              "candidate": 81.10100000000001,
+              "absoluteDifference": -92.865,
+              "ratio": 0.46618879551176673,
+              "regression": false
+            },
+            {
+              "metric": "LayoutDurationMs",
+              "baseline": 2.2009999999999996,
+              "candidate": 1.8780000000000003,
+              "absoluteDifference": -0.3229999999999993,
+              "ratio": 0.8532485233984556,
+              "regression": false
+            },
+            {
+              "metric": "RecalcStyleDurationMs",
+              "baseline": 1.7560000000000007,
+              "candidate": 1.7399999999999993,
+              "absoluteDifference": -0.016000000000001346,
+              "ratio": 0.9908883826879263,
+              "regression": false
+            },
+            {
+              "metric": "draggableImageRectCalls",
+              "baseline": 25,
+              "candidate": 25,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "wheel.scaleGetCalls",
+              "baseline": 34,
+              "candidate": 22,
+              "absoluteDifference": -12,
+              "ratio": 0.6470588235294118,
+              "regression": false
+            },
+            {
+              "metric": "wheel.clientXReads",
+              "baseline": 42,
+              "candidate": 32,
+              "absoluteDifference": -10,
+              "ratio": 0.7619047619047619,
+              "regression": false
+            },
+            {
+              "metric": "wheel.clientYReads",
+              "baseline": 42,
+              "candidate": 32,
+              "absoluteDifference": -10,
+              "ratio": 0.7619047619047619,
+              "regression": false
+            },
+            {
+              "metric": "wheel.deltaYReads",
+              "baseline": 66,
+              "candidate": 44,
+              "absoluteDifference": -22,
+              "ratio": 0.6666666666666666,
+              "regression": false
+            },
+            {
+              "metric": "wheel.deltaModeReads",
+              "baseline": 22,
+              "candidate": 10,
+              "absoluteDifference": -12,
+              "ratio": 0.45454545454545453,
+              "regression": false
+            },
+            {
+              "metric": "wheel.panBurstMedianMs",
+              "baseline": 30.799999952316284,
+              "candidate": 29.200000047683716,
+              "absoluteDifference": -1.5999999046325684,
+              "ratio": 0.9480519510678687,
+              "regression": false
+            }
+          ]
+        }
+      },
+      {
+        "name": "window-dimension-fanout",
+        "pass": true,
+        "performancePass": true,
+        "parityFailures": [],
+        "visual": {
+          "pass": true,
+          "differentPixels": 0,
+          "totalPixels": 921600,
+          "ratio": 0,
+          "baselineSize": {
+            "width": 1280,
+            "height": 720
+          },
+          "candidateSize": {
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "contract": {
+          "pass": true,
+          "failures": [],
+          "maxGeometryDifferencePx": 0
+        },
+        "interaction": {
+          "pass": true,
+          "failures": [],
+          "comparedCheckpoints": 2,
+          "maxNumericDifference": 0
+        },
+        "animationSemantics": {
+          "pass": true,
+          "failures": [],
+          "baselineStageOrder": [
+            2
+          ],
+          "candidateStageOrder": [
+            2
+          ],
+          "baselineEndpoints": {
+            "initial": {
+              "t": 6.400000047683761,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            },
+            "final": {
+              "t": 1210.6000000476838,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            }
+          },
+          "candidateEndpoints": {
+            "initial": {
+              "t": 6.300000095367523,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            },
+            "final": {
+              "t": 565.0000000953673,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            }
+          }
+        },
+        "trajectory": {
+          "pass": true,
+          "gated": false,
+          "reason": "Direct input parity is gated by index-aligned post-input checkpoints; raw rAF samples remain in scenario artifacts.",
+          "baselineSamples": 57,
+          "candidateSamples": 57
+        },
+        "performance": {
+          "pass": true,
+          "measurements": [
+            {
+              "metric": "p95FrameIntervalMs",
+              "baseline": 9.225000000000136,
+              "candidate": 9.024999999999977,
+              "absoluteDifference": -0.20000000000015916,
+              "ratio": 0.9783197831978151,
+              "regression": false
+            },
+            {
+              "metric": "p99FrameIntervalMs",
+              "baseline": 340.72500000000196,
+              "candidate": 50.28500000000028,
+              "absoluteDifference": -290.44000000000165,
+              "ratio": 0.14758236114168316,
+              "regression": false
+            },
+            {
+              "metric": "longTaskTotalMs",
+              "baseline": 748,
+              "candidate": 107,
+              "absoluteDifference": -641,
+              "ratio": 0.14304812834224598,
+              "regression": false
+            },
+            {
+              "metric": "loafBlockingTotalMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "TaskDurationMs",
+              "baseline": 795.5360000000001,
+              "candidate": 118.00700000000002,
+              "absoluteDifference": -677.529,
+              "ratio": 0.14833646748858634,
+              "regression": false
+            },
+            {
+              "metric": "ScriptDurationMs",
+              "baseline": 599.9290000000001,
+              "candidate": 106.935,
+              "absoluteDifference": -492.9940000000001,
+              "ratio": 0.17824609245427372,
+              "regression": false
+            },
+            {
+              "metric": "LayoutDurationMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "RecalcStyleDurationMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "draggableImageRectCalls",
+              "baseline": 2,
+              "candidate": 2,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "changingResizeDispatchMs",
+              "baseline": 185.70000004768372,
+              "candidate": 41.299999952316284,
+              "absoluteDifference": -144.40000009536743,
+              "ratio": 0.2224017228955915,
+              "regression": false
+            },
+            {
+              "metric": "sameSizeResizeDispatchMs",
+              "baseline": 445.90000009536743,
+              "candidate": 54.700000047683716,
+              "absoluteDifference": -391.2000000476837,
+              "ratio": 0.12267324520292595,
+              "regression": false
+            }
+          ]
+        }
+      },
+      {
+        "name": "pinch-hot-path",
+        "pass": true,
+        "performancePass": true,
+        "parityFailures": [],
+        "visual": {
+          "pass": true,
+          "differentPixels": 0,
+          "totalPixels": 921600,
+          "ratio": 0,
+          "baselineSize": {
+            "width": 1280,
+            "height": 720
+          },
+          "candidateSize": {
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "contract": {
+          "pass": true,
+          "failures": [],
+          "maxGeometryDifferencePx": 0
+        },
+        "interaction": {
+          "pass": true,
+          "failures": [],
+          "comparedCheckpoints": 19,
+          "maxNumericDifference": 0
+        },
+        "animationSemantics": {
+          "pass": true,
+          "failures": [],
+          "baselineStageOrder": [
+            2
+          ],
+          "candidateStageOrder": [
+            2
+          ],
+          "baselineEndpoints": {
+            "initial": {
+              "t": 6.1000001430511475,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            },
+            "final": {
+              "t": 4127.000000143051,
+              "x": -3087.8350334782403,
+              "y": -822.0825640956789,
+              "scale": 1.2411247419175884,
+              "animationStage": 2,
+              "toolbarText": "(128, 72)|1.24x",
+              "toolbarOpacity": "1",
+              "sceneTransform": "matrix(1.24112, 0, 0, 1.24112, -3087.83, -822.083)"
+            }
+          },
+          "candidateEndpoints": {
+            "initial": {
+              "t": 7.199999952316375,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            },
+            "final": {
+              "t": 3261.499999952316,
+              "x": -3087.8350334782403,
+              "y": -822.0825640956789,
+              "scale": 1.2411247419175884,
+              "animationStage": 2,
+              "toolbarText": "(128, 72)|1.24x",
+              "toolbarOpacity": "1",
+              "sceneTransform": "matrix(1.24112, 0, 0, 1.24112, -3087.83, -822.083)"
+            }
+          }
+        },
+        "trajectory": {
+          "pass": true,
+          "gated": false,
+          "reason": "Direct input parity is gated by index-aligned post-input checkpoints; raw rAF samples remain in scenario artifacts.",
+          "baselineSamples": 98,
+          "candidateSamples": 96
+        },
+        "performance": {
+          "pass": true,
+          "measurements": [
+            {
+              "metric": "p95FrameIntervalMs",
+              "baseline": 9.199999999999875,
+              "candidate": 9.069999999999935,
+              "absoluteDifference": -0.12999999999994039,
+              "ratio": 0.9858695652173975,
+              "regression": false
+            },
+            {
+              "metric": "p99FrameIntervalMs",
+              "baseline": 9.67500000000016,
+              "candidate": 9.300000000000182,
+              "absoluteDifference": -0.3749999999999787,
+              "ratio": 0.9612403100775222,
+              "regression": false
+            },
+            {
+              "metric": "longTaskTotalMs",
+              "baseline": 3323,
+              "candidate": 2480,
+              "absoluteDifference": -843,
+              "ratio": 0.7463135720734276,
+              "regression": false
+            },
+            {
+              "metric": "loafBlockingTotalMs",
+              "baseline": 3273.6,
+              "candidate": 2431.4,
+              "absoluteDifference": -842.1999999999998,
+              "ratio": 0.7427297165200392,
+              "regression": false
+            },
+            {
+              "metric": "TaskDurationMs",
+              "baseline": 3444.5,
+              "candidate": 2547.8750000000005,
+              "absoluteDifference": -896.6249999999995,
+              "ratio": 0.7396937146175063,
+              "regression": false
+            },
+            {
+              "metric": "ScriptDurationMs",
+              "baseline": 3118.928,
+              "candidate": 2239.0890000000004,
+              "absoluteDifference": -879.8389999999995,
+              "ratio": 0.7179033950126456,
+              "regression": false
+            },
+            {
+              "metric": "LayoutDurationMs",
+              "baseline": 1.6119999999999988,
+              "candidate": 1.5250000000000004,
+              "absoluteDifference": -0.08699999999999841,
+              "ratio": 0.9460297766749389,
+              "regression": false
+            },
+            {
+              "metric": "RecalcStyleDurationMs",
+              "baseline": 3.0279999999999996,
+              "candidate": 3.0939999999999994,
+              "absoluteDifference": 0.06599999999999984,
+              "ratio": 1.021796565389696,
+              "regression": false
+            },
+            {
+              "metric": "draggableImageRectCalls",
+              "baseline": 19,
+              "candidate": 19,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "pinch.mapIteratorArrayFromCalls",
+              "baseline": 13,
+              "candidate": 0,
+              "absoluteDifference": -13,
+              "ratio": 0,
+              "regression": false
+            },
+            {
+              "metric": "pinch.moveBurstMedianMs",
+              "baseline": 657.0999999046326,
+              "candidate": 481.39999985694885,
+              "absoluteDifference": -175.70000004768372,
+              "ratio": 0.7326129963883979,
+              "regression": false
+            }
+          ]
+        }
+      },
+      {
+        "name": "default-intro-content",
+        "pass": true,
+        "performancePass": true,
+        "parityFailures": [],
+        "visual": {
+          "pass": true,
+          "differentPixels": 0,
+          "totalPixels": 921600,
+          "ratio": 0,
+          "baselineSize": {
+            "width": 1280,
+            "height": 720
+          },
+          "candidateSize": {
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "contract": {
+          "pass": true,
+          "failures": [],
+          "maxGeometryDifferencePx": 0
+        },
+        "interaction": {
+          "pass": true,
+          "failures": [],
+          "comparedCheckpoints": 1,
+          "maxNumericDifference": 0
+        },
+        "animationSemantics": {
+          "pass": true,
+          "failures": [],
+          "baselineStageOrder": [
+            2
+          ],
+          "candidateStageOrder": [
+            2
+          ],
+          "baselineEndpoints": {
+            "initial": {
+              "t": 7.199999952316375,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            },
+            "final": {
+              "t": 456.3999999523162,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            }
+          },
+          "candidateEndpoints": {
+            "initial": {
+              "t": 7.599999999999909,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            },
+            "final": {
+              "t": 456.9000000000001,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            }
+          }
+        },
+        "trajectory": {
+          "pass": true,
+          "gated": false,
+          "reason": "Direct input parity is gated by index-aligned post-input checkpoints; raw rAF samples remain in scenario artifacts.",
+          "baselineSamples": 55,
+          "candidateSamples": 55
+        },
+        "performance": {
+          "pass": true,
+          "measurements": [
+            {
+              "metric": "p95FrameIntervalMs",
+              "baseline": 9.135000000000025,
+              "candidate": 9.200000000000045,
+              "absoluteDifference": 0.06500000000002082,
+              "ratio": 1.0071154898741128,
+              "regression": false
+            },
+            {
+              "metric": "p99FrameIntervalMs",
+              "baseline": 9.24699999999999,
+              "candidate": 9.247000000000003,
+              "absoluteDifference": 1.4210854715202004e-14,
+              "ratio": 1.0000000000000016,
+              "regression": false
+            },
+            {
+              "metric": "longTaskTotalMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "loafBlockingTotalMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "TaskDurationMs",
+              "baseline": 8.611000000000008,
+              "candidate": 9.815999999999992,
+              "absoluteDifference": 1.204999999999984,
+              "ratio": 1.139937289513411,
+              "regression": false
+            },
+            {
+              "metric": "ScriptDurationMs",
+              "baseline": 3.5470000000000086,
+              "candidate": 3.610000000000002,
+              "absoluteDifference": 0.0629999999999935,
+              "ratio": 1.0177614885818984,
+              "regression": false
+            },
+            {
+              "metric": "LayoutDurationMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "RecalcStyleDurationMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "draggableImageRectCalls",
+              "baseline": 1,
+              "candidate": 1,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            }
+          ]
+        }
+      },
+      {
+        "name": "static-home",
+        "pass": true,
+        "performancePass": true,
+        "parityFailures": [],
+        "visual": {
+          "pass": true,
+          "differentPixels": 0,
+          "totalPixels": 921600,
+          "ratio": 0,
+          "baselineSize": {
+            "width": 1280,
+            "height": 720
+          },
+          "candidateSize": {
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "contract": {
+          "pass": true,
+          "failures": [],
+          "maxGeometryDifferencePx": 0
+        },
+        "interaction": {
+          "pass": true,
+          "failures": [],
+          "comparedCheckpoints": 1,
+          "maxNumericDifference": 0
+        },
+        "animationSemantics": {
+          "pass": true,
+          "failures": [],
+          "baselineStageOrder": [
+            2
+          ],
+          "candidateStageOrder": [
+            2
+          ],
+          "baselineEndpoints": {
+            "initial": {
+              "t": 5.800000047683625,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            },
+            "final": {
+              "t": 710.5000000476839,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            }
+          },
+          "candidateEndpoints": {
+            "initial": {
+              "t": 5.599999904632568,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            },
+            "final": {
+              "t": 705.9999999046327,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            }
+          }
+        },
+        "trajectory": {
+          "pass": true,
+          "gated": false,
+          "reason": "Direct input parity is gated by index-aligned post-input checkpoints; raw rAF samples remain in scenario artifacts.",
+          "baselineSamples": 86,
+          "candidateSamples": 85
+        },
+        "performance": {
+          "pass": true,
+          "measurements": [
+            {
+              "metric": "p95FrameIntervalMs",
+              "baseline": 9.200000000000045,
+              "candidate": 9.200000000000045,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "p99FrameIntervalMs",
+              "baseline": 9.508000000000134,
+              "candidate": 9.399999999999903,
+              "absoluteDifference": -0.10800000000023147,
+              "ratio": 0.988641144299513,
+              "regression": false
+            },
+            {
+              "metric": "longTaskTotalMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "loafBlockingTotalMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "TaskDurationMs",
+              "baseline": 14.69799999999999,
+              "candidate": 16.401,
+              "absoluteDifference": 1.70300000000001,
+              "ratio": 1.115866104231869,
+              "regression": false
+            },
+            {
+              "metric": "ScriptDurationMs",
+              "baseline": 5.718000000000001,
+              "candidate": 6.349999999999994,
+              "absoluteDifference": 0.6319999999999935,
+              "ratio": 1.110528156698145,
+              "regression": false
+            },
+            {
+              "metric": "LayoutDurationMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "RecalcStyleDurationMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "draggableImageRectCalls",
+              "baseline": 1,
+              "candidate": 1,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            }
+          ]
+        }
+      },
+      {
+        "name": "intro",
+        "pass": true,
+        "performancePass": true,
+        "parityFailures": [],
+        "visual": {
+          "pass": true,
+          "differentPixels": 0,
+          "totalPixels": 921600,
+          "ratio": 0,
+          "baselineSize": {
+            "width": 1280,
+            "height": 720
+          },
+          "candidateSize": {
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "contract": {
+          "pass": true,
+          "failures": [],
+          "maxGeometryDifferencePx": 0
+        },
+        "interaction": {
+          "pass": true,
+          "failures": [],
+          "comparedCheckpoints": 1,
+          "maxNumericDifference": 0
+        },
+        "animationSemantics": {
+          "pass": true,
+          "failures": [],
+          "baselineStageOrder": [
+            0,
+            1,
+            2
+          ],
+          "candidateStageOrder": [
+            0,
+            1,
+            2
+          ],
+          "baselineEndpoints": {
+            "initial": {
+              "t": 112.5,
+              "x": 0,
+              "y": 0,
+              "scale": 0.09,
+              "animationStage": 0,
+              "toolbarText": "",
+              "toolbarOpacity": "",
+              "sceneTransform": "matrix(0.09, 0, 0, 0.09, 0, 0)"
+            },
+            "final": {
+              "t": 6254,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            }
+          },
+          "candidateEndpoints": {
+            "initial": {
+              "t": 142.29999990463256,
+              "x": 0,
+              "y": 0,
+              "scale": 0.09,
+              "animationStage": 0,
+              "toolbarText": "",
+              "toolbarOpacity": "",
+              "sceneTransform": "matrix(0.09, 0, 0, 0.09, 0, 0)"
+            },
+            "final": {
+              "t": 6296.999999904632,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            }
+          }
+        },
+        "trajectory": {
+          "pass": true,
+          "failures": [
+            {
+              "category": "trajectory-x",
+              "difference": 23.63816843321024,
+              "message": "x trajectory differs"
+            },
+            {
+              "category": "trajectory-y",
+              "difference": 5.24568766331123,
+              "message": "y trajectory differs"
+            },
+            {
+              "category": "trajectory-scale",
+              "difference": 0.00788658676584264,
+              "message": "scale trajectory differs"
+            }
+          ],
+          "comparedSamples": 369,
+          "commonDurationMs": 6141.5,
+          "maxDifference": {
+            "x": 23.63816843321024,
+            "y": 5.24568766331123,
+            "scale": 0.00788658676584264
+          },
+          "stageTimingDifferences": {
+            "0": 0,
+            "1": 4.699999999999818,
+            "2": 13.800000000000182
+          },
+          "gated": false,
+          "advisoryFailures": [
+            {
+              "category": "trajectory-x",
+              "difference": 23.63816843321024,
+              "message": "x trajectory differs"
+            },
+            {
+              "category": "trajectory-y",
+              "difference": 5.24568766331123,
+              "message": "y trajectory differs"
+            },
+            {
+              "category": "trajectory-scale",
+              "difference": 0.00788658676584264,
+              "message": "scale trajectory differs"
+            }
+          ],
+          "reason": "Raw rAF timing is advisory because browser scheduling differs between identical runs; exact config, stage order, endpoints, checkpoints, and settled visuals remain gating."
+        },
+        "performance": {
+          "pass": true,
+          "measurements": [
+            {
+              "metric": "p95FrameIntervalMs",
+              "baseline": 9.19999999999991,
+              "candidate": 9.099999999999909,
+              "absoluteDifference": -0.10000000000000142,
+              "ratio": 0.9891304347826084,
+              "regression": false
+            },
+            {
+              "metric": "p99FrameIntervalMs",
+              "baseline": 9.300000000000182,
+              "candidate": 9.299999999999955,
+              "absoluteDifference": -2.2737367544323206e-13,
+              "ratio": 0.9999999999999756,
+              "regression": false
+            },
+            {
+              "metric": "longTaskTotalMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "loafBlockingTotalMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "TaskDurationMs",
+              "baseline": 1022.1049999999998,
+              "candidate": 383.51099999999997,
+              "absoluteDifference": -638.5939999999998,
+              "ratio": 0.37521683193018335,
+              "regression": false
+            },
+            {
+              "metric": "ScriptDurationMs",
+              "baseline": 779.498,
+              "candidate": 175.39300000000003,
+              "absoluteDifference": -604.105,
+              "ratio": 0.2250076331177245,
+              "regression": false
+            },
+            {
+              "metric": "LayoutDurationMs",
+              "baseline": 16.872999999999998,
+              "candidate": 15.754000000000001,
+              "absoluteDifference": -1.1189999999999962,
+              "ratio": 0.9336810288626802,
+              "regression": false
+            },
+            {
+              "metric": "RecalcStyleDurationMs",
+              "baseline": 32.179,
+              "candidate": 34.434,
+              "absoluteDifference": 2.2549999999999955,
+              "ratio": 1.0700767581341868,
+              "regression": false
+            },
+            {
+              "metric": "draggableImageRectCalls",
+              "baseline": 1,
+              "candidate": 1,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            }
+          ]
+        }
+      },
+      {
+        "name": "pan",
+        "pass": true,
+        "performancePass": true,
+        "parityFailures": [],
+        "visual": {
+          "pass": true,
+          "differentPixels": 0,
+          "totalPixels": 921600,
+          "ratio": 0,
+          "baselineSize": {
+            "width": 1280,
+            "height": 720
+          },
+          "candidateSize": {
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "contract": {
+          "pass": true,
+          "failures": [],
+          "maxGeometryDifferencePx": 0
+        },
+        "interaction": {
+          "pass": true,
+          "failures": [],
+          "comparedCheckpoints": 32,
+          "maxNumericDifference": 0
+        },
+        "animationSemantics": {
+          "pass": true,
+          "failures": [],
+          "baselineStageOrder": [
+            2
+          ],
+          "candidateStageOrder": [
+            2
+          ],
+          "baselineEndpoints": {
+            "initial": {
+              "t": 6.599999952316239,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            },
+            "final": {
+              "t": 1223.1999999523164,
+              "x": -2100,
+              "y": -445,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(-260, -145)|1.00x",
+              "toolbarOpacity": "1",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2100, -445)"
+            }
+          },
+          "candidateEndpoints": {
+            "initial": {
+              "t": 6.7000000000000455,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            },
+            "final": {
+              "t": 1223.4,
+              "x": -2100,
+              "y": -445,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(-260, -145)|1.00x",
+              "toolbarOpacity": "1",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2100, -445)"
+            }
+          }
+        },
+        "trajectory": {
+          "pass": true,
+          "gated": false,
+          "reason": "Direct input parity is gated by index-aligned post-input checkpoints; raw rAF samples remain in scenario artifacts.",
+          "baselineSamples": 143,
+          "candidateSamples": 145
+        },
+        "performance": {
+          "pass": true,
+          "measurements": [
+            {
+              "metric": "p95FrameIntervalMs",
+              "baseline": 9.199999999999818,
+              "candidate": 9.084999999999923,
+              "absoluteDifference": -0.11499999999989541,
+              "ratio": 0.9875000000000111,
+              "regression": false
+            },
+            {
+              "metric": "p99FrameIntervalMs",
+              "baseline": 9.299999999999995,
+              "candidate": 9.25700000000009,
+              "absoluteDifference": -0.042999999999905114,
+              "ratio": 0.9953763440860317,
+              "regression": false
+            },
+            {
+              "metric": "longTaskTotalMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "loafBlockingTotalMs",
+              "baseline": 2.1,
+              "candidate": 0,
+              "absoluteDifference": -2.1,
+              "ratio": 0,
+              "regression": false
+            },
+            {
+              "metric": "TaskDurationMs",
+              "baseline": 220.16699999999997,
+              "candidate": 107.249,
+              "absoluteDifference": -112.91799999999998,
+              "ratio": 0.4871256818687633,
+              "regression": false
+            },
+            {
+              "metric": "ScriptDurationMs",
+              "baseline": 119.61,
+              "candidate": 25.369000000000003,
+              "absoluteDifference": -94.241,
+              "ratio": 0.21209765069810219,
+              "regression": false
+            },
+            {
+              "metric": "LayoutDurationMs",
+              "baseline": 2.865,
+              "candidate": 3.039000000000001,
+              "absoluteDifference": 0.17400000000000082,
+              "ratio": 1.060732984293194,
+              "regression": false
+            },
+            {
+              "metric": "RecalcStyleDurationMs",
+              "baseline": 5.232,
+              "candidate": 4.092,
+              "absoluteDifference": -1.1400000000000006,
+              "ratio": 0.7821100917431192,
+              "regression": false
+            },
+            {
+              "metric": "draggableImageRectCalls",
+              "baseline": 61,
+              "candidate": 61,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            }
+          ]
+        }
+      },
+      {
+        "name": "zoom",
+        "pass": true,
+        "performancePass": true,
+        "parityFailures": [],
+        "visual": {
+          "pass": true,
+          "differentPixels": 0,
+          "totalPixels": 921600,
+          "ratio": 0,
+          "baselineSize": {
+            "width": 1280,
+            "height": 720
+          },
+          "candidateSize": {
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "contract": {
+          "pass": true,
+          "failures": [],
+          "maxGeometryDifferencePx": 0
+        },
+        "interaction": {
+          "pass": true,
+          "failures": [],
+          "comparedCheckpoints": 9,
+          "maxNumericDifference": 0
+        },
+        "animationSemantics": {
+          "pass": true,
+          "failures": [],
+          "baselineStageOrder": [
+            2
+          ],
+          "candidateStageOrder": [
+            2
+          ],
+          "baselineEndpoints": {
+            "initial": {
+              "t": 1.400000000000091,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            },
+            "final": {
+              "t": 785.3000000000002,
+              "x": -4391.300332523002,
+              "y": -1233.24510529895,
+              "scale": 1.6771001108410006,
+              "animationStage": 2,
+              "toolbarText": "(258, 145)|1.68x",
+              "toolbarOpacity": "1",
+              "sceneTransform": "matrix(1.6771, 0, 0, 1.6771, -4391.3, -1233.25)"
+            }
+          },
+          "candidateEndpoints": {
+            "initial": {
+              "t": 7.199999904632477,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            },
+            "final": {
+              "t": 740.4999999046327,
+              "x": -4391.300332523002,
+              "y": -1233.24510529895,
+              "scale": 1.6771001108410006,
+              "animationStage": 2,
+              "toolbarText": "(258, 145)|1.68x",
+              "toolbarOpacity": "1",
+              "sceneTransform": "matrix(1.6771, 0, 0, 1.6771, -4391.3, -1233.25)"
+            }
+          }
+        },
+        "trajectory": {
+          "pass": true,
+          "gated": false,
+          "reason": "Direct input parity is gated by index-aligned post-input checkpoints; raw rAF samples remain in scenario artifacts.",
+          "baselineSamples": 92,
+          "candidateSamples": 87
+        },
+        "performance": {
+          "pass": true,
+          "measurements": [
+            {
+              "metric": "p95FrameIntervalMs",
+              "baseline": 9.049999999999955,
+              "candidate": 9.175000000000068,
+              "absoluteDifference": 0.1250000000001137,
+              "ratio": 1.0138121546961452,
+              "regression": false
+            },
+            {
+              "metric": "p99FrameIntervalMs",
+              "baseline": 11.819999999999752,
+              "candidate": 12.915000000000305,
+              "absoluteDifference": 1.095000000000553,
+              "ratio": 1.0926395939086782,
+              "regression": false
+            },
+            {
+              "metric": "longTaskTotalMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "loafBlockingTotalMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "TaskDurationMs",
+              "baseline": 86.582,
+              "candidate": 64.03899999999999,
+              "absoluteDifference": -22.543000000000006,
+              "ratio": 0.7396341040862996,
+              "regression": false
+            },
+            {
+              "metric": "ScriptDurationMs",
+              "baseline": 33.319,
+              "candidate": 9.026000000000007,
+              "absoluteDifference": -24.292999999999996,
+              "ratio": 0.27089648548876033,
+              "regression": false
+            },
+            {
+              "metric": "LayoutDurationMs",
+              "baseline": 0.8799999999999997,
+              "candidate": 0.5839999999999994,
+              "absoluteDifference": -0.29600000000000026,
+              "ratio": 0.6636363636363632,
+              "regression": false
+            },
+            {
+              "metric": "RecalcStyleDurationMs",
+              "baseline": 0.49900000000000033,
+              "candidate": 0.4730000000000003,
+              "absoluteDifference": -0.026000000000000023,
+              "ratio": 0.9478957915831663,
+              "regression": false
+            },
+            {
+              "metric": "draggableImageRectCalls",
+              "baseline": 10,
+              "candidate": 10,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            }
+          ]
+        }
+      },
+      {
+        "name": "navbar",
+        "pass": true,
+        "performancePass": true,
+        "parityFailures": [],
+        "visual": {
+          "pass": true,
+          "differentPixels": 0,
+          "totalPixels": 921600,
+          "ratio": 0,
+          "baselineSize": {
+            "width": 1280,
+            "height": 720
+          },
+          "candidateSize": {
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "contract": {
+          "pass": true,
+          "failures": [],
+          "maxGeometryDifferencePx": 0
+        },
+        "interaction": {
+          "pass": true,
+          "failures": [],
+          "comparedCheckpoints": 2,
+          "maxNumericDifference": 0
+        },
+        "animationSemantics": {
+          "pass": true,
+          "failures": [],
+          "baselineStageOrder": [
+            2
+          ],
+          "candidateStageOrder": [
+            2
+          ],
+          "baselineEndpoints": {
+            "initial": {
+              "t": 7.300000047683625,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            },
+            "final": {
+              "t": 1173.9000000476835,
+              "x": -320,
+              "y": -1760,
+              "scale": 0.8,
+              "animationStage": 2,
+              "toolbarText": "(-1960, 1610)|0.80x",
+              "toolbarOpacity": "1",
+              "sceneTransform": "matrix(0.8, 0, 0, 0.8, -320, -1760)"
+            }
+          },
+          "candidateEndpoints": {
+            "initial": {
+              "t": 7.50000004768367,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            },
+            "final": {
+              "t": 1178.4000000476835,
+              "x": -320,
+              "y": -1760,
+              "scale": 0.8,
+              "animationStage": 2,
+              "toolbarText": "(-1960, 1610)|0.80x",
+              "toolbarOpacity": "1",
+              "sceneTransform": "matrix(0.8, 0, 0, 0.8, -320, -1760)"
+            }
+          }
+        },
+        "trajectory": {
+          "pass": true,
+          "failures": [
+            {
+              "category": "trajectory-x",
+              "difference": 53.18000949491079,
+              "message": "x trajectory differs"
+            },
+            {
+              "category": "trajectory-y",
+              "difference": 30.500299563257727,
+              "message": "y trajectory differs"
+            },
+            {
+              "category": "trajectory-scale",
+              "difference": 0.005213726421069653,
+              "message": "scale trajectory differs"
+            }
+          ],
+          "comparedSamples": 70,
+          "commonDurationMs": 1163.1999999523161,
+          "maxDifference": {
+            "x": 53.18000949491079,
+            "y": 30.500299563257727,
+            "scale": 0.005213726421069653
+          },
+          "stageTimingDifferences": {
+            "2": 3.4000000476837613
+          },
+          "gated": false,
+          "advisoryFailures": [
+            {
+              "category": "trajectory-x",
+              "difference": 53.18000949491079,
+              "message": "x trajectory differs"
+            },
+            {
+              "category": "trajectory-y",
+              "difference": 30.500299563257727,
+              "message": "y trajectory differs"
+            },
+            {
+              "category": "trajectory-scale",
+              "difference": 0.005213726421069653,
+              "message": "scale trajectory differs"
+            }
+          ],
+          "reason": "Raw rAF timing is advisory because browser scheduling differs between identical runs; exact config, stage order, endpoints, checkpoints, and settled visuals remain gating."
+        },
+        "performance": {
+          "pass": true,
+          "measurements": [
+            {
+              "metric": "p95FrameIntervalMs",
+              "baseline": 9.299999999999955,
+              "candidate": 9.199999999999818,
+              "absoluteDifference": -0.10000000000013642,
+              "ratio": 0.9892473118279422,
+              "regression": false
+            },
+            {
+              "metric": "p99FrameIntervalMs",
+              "baseline": 9.300000000000182,
+              "candidate": 9.263000000000215,
+              "absoluteDifference": -0.03699999999996706,
+              "ratio": 0.9960215053763477,
+              "regression": false
+            },
+            {
+              "metric": "longTaskTotalMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "loafBlockingTotalMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "TaskDurationMs",
+              "baseline": 365.113,
+              "candidate": 132.92800000000003,
+              "absoluteDifference": -232.18499999999997,
+              "ratio": 0.36407358817681107,
+              "regression": false
+            },
+            {
+              "metric": "ScriptDurationMs",
+              "baseline": 264.55500000000006,
+              "candidate": 32.815999999999995,
+              "absoluteDifference": -231.73900000000006,
+              "ratio": 0.12404225964355234,
+              "regression": false
+            },
+            {
+              "metric": "LayoutDurationMs",
+              "baseline": 6.260999999999999,
+              "candidate": 6.760000000000001,
+              "absoluteDifference": 0.49900000000000144,
+              "ratio": 1.079699728477879,
+              "regression": false
+            },
+            {
+              "metric": "RecalcStyleDurationMs",
+              "baseline": 8.725,
+              "candidate": 9.742,
+              "absoluteDifference": 1.0170000000000012,
+              "ratio": 1.1165616045845275,
+              "regression": false
+            },
+            {
+              "metric": "draggableImageRectCalls",
+              "baseline": 3,
+              "candidate": 3,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            }
+          ]
+        }
+      },
+      {
+        "name": "toolbar",
+        "pass": true,
+        "performancePass": true,
+        "parityFailures": [],
+        "visual": {
+          "pass": true,
+          "differentPixels": 0,
+          "totalPixels": 921600,
+          "ratio": 0,
+          "baselineSize": {
+            "width": 1280,
+            "height": 720
+          },
+          "candidateSize": {
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "contract": {
+          "pass": true,
+          "failures": [],
+          "maxGeometryDifferencePx": 0
+        },
+        "interaction": {
+          "pass": true,
+          "failures": [],
+          "comparedCheckpoints": 11,
+          "maxNumericDifference": 0
+        },
+        "animationSemantics": {
+          "pass": true,
+          "failures": [],
+          "baselineStageOrder": [
+            2
+          ],
+          "candidateStageOrder": [
+            2
+          ],
+          "baselineEndpoints": {
+            "initial": {
+              "t": 6.5,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            },
+            "final": {
+              "t": 815,
+              "x": -2552,
+              "y": -734,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(192, 144)|1.00x",
+              "toolbarOpacity": "1",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2552, -734)"
+            }
+          },
+          "candidateEndpoints": {
+            "initial": {
+              "t": 7.300000143051193,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            },
+            "final": {
+              "t": 794.6000001430511,
+              "x": -2552,
+              "y": -734,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(192, 144)|1.00x",
+              "toolbarOpacity": "1",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2552, -734)"
+            }
+          }
+        },
+        "trajectory": {
+          "pass": true,
+          "gated": false,
+          "reason": "Direct input parity is gated by index-aligned post-input checkpoints; raw rAF samples remain in scenario artifacts.",
+          "baselineSamples": 94,
+          "candidateSamples": 94
+        },
+        "performance": {
+          "pass": true,
+          "measurements": [
+            {
+              "metric": "p95FrameIntervalMs",
+              "baseline": 9.299999999999955,
+              "candidate": 9.200000000000138,
+              "absoluteDifference": -0.09999999999981668,
+              "ratio": 0.9892473118279766,
+              "regression": false
+            },
+            {
+              "metric": "p99FrameIntervalMs",
+              "baseline": 11.984000000000032,
+              "candidate": 11.108000000000057,
+              "absoluteDifference": -0.8759999999999746,
+              "ratio": 0.9269025367156232,
+              "regression": false
+            },
+            {
+              "metric": "longTaskTotalMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "loafBlockingTotalMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "TaskDurationMs",
+              "baseline": 103.49500000000002,
+              "candidate": 54.36099999999999,
+              "absoluteDifference": -49.13400000000003,
+              "ratio": 0.5252524276535097,
+              "regression": false
+            },
+            {
+              "metric": "ScriptDurationMs",
+              "baseline": 38.142999999999994,
+              "candidate": 7.862000000000008,
+              "absoluteDifference": -30.280999999999985,
+              "ratio": 0.20611907820569986,
+              "regression": false
+            },
+            {
+              "metric": "LayoutDurationMs",
+              "baseline": 0.771,
+              "candidate": 0.805000000000001,
+              "absoluteDifference": 0.03400000000000103,
+              "ratio": 1.044098573281454,
+              "regression": false
+            },
+            {
+              "metric": "RecalcStyleDurationMs",
+              "baseline": 0.6239999999999996,
+              "candidate": 0.6739999999999993,
+              "absoluteDifference": 0.04999999999999971,
+              "ratio": 1.0801282051282046,
+              "regression": false
+            },
+            {
+              "metric": "draggableImageRectCalls",
+              "baseline": 12,
+              "candidate": 12,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            }
+          ]
+        }
+      },
+      {
+        "name": "toolbar-custom-format",
+        "pass": true,
+        "performancePass": true,
+        "parityFailures": [],
+        "visual": {
+          "pass": true,
+          "differentPixels": 0,
+          "totalPixels": 921600,
+          "ratio": 0,
+          "baselineSize": {
+            "width": 1280,
+            "height": 720
+          },
+          "candidateSize": {
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "contract": {
+          "pass": true,
+          "failures": [],
+          "maxGeometryDifferencePx": 0
+        },
+        "interaction": {
+          "pass": true,
+          "failures": [],
+          "comparedCheckpoints": 11,
+          "maxNumericDifference": 0
+        },
+        "animationSemantics": {
+          "pass": true,
+          "failures": [],
+          "baselineStageOrder": [
+            2
+          ],
+          "candidateStageOrder": [
+            2
+          ],
+          "baselineEndpoints": {
+            "initial": {
+              "t": 6.999999904632659,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "coords 0/0|zoom 100.00%",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            },
+            "final": {
+              "t": 811.1999999046325,
+              "x": -2552,
+              "y": -734,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "coords 192/144|zoom 100.00%",
+              "toolbarOpacity": "1",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2552, -734)"
+            }
+          },
+          "candidateEndpoints": {
+            "initial": {
+              "t": 7.2999999999999545,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "coords 0/0|zoom 100.00%",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            },
+            "final": {
+              "t": 794.5999999999999,
+              "x": -2552,
+              "y": -734,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "coords 192/144|zoom 100.00%",
+              "toolbarOpacity": "1",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2552, -734)"
+            }
+          }
+        },
+        "trajectory": {
+          "pass": true,
+          "gated": false,
+          "reason": "Direct input parity is gated by index-aligned post-input checkpoints; raw rAF samples remain in scenario artifacts.",
+          "baselineSamples": 96,
+          "candidateSamples": 96
+        },
+        "performance": {
+          "pass": true,
+          "measurements": [
+            {
+              "metric": "p95FrameIntervalMs",
+              "baseline": 9.229999999999858,
+              "candidate": 9.200000000000045,
+              "absoluteDifference": -0.029999999999812843,
+              "ratio": 0.9967497291441155,
+              "regression": false
+            },
+            {
+              "metric": "p99FrameIntervalMs",
+              "baseline": 10.247999999999989,
+              "candidate": 9.738000000000197,
+              "absoluteDifference": -0.509999999999792,
+              "ratio": 0.9502341920374909,
+              "regression": false
+            },
+            {
+              "metric": "longTaskTotalMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "loafBlockingTotalMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "TaskDurationMs",
+              "baseline": 81.051,
+              "candidate": 51.73800000000001,
+              "absoluteDifference": -29.312999999999995,
+              "ratio": 0.6383388237035941,
+              "regression": false
+            },
+            {
+              "metric": "ScriptDurationMs",
+              "baseline": 34.03199999999999,
+              "candidate": 12.918,
+              "absoluteDifference": -21.11399999999999,
+              "ratio": 0.3795839210155149,
+              "regression": false
+            },
+            {
+              "metric": "LayoutDurationMs",
+              "baseline": 0.7990000000000003,
+              "candidate": 0.9170000000000003,
+              "absoluteDifference": 0.118,
+              "ratio": 1.1476846057571963,
+              "regression": false
+            },
+            {
+              "metric": "RecalcStyleDurationMs",
+              "baseline": 0.6030000000000002,
+              "candidate": 0.5599999999999997,
+              "absoluteDifference": -0.04300000000000048,
+              "ratio": 0.9286898839137637,
+              "regression": false
+            },
+            {
+              "metric": "draggableImageRectCalls",
+              "baseline": 12,
+              "candidate": 12,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            }
+          ]
+        }
+      },
+      {
+        "name": "toolbar-dynamic-format",
+        "pass": true,
+        "performancePass": false,
+        "parityFailures": [],
+        "visual": {
+          "pass": true,
+          "differentPixels": 0,
+          "totalPixels": 921600,
+          "ratio": 0,
+          "baselineSize": {
+            "width": 1280,
+            "height": 720
+          },
+          "candidateSize": {
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "contract": {
+          "pass": true,
+          "failures": [],
+          "maxGeometryDifferencePx": 0
+        },
+        "interaction": {
+          "pass": true,
+          "failures": [],
+          "comparedCheckpoints": 12,
+          "maxNumericDifference": 0
+        },
+        "animationSemantics": {
+          "pass": true,
+          "failures": [],
+          "baselineStageOrder": [
+            2
+          ],
+          "candidateStageOrder": [
+            2
+          ],
+          "baselineEndpoints": {
+            "initial": {
+              "t": 6.900000143051102,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            },
+            "final": {
+              "t": 806.9000001430513,
+              "x": -2552,
+              "y": -734,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "coords 192/144|zoom 100.00%",
+              "toolbarOpacity": "1",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2552, -734)"
+            }
+          },
+          "candidateEndpoints": {
+            "initial": {
+              "t": 4.399999904632523,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            },
+            "final": {
+              "t": 833.8999999046328,
+              "x": -2552,
+              "y": -734,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "coords 192/144|zoom 100.00%",
+              "toolbarOpacity": "1",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2552, -734)"
+            }
+          }
+        },
+        "trajectory": {
+          "pass": true,
+          "gated": false,
+          "reason": "Direct input parity is gated by index-aligned post-input checkpoints; raw rAF samples remain in scenario artifacts.",
+          "baselineSamples": 95,
+          "candidateSamples": 98
+        },
+        "performance": {
+          "pass": false,
+          "measurements": [
+            {
+              "metric": "p95FrameIntervalMs",
+              "baseline": 9.234999999999934,
+              "candidate": 9.120000000000072,
+              "absoluteDifference": -0.11499999999986166,
+              "ratio": 0.9875473741202098,
+              "regression": false
+            },
+            {
+              "metric": "p99FrameIntervalMs",
+              "baseline": 10.470999999999771,
+              "candidate": 12.759999999999701,
+              "absoluteDifference": 2.2889999999999304,
+              "ratio": 1.2186037627733721,
+              "regression": true
+            },
+            {
+              "metric": "longTaskTotalMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "loafBlockingTotalMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "TaskDurationMs",
+              "baseline": 87.01799999999999,
+              "candidate": 83.79800000000002,
+              "absoluteDifference": -3.2199999999999704,
+              "ratio": 0.9629961617136688,
+              "regression": false
+            },
+            {
+              "metric": "ScriptDurationMs",
+              "baseline": 41.271,
+              "candidate": 29.882000000000005,
+              "absoluteDifference": -11.388999999999996,
+              "ratio": 0.7240435172397084,
+              "regression": false
+            },
+            {
+              "metric": "LayoutDurationMs",
+              "baseline": 0.9080000000000008,
+              "candidate": 1.1190000000000002,
+              "absoluteDifference": 0.2109999999999994,
+              "ratio": 1.2323788546255499,
+              "regression": false
+            },
+            {
+              "metric": "RecalcStyleDurationMs",
+              "baseline": 0.7410000000000003,
+              "candidate": 0.7489999999999997,
+              "absoluteDifference": 0.007999999999999341,
+              "ratio": 1.0107962213225363,
+              "regression": false
+            },
+            {
+              "metric": "draggableImageRectCalls",
+              "baseline": 13,
+              "candidate": 13,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            }
+          ]
+        }
+      },
+      {
+        "name": "drag-hover-hit-test",
+        "pass": true,
+        "performancePass": true,
+        "parityFailures": [],
+        "visual": {
+          "pass": true,
+          "differentPixels": 0,
+          "totalPixels": 921600,
+          "ratio": 0,
+          "baselineSize": {
+            "width": 1280,
+            "height": 720
+          },
+          "candidateSize": {
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "contract": {
+          "pass": true,
+          "failures": [],
+          "maxGeometryDifferencePx": 0
+        },
+        "interaction": {
+          "pass": true,
+          "failures": [],
+          "comparedCheckpoints": 6,
+          "maxNumericDifference": 0
+        },
+        "animationSemantics": {
+          "pass": true,
+          "failures": [],
+          "baselineStageOrder": [
+            2
+          ],
+          "candidateStageOrder": [
+            2
+          ],
+          "baselineEndpoints": {
+            "initial": {
+              "t": 5.199999952316375,
+              "x": -3040,
+              "y": -1640,
+              "scale": 0.8,
+              "animationStage": 2,
+              "toolbarText": "(1440, 1460)|0.80x",
+              "toolbarOpacity": "1",
+              "sceneTransform": "matrix(0.8, 0, 0, 0.8, -3040, -1640)"
+            },
+            "final": {
+              "t": 3009.999999952316,
+              "x": -3040,
+              "y": -1640,
+              "scale": 0.8,
+              "animationStage": 2,
+              "toolbarText": "(1440, 1460)|0.80x",
+              "toolbarOpacity": "1",
+              "sceneTransform": "matrix(0.8, 0, 0, 0.8, -3040, -1640)"
+            }
+          },
+          "candidateEndpoints": {
+            "initial": {
+              "t": 5.599999952316239,
+              "x": -3040,
+              "y": -1640,
+              "scale": 0.8,
+              "animationStage": 2,
+              "toolbarText": "(1440, 1460)|0.80x",
+              "toolbarOpacity": "1",
+              "sceneTransform": "matrix(0.8, 0, 0, 0.8, -3040, -1640)"
+            },
+            "final": {
+              "t": 2897.699999952316,
+              "x": -3040,
+              "y": -1640,
+              "scale": 0.8,
+              "animationStage": 2,
+              "toolbarText": "(1440, 1460)|0.80x",
+              "toolbarOpacity": "1",
+              "sceneTransform": "matrix(0.8, 0, 0, 0.8, -3040, -1640)"
+            }
+          }
+        },
+        "trajectory": {
+          "pass": true,
+          "gated": false,
+          "reason": "Direct input parity is gated by index-aligned post-input checkpoints; raw rAF samples remain in scenario artifacts.",
+          "baselineSamples": 222,
+          "candidateSamples": 224
+        },
+        "performance": {
+          "pass": true,
+          "measurements": [
+            {
+              "metric": "p95FrameIntervalMs",
+              "baseline": 9.299999999999727,
+              "candidate": 9.200000000000033,
+              "absoluteDifference": -0.09999999999969411,
+              "ratio": 0.9892473118279895,
+              "regression": false
+            },
+            {
+              "metric": "p99FrameIntervalMs",
+              "baseline": 9.300000000000182,
+              "candidate": 9.379000000000108,
+              "absoluteDifference": 0.07899999999992602,
+              "ratio": 1.0084946236559058,
+              "regression": false
+            },
+            {
+              "metric": "longTaskTotalMs",
+              "baseline": 1166,
+              "candidate": 1044,
+              "absoluteDifference": -122,
+              "ratio": 0.8953687821612349,
+              "regression": false
+            },
+            {
+              "metric": "loafBlockingTotalMs",
+              "baseline": 1116.8,
+              "candidate": 994.2,
+              "absoluteDifference": -122.59999999999991,
+              "ratio": 0.8902220630372494,
+              "regression": false
+            },
+            {
+              "metric": "TaskDurationMs",
+              "baseline": 1293.0269999999998,
+              "candidate": 1131.1970000000001,
+              "absoluteDifference": -161.8299999999997,
+              "ratio": 0.8748440674479344,
+              "regression": false
+            },
+            {
+              "metric": "ScriptDurationMs",
+              "baseline": 1015.3859999999999,
+              "candidate": 887.955,
+              "absoluteDifference": -127.43099999999981,
+              "ratio": 0.8744999438637131,
+              "regression": false
+            },
+            {
+              "metric": "LayoutDurationMs",
+              "baseline": 0.35199999999999987,
+              "candidate": 0.3870000000000019,
+              "absoluteDifference": 0.03500000000000203,
+              "ratio": 1.099431818181824,
+              "regression": false
+            },
+            {
+              "metric": "RecalcStyleDurationMs",
+              "baseline": 1.2750000000000001,
+              "candidate": 1.0579999999999998,
+              "absoluteDifference": -0.2170000000000003,
+              "ratio": 0.8298039215686273,
+              "regression": false
+            },
+            {
+              "metric": "draggableImageRectCalls",
+              "baseline": 1000016,
+              "candidate": 500012,
+              "absoluteDifference": -500004,
+              "ratio": 0.500003999936001,
+              "regression": false
+            },
+            {
+              "metric": "draggable.hoverBurstMedianMs",
+              "baseline": 232,
+              "candidate": 203.59999990463257,
+              "absoluteDifference": -28.40000009536743,
+              "ratio": 0.8775862064854852,
+              "regression": false
+            }
+          ]
+        }
+      },
+      {
+        "name": "drag",
+        "pass": true,
+        "performancePass": true,
+        "parityFailures": [],
+        "visual": {
+          "pass": true,
+          "differentPixels": 0,
+          "totalPixels": 921600,
+          "ratio": 0,
+          "baselineSize": {
+            "width": 1280,
+            "height": 720
+          },
+          "candidateSize": {
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "contract": {
+          "pass": true,
+          "failures": [],
+          "maxGeometryDifferencePx": 0
+        },
+        "interaction": {
+          "pass": true,
+          "failures": [],
+          "comparedCheckpoints": 28,
+          "maxNumericDifference": 0
+        },
+        "animationSemantics": {
+          "pass": true,
+          "failures": [],
+          "baselineStageOrder": [
+            2
+          ],
+          "candidateStageOrder": [
+            2
+          ],
+          "baselineEndpoints": {
+            "initial": {
+              "t": 7.7000000000000455,
+              "x": -3040,
+              "y": -1640,
+              "scale": 0.8,
+              "animationStage": 2,
+              "toolbarText": "(1440, 1460)|0.80x",
+              "toolbarOpacity": "1",
+              "sceneTransform": "matrix(0.8, 0, 0, 0.8, -3040, -1640)"
+            },
+            "final": {
+              "t": 1182.9,
+              "x": -3040,
+              "y": -1640,
+              "scale": 0.8,
+              "animationStage": 2,
+              "toolbarText": "(1440, 1460)|0.80x",
+              "toolbarOpacity": "1",
+              "sceneTransform": "matrix(0.8, 0, 0, 0.8, -3040, -1640)"
+            }
+          },
+          "candidateEndpoints": {
+            "initial": {
+              "t": 6.299999952316284,
+              "x": -3040,
+              "y": -1640,
+              "scale": 0.8,
+              "animationStage": 2,
+              "toolbarText": "(1440, 1460)|0.80x",
+              "toolbarOpacity": "1",
+              "sceneTransform": "matrix(0.8, 0, 0, 0.8, -3040, -1640)"
+            },
+            "final": {
+              "t": 1181.2999999523163,
+              "x": -3040,
+              "y": -1640,
+              "scale": 0.8,
+              "animationStage": 2,
+              "toolbarText": "(1440, 1460)|0.80x",
+              "toolbarOpacity": "1",
+              "sceneTransform": "matrix(0.8, 0, 0, 0.8, -3040, -1640)"
+            }
+          }
+        },
+        "trajectory": {
+          "pass": true,
+          "gated": false,
+          "reason": "Direct input parity is gated by index-aligned post-input checkpoints; raw rAF samples remain in scenario artifacts.",
+          "baselineSamples": 143,
+          "candidateSamples": 142
+        },
+        "performance": {
+          "pass": true,
+          "measurements": [
+            {
+              "metric": "p95FrameIntervalMs",
+              "baseline": 9.199999999999818,
+              "candidate": 9.299999999999955,
+              "absoluteDifference": 0.10000000000013642,
+              "ratio": 1.0108695652174065,
+              "regression": false
+            },
+            {
+              "metric": "p99FrameIntervalMs",
+              "baseline": 9.299999999999727,
+              "candidate": 9.4,
+              "absoluteDifference": 0.1000000000002732,
+              "ratio": 1.0107526881720728,
+              "regression": false
+            },
+            {
+              "metric": "longTaskTotalMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "loafBlockingTotalMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "TaskDurationMs",
+              "baseline": 88.49300000000004,
+              "candidate": 72.748,
+              "absoluteDifference": -15.745000000000033,
+              "ratio": 0.8220763224209822,
+              "regression": false
+            },
+            {
+              "metric": "ScriptDurationMs",
+              "baseline": 31.781999999999975,
+              "candidate": 29.958000000000013,
+              "absoluteDifference": -1.8239999999999625,
+              "ratio": 0.9426090239758365,
+              "regression": false
+            },
+            {
+              "metric": "LayoutDurationMs",
+              "baseline": 0.24099999999999988,
+              "candidate": 0.46900000000000064,
+              "absoluteDifference": 0.22800000000000076,
+              "ratio": 1.9460580912863106,
+              "regression": false
+            },
+            {
+              "metric": "RecalcStyleDurationMs",
+              "baseline": 4.621999999999999,
+              "candidate": 3.32,
+              "absoluteDifference": -1.3019999999999992,
+              "ratio": 0.7183037646040676,
+              "regression": false
+            },
+            {
+              "metric": "draggableImageRectCalls",
+              "baseline": 30,
+              "candidate": 29,
+              "absoluteDifference": -1,
+              "ratio": 0.9666666666666667,
+              "regression": false
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "toolbarDynamicReplications": [
+    {
+      "generatedAt": "2026-07-18T04:55:15.159Z",
+      "inputs": {
+        "sourceMode": "local",
+        "scenarios": [
+          "toolbar-dynamic-format"
+        ],
+        "sections": 100
+      },
+      "provenance": {
+        "baseline": {
+          "package": {
+            "name": "@hunterchen/canvas",
+            "version": "0.12.0"
+          },
+          "proof": "719eec68ae7cbacc0a26497c49645768e4c991b7a818b1d4b7455fcac6e0aee1",
+          "source": {
+            "algorithm": "sha256",
+            "hash": "326d96b9687797b30244c2e64ea3750e9cdb2f7e821617acbb226cbacba1dd1d",
+            "fileCount": 20,
+            "bytes": 101890
+          },
+          "git": {
+            "head": "476f6c939907849df9ecded77b0729ed84cf3833",
+            "sourceTree": "a7ba65afdd637ac6230949df3241f8e7a3f9f22b",
+            "sourceDirty": false
+          }
+        },
+        "candidate": {
+          "package": {
+            "name": "@hunterchen/canvas",
+            "version": "0.12.0"
+          },
+          "proof": "550e6648afe537718dff361bf668f782e68110cb9caba2aa8ee2da2087b1c61b",
+          "source": {
+            "algorithm": "sha256",
+            "hash": "1acb4e0419924730cd989a9f7943704bd14d03928a3b4f44b2920e89f5802034",
+            "fileCount": 20,
+            "bytes": 103693
+          },
+          "git": {
+            "head": "4b479bdb9fa08f0e04295f0f887d6a3169d73f62",
+            "sourceTree": "6666c3022f17610257a4c6236c22b191c76e6833",
+            "sourceDirty": false
+          }
+        }
+      },
+      "summary": {
+        "parityPass": true,
+        "comparisonParityPass": true,
+        "performancePass": true,
+        "pageErrors": 0,
+        "deferredUserDecisions": []
+      },
+      "comparison": {
+        "name": "toolbar-dynamic-format",
+        "pass": true,
+        "performancePass": true,
+        "parityFailures": [],
+        "visual": {
+          "pass": true,
+          "differentPixels": 0,
+          "totalPixels": 921600,
+          "ratio": 0,
+          "baselineSize": {
+            "width": 1280,
+            "height": 720
+          },
+          "candidateSize": {
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "contract": {
+          "pass": true,
+          "failures": [],
+          "maxGeometryDifferencePx": 0
+        },
+        "interaction": {
+          "pass": true,
+          "failures": [],
+          "comparedCheckpoints": 12,
+          "maxNumericDifference": 0
+        },
+        "animationSemantics": {
+          "pass": true,
+          "failures": [],
+          "baselineStageOrder": [
+            2
+          ],
+          "candidateStageOrder": [
+            2
+          ],
+          "baselineEndpoints": {
+            "initial": {
+              "t": 5.5,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            },
+            "final": {
+              "t": 813.8000000000002,
+              "x": -2552,
+              "y": -734,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "coords 192/144|zoom 100.00%",
+              "toolbarOpacity": "1",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2552, -734)"
+            }
+          },
+          "candidateEndpoints": {
+            "initial": {
+              "t": 6.699999952316375,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            },
+            "final": {
+              "t": 798.2999999523163,
+              "x": -2552,
+              "y": -734,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "coords 192/144|zoom 100.00%",
+              "toolbarOpacity": "1",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2552, -734)"
+            }
+          }
+        },
+        "trajectory": {
+          "pass": true,
+          "gated": false,
+          "reason": "Direct input parity is gated by index-aligned post-input checkpoints; raw rAF samples remain in scenario artifacts.",
+          "baselineSamples": 97,
+          "candidateSamples": 95
+        },
+        "performance": {
+          "pass": true,
+          "measurements": [
+            {
+              "metric": "p95FrameIntervalMs",
+              "baseline": 9.300000000000011,
+              "candidate": 9.299999999999955,
+              "absoluteDifference": -5.684341886080802e-14,
+              "ratio": 0.9999999999999939,
+              "regression": false
+            },
+            {
+              "metric": "p99FrameIntervalMs",
+              "baseline": 9.760000000000073,
+              "candidate": 9.911000000000037,
+              "absoluteDifference": 0.15099999999996427,
+              "ratio": 1.0154713114754061,
+              "regression": false
+            },
+            {
+              "metric": "longTaskTotalMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "loafBlockingTotalMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "TaskDurationMs",
+              "baseline": 96.40100000000001,
+              "candidate": 58.87399999999998,
+              "absoluteDifference": -37.52700000000003,
+              "ratio": 0.6107198058111428,
+              "regression": false
+            },
+            {
+              "metric": "ScriptDurationMs",
+              "baseline": 45.58300000000001,
+              "candidate": 16.167,
+              "absoluteDifference": -29.41600000000001,
+              "ratio": 0.3546716977820678,
+              "regression": false
+            },
+            {
+              "metric": "LayoutDurationMs",
+              "baseline": 0.9049999999999996,
+              "candidate": 1.2510000000000003,
+              "absoluteDifference": 0.34600000000000075,
+              "ratio": 1.3823204419889512,
+              "regression": false
+            },
+            {
+              "metric": "RecalcStyleDurationMs",
+              "baseline": 0.7530000000000002,
+              "candidate": 0.8780000000000003,
+              "absoluteDifference": 0.1250000000000001,
+              "ratio": 1.1660026560424968,
+              "regression": false
+            },
+            {
+              "metric": "draggableImageRectCalls",
+              "baseline": 13,
+              "candidate": 13,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "generatedAt": "2026-07-18T04:55:22.908Z",
+      "inputs": {
+        "sourceMode": "local",
+        "scenarios": [
+          "toolbar-dynamic-format"
+        ],
+        "sections": 100
+      },
+      "provenance": {
+        "baseline": {
+          "package": {
+            "name": "@hunterchen/canvas",
+            "version": "0.12.0"
+          },
+          "proof": "719eec68ae7cbacc0a26497c49645768e4c991b7a818b1d4b7455fcac6e0aee1",
+          "source": {
+            "algorithm": "sha256",
+            "hash": "326d96b9687797b30244c2e64ea3750e9cdb2f7e821617acbb226cbacba1dd1d",
+            "fileCount": 20,
+            "bytes": 101890
+          },
+          "git": {
+            "head": "476f6c939907849df9ecded77b0729ed84cf3833",
+            "sourceTree": "a7ba65afdd637ac6230949df3241f8e7a3f9f22b",
+            "sourceDirty": false
+          }
+        },
+        "candidate": {
+          "package": {
+            "name": "@hunterchen/canvas",
+            "version": "0.12.0"
+          },
+          "proof": "550e6648afe537718dff361bf668f782e68110cb9caba2aa8ee2da2087b1c61b",
+          "source": {
+            "algorithm": "sha256",
+            "hash": "1acb4e0419924730cd989a9f7943704bd14d03928a3b4f44b2920e89f5802034",
+            "fileCount": 20,
+            "bytes": 103693
+          },
+          "git": {
+            "head": "4b479bdb9fa08f0e04295f0f887d6a3169d73f62",
+            "sourceTree": "6666c3022f17610257a4c6236c22b191c76e6833",
+            "sourceDirty": false
+          }
+        }
+      },
+      "summary": {
+        "parityPass": true,
+        "comparisonParityPass": true,
+        "performancePass": true,
+        "pageErrors": 0,
+        "deferredUserDecisions": []
+      },
+      "comparison": {
+        "name": "toolbar-dynamic-format",
+        "pass": true,
+        "performancePass": true,
+        "parityFailures": [],
+        "visual": {
+          "pass": true,
+          "differentPixels": 0,
+          "totalPixels": 921600,
+          "ratio": 0,
+          "baselineSize": {
+            "width": 1280,
+            "height": 720
+          },
+          "candidateSize": {
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "contract": {
+          "pass": true,
+          "failures": [],
+          "maxGeometryDifferencePx": 0
+        },
+        "interaction": {
+          "pass": true,
+          "failures": [],
+          "comparedCheckpoints": 12,
+          "maxNumericDifference": 0
+        },
+        "animationSemantics": {
+          "pass": true,
+          "failures": [],
+          "baselineStageOrder": [
+            2
+          ],
+          "candidateStageOrder": [
+            2
+          ],
+          "baselineEndpoints": {
+            "initial": {
+              "t": 5.1000001430511475,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            },
+            "final": {
+              "t": 897.0000001430512,
+              "x": -2552,
+              "y": -734,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "coords 192/144|zoom 100.00%",
+              "toolbarOpacity": "1",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2552, -734)"
+            }
+          },
+          "candidateEndpoints": {
+            "initial": {
+              "t": 5.000000095367341,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            },
+            "final": {
+              "t": 871.7000000953676,
+              "x": -2552,
+              "y": -734,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "coords 192/144|zoom 100.00%",
+              "toolbarOpacity": "1",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2552, -734)"
+            }
+          }
+        },
+        "trajectory": {
+          "pass": true,
+          "gated": false,
+          "reason": "Direct input parity is gated by index-aligned post-input checkpoints; raw rAF samples remain in scenario artifacts.",
+          "baselineSamples": 104,
+          "candidateSamples": 101
+        },
+        "performance": {
+          "pass": true,
+          "measurements": [
+            {
+              "metric": "p95FrameIntervalMs",
+              "baseline": 9.300000000000159,
+              "candidate": 9.299999999999965,
+              "absoluteDifference": -1.936228954946273e-13,
+              "ratio": 0.9999999999999791,
+              "regression": false
+            },
+            {
+              "metric": "p99FrameIntervalMs",
+              "baseline": 9.300000000000182,
+              "candidate": 9.625000000000346,
+              "absoluteDifference": 0.3250000000001645,
+              "ratio": 1.0349462365591569,
+              "regression": false
+            },
+            {
+              "metric": "longTaskTotalMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "loafBlockingTotalMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "TaskDurationMs",
+              "baseline": 129.866,
+              "candidate": 101.59099999999998,
+              "absoluteDifference": -28.275000000000034,
+              "ratio": 0.7822755763633281,
+              "regression": false
+            },
+            {
+              "metric": "ScriptDurationMs",
+              "baseline": 53.096000000000004,
+              "candidate": 28.668,
+              "absoluteDifference": -24.428000000000004,
+              "ratio": 0.5399276781678468,
+              "regression": false
+            },
+            {
+              "metric": "LayoutDurationMs",
+              "baseline": 1.259999999999999,
+              "candidate": 1.462999999999999,
+              "absoluteDifference": 0.20300000000000007,
+              "ratio": 1.1611111111111112,
+              "regression": false
+            },
+            {
+              "metric": "RecalcStyleDurationMs",
+              "baseline": 0.9750000000000002,
+              "candidate": 1.112,
+              "absoluteDifference": 0.1369999999999999,
+              "ratio": 1.1405128205128203,
+              "regression": false
+            },
+            {
+              "metric": "draggableImageRectCalls",
+              "baseline": 13,
+              "candidate": 13,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "generatedAt": "2026-07-18T04:55:29.941Z",
+      "inputs": {
+        "sourceMode": "local",
+        "scenarios": [
+          "toolbar-dynamic-format"
+        ],
+        "sections": 100
+      },
+      "provenance": {
+        "baseline": {
+          "package": {
+            "name": "@hunterchen/canvas",
+            "version": "0.12.0"
+          },
+          "proof": "719eec68ae7cbacc0a26497c49645768e4c991b7a818b1d4b7455fcac6e0aee1",
+          "source": {
+            "algorithm": "sha256",
+            "hash": "326d96b9687797b30244c2e64ea3750e9cdb2f7e821617acbb226cbacba1dd1d",
+            "fileCount": 20,
+            "bytes": 101890
+          },
+          "git": {
+            "head": "476f6c939907849df9ecded77b0729ed84cf3833",
+            "sourceTree": "a7ba65afdd637ac6230949df3241f8e7a3f9f22b",
+            "sourceDirty": false
+          }
+        },
+        "candidate": {
+          "package": {
+            "name": "@hunterchen/canvas",
+            "version": "0.12.0"
+          },
+          "proof": "550e6648afe537718dff361bf668f782e68110cb9caba2aa8ee2da2087b1c61b",
+          "source": {
+            "algorithm": "sha256",
+            "hash": "1acb4e0419924730cd989a9f7943704bd14d03928a3b4f44b2920e89f5802034",
+            "fileCount": 20,
+            "bytes": 103693
+          },
+          "git": {
+            "head": "4b479bdb9fa08f0e04295f0f887d6a3169d73f62",
+            "sourceTree": "6666c3022f17610257a4c6236c22b191c76e6833",
+            "sourceDirty": false
+          }
+        }
+      },
+      "summary": {
+        "parityPass": true,
+        "comparisonParityPass": true,
+        "performancePass": true,
+        "pageErrors": 0,
+        "deferredUserDecisions": []
+      },
+      "comparison": {
+        "name": "toolbar-dynamic-format",
+        "pass": true,
+        "performancePass": true,
+        "parityFailures": [],
+        "visual": {
+          "pass": true,
+          "differentPixels": 0,
+          "totalPixels": 921600,
+          "ratio": 0,
+          "baselineSize": {
+            "width": 1280,
+            "height": 720
+          },
+          "candidateSize": {
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "contract": {
+          "pass": true,
+          "failures": [],
+          "maxGeometryDifferencePx": 0
+        },
+        "interaction": {
+          "pass": true,
+          "failures": [],
+          "comparedCheckpoints": 12,
+          "maxNumericDifference": 0
+        },
+        "animationSemantics": {
+          "pass": true,
+          "failures": [],
+          "baselineStageOrder": [
+            2
+          ],
+          "candidateStageOrder": [
+            2
+          ],
+          "baselineEndpoints": {
+            "initial": {
+              "t": 5.999999809265091,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            },
+            "final": {
+              "t": 797.5999998092652,
+              "x": -2552,
+              "y": -734,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "coords 192/144|zoom 100.00%",
+              "toolbarOpacity": "1",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2552, -734)"
+            }
+          },
+          "candidateEndpoints": {
+            "initial": {
+              "t": 6.100000190734818,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            },
+            "final": {
+              "t": 831.100000190735,
+              "x": -2552,
+              "y": -734,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "coords 192/144|zoom 100.00%",
+              "toolbarOpacity": "1",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2552, -734)"
+            }
+          }
+        },
+        "trajectory": {
+          "pass": true,
+          "gated": false,
+          "reason": "Direct input parity is gated by index-aligned post-input checkpoints; raw rAF samples remain in scenario artifacts.",
+          "baselineSamples": 95,
+          "candidateSamples": 98
+        },
+        "performance": {
+          "pass": true,
+          "measurements": [
+            {
+              "metric": "p95FrameIntervalMs",
+              "baseline": 9.300000000000182,
+              "candidate": 9.3,
+              "absoluteDifference": -1.8118839761882555e-13,
+              "ratio": 0.9999999999999806,
+              "regression": false
+            },
+            {
+              "metric": "p99FrameIntervalMs",
+              "baseline": 9.904000000000028,
+              "candidate": 10.007999999999745,
+              "absoluteDifference": 0.10399999999971676,
+              "ratio": 1.010500807754414,
+              "regression": false
+            },
+            {
+              "metric": "longTaskTotalMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "loafBlockingTotalMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "TaskDurationMs",
+              "baseline": 91.59400000000001,
+              "candidate": 69.845,
+              "absoluteDifference": -21.74900000000001,
+              "ratio": 0.7625499486865951,
+              "regression": false
+            },
+            {
+              "metric": "ScriptDurationMs",
+              "baseline": 44.895,
+              "candidate": 16.311999999999994,
+              "absoluteDifference": -28.58300000000001,
+              "ratio": 0.3633366744626349,
+              "regression": false
+            },
+            {
+              "metric": "LayoutDurationMs",
+              "baseline": 1.0929999999999993,
+              "candidate": 1.0359999999999996,
+              "absoluteDifference": -0.05699999999999972,
+              "ratio": 0.947849954254346,
+              "regression": false
+            },
+            {
+              "metric": "RecalcStyleDurationMs",
+              "baseline": 0.9189999999999997,
+              "candidate": 0.8020000000000006,
+              "absoluteDifference": -0.1169999999999991,
+              "ratio": 0.8726877040261163,
+              "regression": false
+            },
+            {
+              "metric": "draggableImageRectCalls",
+              "baseline": 13,
+              "candidate": 13,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "generatedAt": "2026-07-18T04:55:36.183Z",
+      "inputs": {
+        "sourceMode": "local",
+        "scenarios": [
+          "toolbar-dynamic-format"
+        ],
+        "sections": 100
+      },
+      "provenance": {
+        "baseline": {
+          "package": {
+            "name": "@hunterchen/canvas",
+            "version": "0.12.0"
+          },
+          "proof": "719eec68ae7cbacc0a26497c49645768e4c991b7a818b1d4b7455fcac6e0aee1",
+          "source": {
+            "algorithm": "sha256",
+            "hash": "326d96b9687797b30244c2e64ea3750e9cdb2f7e821617acbb226cbacba1dd1d",
+            "fileCount": 20,
+            "bytes": 101890
+          },
+          "git": {
+            "head": "476f6c939907849df9ecded77b0729ed84cf3833",
+            "sourceTree": "a7ba65afdd637ac6230949df3241f8e7a3f9f22b",
+            "sourceDirty": false
+          }
+        },
+        "candidate": {
+          "package": {
+            "name": "@hunterchen/canvas",
+            "version": "0.12.0"
+          },
+          "proof": "550e6648afe537718dff361bf668f782e68110cb9caba2aa8ee2da2087b1c61b",
+          "source": {
+            "algorithm": "sha256",
+            "hash": "1acb4e0419924730cd989a9f7943704bd14d03928a3b4f44b2920e89f5802034",
+            "fileCount": 20,
+            "bytes": 103693
+          },
+          "git": {
+            "head": "4b479bdb9fa08f0e04295f0f887d6a3169d73f62",
+            "sourceTree": "6666c3022f17610257a4c6236c22b191c76e6833",
+            "sourceDirty": false
+          }
+        }
+      },
+      "summary": {
+        "parityPass": true,
+        "comparisonParityPass": true,
+        "performancePass": true,
+        "pageErrors": 0,
+        "deferredUserDecisions": []
+      },
+      "comparison": {
+        "name": "toolbar-dynamic-format",
+        "pass": true,
+        "performancePass": true,
+        "parityFailures": [],
+        "visual": {
+          "pass": true,
+          "differentPixels": 0,
+          "totalPixels": 921600,
+          "ratio": 0,
+          "baselineSize": {
+            "width": 1280,
+            "height": 720
+          },
+          "candidateSize": {
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "contract": {
+          "pass": true,
+          "failures": [],
+          "maxGeometryDifferencePx": 0
+        },
+        "interaction": {
+          "pass": true,
+          "failures": [],
+          "comparedCheckpoints": 12,
+          "maxNumericDifference": 0
+        },
+        "animationSemantics": {
+          "pass": true,
+          "failures": [],
+          "baselineStageOrder": [
+            2
+          ],
+          "candidateStageOrder": [
+            2
+          ],
+          "baselineEndpoints": {
+            "initial": {
+              "t": 6.300000047683625,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            },
+            "final": {
+              "t": 806.3000000476836,
+              "x": -2552,
+              "y": -734,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "coords 192/144|zoom 100.00%",
+              "toolbarOpacity": "1",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2552, -734)"
+            }
+          },
+          "candidateEndpoints": {
+            "initial": {
+              "t": 5.699999952316375,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            },
+            "final": {
+              "t": 798.1999999523164,
+              "x": -2552,
+              "y": -734,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "coords 192/144|zoom 100.00%",
+              "toolbarOpacity": "1",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2552, -734)"
+            }
+          }
+        },
+        "trajectory": {
+          "pass": true,
+          "gated": false,
+          "reason": "Direct input parity is gated by index-aligned post-input checkpoints; raw rAF samples remain in scenario artifacts.",
+          "baselineSamples": 95,
+          "candidateSamples": 95
+        },
+        "performance": {
+          "pass": true,
+          "measurements": [
+            {
+              "metric": "p95FrameIntervalMs",
+              "baseline": 9.33499999999999,
+              "candidate": 9.299999999999955,
+              "absoluteDifference": -0.03500000000003567,
+              "ratio": 0.9962506695232956,
+              "regression": false
+            },
+            {
+              "metric": "p99FrameIntervalMs",
+              "baseline": 10.46399999999999,
+              "candidate": 9.939000000000041,
+              "absoluteDifference": -0.5249999999999488,
+              "ratio": 0.9498279816513809,
+              "regression": false
+            },
+            {
+              "metric": "longTaskTotalMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "loafBlockingTotalMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "TaskDurationMs",
+              "baseline": 93.699,
+              "candidate": 55.68199999999998,
+              "absoluteDifference": -38.01700000000002,
+              "ratio": 0.5942646132829591,
+              "regression": false
+            },
+            {
+              "metric": "ScriptDurationMs",
+              "baseline": 44.28900000000001,
+              "candidate": 14.322000000000001,
+              "absoluteDifference": -29.967000000000006,
+              "ratio": 0.32337600758653384,
+              "regression": false
+            },
+            {
+              "metric": "LayoutDurationMs",
+              "baseline": 1.162,
+              "candidate": 1.025,
+              "absoluteDifference": -0.137,
+              "ratio": 0.8820998278829604,
+              "regression": false
+            },
+            {
+              "metric": "RecalcStyleDurationMs",
+              "baseline": 0.8000000000000004,
+              "candidate": 0.7309999999999999,
+              "absoluteDifference": -0.0690000000000005,
+              "ratio": 0.9137499999999994,
+              "regression": false
+            },
+            {
+              "metric": "draggableImageRectCalls",
+              "baseline": 13,
+              "candidate": 13,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "generatedAt": "2026-07-18T04:55:42.452Z",
+      "inputs": {
+        "sourceMode": "local",
+        "scenarios": [
+          "toolbar-dynamic-format"
+        ],
+        "sections": 100
+      },
+      "provenance": {
+        "baseline": {
+          "package": {
+            "name": "@hunterchen/canvas",
+            "version": "0.12.0"
+          },
+          "proof": "719eec68ae7cbacc0a26497c49645768e4c991b7a818b1d4b7455fcac6e0aee1",
+          "source": {
+            "algorithm": "sha256",
+            "hash": "326d96b9687797b30244c2e64ea3750e9cdb2f7e821617acbb226cbacba1dd1d",
+            "fileCount": 20,
+            "bytes": 101890
+          },
+          "git": {
+            "head": "476f6c939907849df9ecded77b0729ed84cf3833",
+            "sourceTree": "a7ba65afdd637ac6230949df3241f8e7a3f9f22b",
+            "sourceDirty": false
+          }
+        },
+        "candidate": {
+          "package": {
+            "name": "@hunterchen/canvas",
+            "version": "0.12.0"
+          },
+          "proof": "550e6648afe537718dff361bf668f782e68110cb9caba2aa8ee2da2087b1c61b",
+          "source": {
+            "algorithm": "sha256",
+            "hash": "1acb4e0419924730cd989a9f7943704bd14d03928a3b4f44b2920e89f5802034",
+            "fileCount": 20,
+            "bytes": 103693
+          },
+          "git": {
+            "head": "4b479bdb9fa08f0e04295f0f887d6a3169d73f62",
+            "sourceTree": "6666c3022f17610257a4c6236c22b191c76e6833",
+            "sourceDirty": false
+          }
+        }
+      },
+      "summary": {
+        "parityPass": true,
+        "comparisonParityPass": true,
+        "performancePass": true,
+        "pageErrors": 0,
+        "deferredUserDecisions": []
+      },
+      "comparison": {
+        "name": "toolbar-dynamic-format",
+        "pass": true,
+        "performancePass": true,
+        "parityFailures": [],
+        "visual": {
+          "pass": true,
+          "differentPixels": 0,
+          "totalPixels": 921600,
+          "ratio": 0,
+          "baselineSize": {
+            "width": 1280,
+            "height": 720
+          },
+          "candidateSize": {
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "contract": {
+          "pass": true,
+          "failures": [],
+          "maxGeometryDifferencePx": 0
+        },
+        "interaction": {
+          "pass": true,
+          "failures": [],
+          "comparedCheckpoints": 12,
+          "maxNumericDifference": 0
+        },
+        "animationSemantics": {
+          "pass": true,
+          "failures": [],
+          "baselineStageOrder": [
+            2
+          ],
+          "candidateStageOrder": [
+            2
+          ],
+          "baselineEndpoints": {
+            "initial": {
+              "t": 4.600000095367477,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            },
+            "final": {
+              "t": 812.0000000953673,
+              "x": -2552,
+              "y": -734,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "coords 192/144|zoom 100.00%",
+              "toolbarOpacity": "1",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2552, -734)"
+            }
+          },
+          "candidateEndpoints": {
+            "initial": {
+              "t": 6.200000095367386,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            },
+            "final": {
+              "t": 798.0000000953673,
+              "x": -2552,
+              "y": -734,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "coords 192/144|zoom 100.00%",
+              "toolbarOpacity": "1",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2552, -734)"
+            }
+          }
+        },
+        "trajectory": {
+          "pass": true,
+          "gated": false,
+          "reason": "Direct input parity is gated by index-aligned post-input checkpoints; raw rAF samples remain in scenario artifacts.",
+          "baselineSamples": 95,
+          "candidateSamples": 95
+        },
+        "performance": {
+          "pass": true,
+          "measurements": [
+            {
+              "metric": "p95FrameIntervalMs",
+              "baseline": 9.300000000000182,
+              "candidate": 9.299999999999955,
+              "absoluteDifference": -2.2737367544323206e-13,
+              "ratio": 0.9999999999999756,
+              "regression": false
+            },
+            {
+              "metric": "p99FrameIntervalMs",
+              "baseline": 11.051999999999712,
+              "candidate": 9.904000000000028,
+              "absoluteDifference": -1.1479999999996835,
+              "ratio": 0.8961273977560882,
+              "regression": false
+            },
+            {
+              "metric": "longTaskTotalMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "loafBlockingTotalMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "TaskDurationMs",
+              "baseline": 109.31600000000003,
+              "candidate": 58.28,
+              "absoluteDifference": -51.03600000000003,
+              "ratio": 0.5331333016209886,
+              "regression": false
+            },
+            {
+              "metric": "ScriptDurationMs",
+              "baseline": 48.60500000000001,
+              "candidate": 16.06700000000001,
+              "absoluteDifference": -32.538,
+              "ratio": 0.33056269931077065,
+              "regression": false
+            },
+            {
+              "metric": "LayoutDurationMs",
+              "baseline": 1.3690000000000004,
+              "candidate": 1.0800000000000012,
+              "absoluteDifference": -0.28899999999999926,
+              "ratio": 0.7888970051132219,
+              "regression": false
+            },
+            {
+              "metric": "RecalcStyleDurationMs",
+              "baseline": 1.0430000000000006,
+              "candidate": 0.8619999999999999,
+              "absoluteDifference": -0.18100000000000072,
+              "ratio": 0.8264621284755507,
+              "regression": false
+            },
+            {
+              "metric": "draggableImageRectCalls",
+              "baseline": 13,
+              "candidate": 13,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "generatedAt": "2026-07-18T04:55:48.788Z",
+      "inputs": {
+        "sourceMode": "local",
+        "scenarios": [
+          "toolbar-dynamic-format"
+        ],
+        "sections": 100
+      },
+      "provenance": {
+        "baseline": {
+          "package": {
+            "name": "@hunterchen/canvas",
+            "version": "0.12.0"
+          },
+          "proof": "719eec68ae7cbacc0a26497c49645768e4c991b7a818b1d4b7455fcac6e0aee1",
+          "source": {
+            "algorithm": "sha256",
+            "hash": "326d96b9687797b30244c2e64ea3750e9cdb2f7e821617acbb226cbacba1dd1d",
+            "fileCount": 20,
+            "bytes": 101890
+          },
+          "git": {
+            "head": "476f6c939907849df9ecded77b0729ed84cf3833",
+            "sourceTree": "a7ba65afdd637ac6230949df3241f8e7a3f9f22b",
+            "sourceDirty": false
+          }
+        },
+        "candidate": {
+          "package": {
+            "name": "@hunterchen/canvas",
+            "version": "0.12.0"
+          },
+          "proof": "550e6648afe537718dff361bf668f782e68110cb9caba2aa8ee2da2087b1c61b",
+          "source": {
+            "algorithm": "sha256",
+            "hash": "1acb4e0419924730cd989a9f7943704bd14d03928a3b4f44b2920e89f5802034",
+            "fileCount": 20,
+            "bytes": 103693
+          },
+          "git": {
+            "head": "4b479bdb9fa08f0e04295f0f887d6a3169d73f62",
+            "sourceTree": "6666c3022f17610257a4c6236c22b191c76e6833",
+            "sourceDirty": false
+          }
+        }
+      },
+      "summary": {
+        "parityPass": true,
+        "comparisonParityPass": true,
+        "performancePass": true,
+        "pageErrors": 0,
+        "deferredUserDecisions": []
+      },
+      "comparison": {
+        "name": "toolbar-dynamic-format",
+        "pass": true,
+        "performancePass": true,
+        "parityFailures": [],
+        "visual": {
+          "pass": true,
+          "differentPixels": 0,
+          "totalPixels": 921600,
+          "ratio": 0,
+          "baselineSize": {
+            "width": 1280,
+            "height": 720
+          },
+          "candidateSize": {
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "contract": {
+          "pass": true,
+          "failures": [],
+          "maxGeometryDifferencePx": 0
+        },
+        "interaction": {
+          "pass": true,
+          "failures": [],
+          "comparedCheckpoints": 12,
+          "maxNumericDifference": 0
+        },
+        "animationSemantics": {
+          "pass": true,
+          "failures": [],
+          "baselineStageOrder": [
+            2
+          ],
+          "candidateStageOrder": [
+            2
+          ],
+          "baselineEndpoints": {
+            "initial": {
+              "t": 6.399999809265182,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            },
+            "final": {
+              "t": 806.399999809265,
+              "x": -2552,
+              "y": -734,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "coords 192/144|zoom 100.00%",
+              "toolbarOpacity": "1",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2552, -734)"
+            }
+          },
+          "candidateEndpoints": {
+            "initial": {
+              "t": 6.499999904632659,
+              "x": -2360,
+              "y": -590,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "(0, 0)|1.00x",
+              "toolbarOpacity": "0",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2360, -590)"
+            },
+            "final": {
+              "t": 806.4999999046327,
+              "x": -2552,
+              "y": -734,
+              "scale": 1,
+              "animationStage": 2,
+              "toolbarText": "coords 192/144|zoom 100.00%",
+              "toolbarOpacity": "1",
+              "sceneTransform": "matrix(1, 0, 0, 1, -2552, -734)"
+            }
+          }
+        },
+        "trajectory": {
+          "pass": true,
+          "gated": false,
+          "reason": "Direct input parity is gated by index-aligned post-input checkpoints; raw rAF samples remain in scenario artifacts.",
+          "baselineSamples": 95,
+          "candidateSamples": 95
+        },
+        "performance": {
+          "pass": true,
+          "measurements": [
+            {
+              "metric": "p95FrameIntervalMs",
+              "baseline": 9.299999999999955,
+              "candidate": 9.299999999999955,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "p99FrameIntervalMs",
+              "baseline": 10.40600000000007,
+              "candidate": 10.392000000000069,
+              "absoluteDifference": -0.014000000000001123,
+              "ratio": 0.9986546223332692,
+              "regression": false
+            },
+            {
+              "metric": "longTaskTotalMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "loafBlockingTotalMs",
+              "baseline": 0,
+              "candidate": 0,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            },
+            {
+              "metric": "TaskDurationMs",
+              "baseline": 87.57500000000002,
+              "candidate": 61.81,
+              "absoluteDifference": -25.765000000000015,
+              "ratio": 0.7057950328290036,
+              "regression": false
+            },
+            {
+              "metric": "ScriptDurationMs",
+              "baseline": 42.33200000000001,
+              "candidate": 14.398999999999996,
+              "absoluteDifference": -27.933000000000014,
+              "ratio": 0.3401445714825662,
+              "regression": false
+            },
+            {
+              "metric": "LayoutDurationMs",
+              "baseline": 0.9099999999999994,
+              "candidate": 0.9579999999999996,
+              "absoluteDifference": 0.048000000000000265,
+              "ratio": 1.052747252747253,
+              "regression": false
+            },
+            {
+              "metric": "RecalcStyleDurationMs",
+              "baseline": 0.7860000000000003,
+              "candidate": 0.7509999999999999,
+              "absoluteDifference": -0.035000000000000364,
+              "ratio": 0.9554707379134856,
+              "regression": false
+            },
+            {
+              "metric": "draggableImageRectCalls",
+              "baseline": 13,
+              "candidate": 13,
+              "absoluteDifference": 0,
+              "ratio": 1,
+              "regression": false
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

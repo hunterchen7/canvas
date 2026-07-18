@@ -22,7 +22,6 @@ import {
   canvasHeight,
   canvasWidth,
   getDistance,
-  getMidpoint,
   getScreenSizeEnum,
   getSectionPanCoordinates,
   INTERACTIVE_SELECTOR,
@@ -52,7 +51,7 @@ import type {
   ZoomConfig,
 } from "../../types";
 import { CanvasWrapper } from "./wrapper";
-import { usePerformanceMode } from "../../hooks/usePerformanceMode";
+import { usePerformanceModeForWidth } from "../../hooks/usePerformanceMode";
 import type { ReactNode } from "react";
 import { DefaultCanvasBackground } from "./backgrounds";
 
@@ -140,7 +139,7 @@ const Canvas: FC<Props> = ({
 }) => {
   const { height: windowHeight, width: windowWidth } = useWindowDimensions();
 
-  const { mode } = usePerformanceMode();
+  const { mode } = usePerformanceModeForWidth(windowWidth);
 
   const hasNavbar = Boolean(navItems && navItems.length > 0);
 
@@ -315,7 +314,6 @@ const Canvas: FC<Props> = ({
   );
   const initialPinchStateRef = useRef<{
     distance: number;
-    midpoint: Point;
     zoom: number;
     panOffset: Point;
   } | null>(null);
@@ -386,10 +384,11 @@ const Canvas: FC<Props> = ({
         if (viewportRef.current) viewportRef.current.style.cursor = "grabbing";
       } else if (activePointersRef.current.size === 2) {
         setIsPanning(false);
-        const pointers = Array.from(activePointersRef.current.values());
+        const pointers = activePointersRef.current.values();
+        const p1 = pointers.next().value!;
+        const p2 = pointers.next().value!;
         initialPinchStateRef.current = {
-          distance: getDistance(pointers[0]!, pointers[1]!),
-          midpoint: getMidpoint(pointers[0]!, pointers[1]!),
+          distance: getDistance(p1, p2),
           zoom: scale.get(),
           panOffset: { x: x.get(), y: y.get() },
         };
@@ -424,11 +423,12 @@ const Canvas: FC<Props> = ({
         event.preventDefault();
         const deltaX = event.clientX - panStartPoint.x;
         const deltaY = event.clientY - panStartPoint.y;
+        const currentScale = scale.get();
 
         // UPDATE to use motion value
-        const minPanX = windowWidth - sceneWidth * scale.get();
+        const minPanX = windowWidth - sceneWidth * currentScale;
         const maxPanX = 0;
-        const minPanY = windowHeight - sceneHeight * scale.get();
+        const minPanY = windowHeight - sceneHeight * currentScale;
         const maxPanY = 0;
 
         const newX = Math.min(
@@ -446,12 +446,13 @@ const Canvas: FC<Props> = ({
         initialPinchStateRef.current
       ) {
         event.preventDefault();
-        const pointers = Array.from(activePointersRef.current.values());
-        const p1 = pointers[0]!;
-        const p2 = pointers[1]!;
+        const pointers = activePointersRef.current.values();
+        const p1 = pointers.next().value!;
+        const p2 = pointers.next().value!;
 
         const currentDistance = getDistance(p1, p2);
-        const currentMidpoint = getMidpoint(p1, p2);
+        const mx = (p1.clientX + p2.clientX) / 2;
+        const my = (p1.clientY + p2.clientY) / 2;
 
         const {
           distance: initialDistance,
@@ -468,9 +469,6 @@ const Canvas: FC<Props> = ({
           Math.min(newZoom, 10),
           MIN_ZOOM // Ensure zoom is not less than MIN_ZOOM
         );
-
-        const mx = currentMidpoint.x;
-        const my = currentMidpoint.y;
 
         const minPanX = windowWidth - sceneWidth * newZoom;
         const maxPanX = 0;
@@ -539,7 +537,7 @@ const Canvas: FC<Props> = ({
         activePointersRef.current.size === 1 &&
         !initialPinchStateRef.current
       ) {
-        const lastPointer = Array.from(activePointersRef.current.values())[0]!;
+        const lastPointer = activePointersRef.current.values().next().value!;
         setIsPanning(true);
         setPanStartPoint({ x: lastPointer.clientX, y: lastPointer.clientY });
         setInitialPanOffsetOnDrag({ x: x.get(), y: y.get() });
@@ -557,20 +555,19 @@ const Canvas: FC<Props> = ({
       event.preventDefault();
       // pinch gesture on track
       const isPinch = event.ctrlKey || event.metaKey;
-      const isMouseWheelZoom =
-        event.deltaMode === WheelEvent.DOM_DELTA_LINE ||
-        Math.abs(event.deltaY) >= 100;
-
-      // mouse wheel zoom and track pad zoom have different sensitivities
-      const ZOOM_SENSITIVITY = isMouseWheelZoom
-        ? MOUSE_WHEEL_ZOOM_SENSITIVITY
-        : TRACKPAD_ZOOM_SENSITIVITY;
 
       if (isPinch) {
+        const deltaMode = event.deltaMode;
+        const deltaY = event.deltaY;
+        const isMouseWheelZoom =
+          deltaMode === WheelEvent.DOM_DELTA_LINE || Math.abs(deltaY) >= 100;
+        const zoomSensitivity = isMouseWheelZoom
+          ? MOUSE_WHEEL_ZOOM_SENSITIVITY
+          : TRACKPAD_ZOOM_SENSITIVITY;
         const currentZoom = scale.get();
         const nextZoom = Math.max(
           Math.min(
-            currentZoom * (1 - event.deltaY * ZOOM_SENSITIVITY),
+            currentZoom * (1 - deltaY * zoomSensitivity),
             MAX_ZOOM
           ),
           MIN_ZOOM,
@@ -586,12 +583,14 @@ const Canvas: FC<Props> = ({
         const vpTop = rect.top;
         const viewportWidth = rect.width;
         const viewportHeight = rect.height;
+        const cursorViewportX = event.clientX - vpLeft;
+        const cursorViewportY = event.clientY - vpTop;
 
-        const cursorSceneX = (event.clientX - vpLeft - x.get()) / currentZoom;
-        const cursorSceneY = (event.clientY - vpTop - y.get()) / currentZoom;
+        const cursorSceneX = (cursorViewportX - x.get()) / currentZoom;
+        const cursorSceneY = (cursorViewportY - y.get()) / currentZoom;
 
-        let newPanX = event.clientX - vpLeft - cursorSceneX * nextZoom;
-        let newPanY = event.clientY - vpTop - cursorSceneY * nextZoom;
+        let newPanX = cursorViewportX - cursorSceneX * nextZoom;
+        let newPanY = cursorViewportY - cursorSceneY * nextZoom;
 
         const minPanX = viewportWidth - sceneWidth * nextZoom;
         const minPanY = viewportHeight - sceneHeight * nextZoom;
@@ -610,10 +609,11 @@ const Canvas: FC<Props> = ({
         const scrollSpeed = 1;
         const newPanX = x.get() - event.deltaX * scrollSpeed;
         const newPanY = y.get() - event.deltaY * scrollSpeed;
+        const currentScale = scale.get();
 
-        const minPanX = windowWidth - sceneWidth * scale.get();
+        const minPanX = windowWidth - sceneWidth * currentScale;
         const maxPanX = 0;
-        const minPanY = windowHeight - sceneHeight * scale.get();
+        const minPanY = windowHeight - sceneHeight * currentScale;
         const maxPanY = 0;
 
         const clampedPanX = Math.min(Math.max(newPanX, minPanX), maxPanX);
