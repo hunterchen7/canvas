@@ -10,7 +10,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { rolldown } from "rolldown";
+import { rolldown, type OutputChunk } from "rolldown";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const REPOSITORY_ROOT = path.resolve(SCRIPT_DIR, "../..");
@@ -26,16 +26,18 @@ const FIXTURES = [
   ["isIOS", "is-ios.mjs"],
   ["getDistance", "get-distance.mjs"],
   ["cn", "cn.mjs"],
-];
+] as const;
 
 const PEER_PACKAGES = ["framer-motion", "react", "react-dom"];
-const MODES = [
+const MODES: ReadonlyArray<
+  readonly [string, ((specifier: string) => boolean) | undefined]
+> = [
   ["externalPeers", isPeerImport],
   ["bundled", undefined],
 ];
 
 function printUsage() {
-  console.log(`Usage: node benchmarks/bundle/run.mjs [options]
+  console.log(`Usage: node benchmarks/bundle/run.ts [options]
 
 Options:
   --baseline <file>                 Compare results with a JSON baseline
@@ -233,7 +235,7 @@ function deliveryMetrics(outputChunks) {
   };
 }
 
-function partitionInitialChunks(outputChunks) {
+function partitionInitialChunks(outputChunks: OutputChunk[]) {
   const chunksByFileName = new Map(
     outputChunks.map((chunk) => [chunk.fileName, chunk]),
   );
@@ -264,7 +266,10 @@ function partitionInitialChunks(outputChunks) {
   };
 }
 
-async function measureBundle(fixturePath, external) {
+async function measureBundle(
+  fixturePath: string,
+  external: ((specifier: string) => boolean) | undefined,
+) {
   const bundle = await rolldown({
     input: fixturePath,
     external,
@@ -377,7 +382,7 @@ function formatBytes(value) {
 }
 
 function printResults(results) {
-  const headings = [
+  const headings: Array<readonly [string, number]> = [
     ["Fixture", 17],
     ["Mode", 14],
     ["Raw", 11],
@@ -389,7 +394,7 @@ function printResults(results) {
     ["Lucide", 7],
     ["Chunks", 6],
   ];
-  const row = (values) =>
+  const row = (values: Array<string | number>) =>
     values
       .map((value, index) => String(value).padEnd(headings[index][1]))
       .join(" ")

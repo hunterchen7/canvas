@@ -26,7 +26,7 @@ or rendering tradeoff still requires an explicit product decision.
 The default command rebuilds `dist` before measuring it:
 
 ```sh
-node benchmarks/bundle/run.mjs
+node benchmarks/bundle/run.ts
 ```
 
 Use the Node version pinned in the repository's `.nvmrc`. The JSON baseline
@@ -41,13 +41,13 @@ requires the same explicit historical remeasurement.
 Reuse an existing build when iterating on the benchmark itself:
 
 ```sh
-node benchmarks/bundle/run.mjs --skip-build
+node benchmarks/bundle/run.ts --skip-build
 ```
 
 Write or intentionally update a deterministic JSON baseline:
 
 ```sh
-node benchmarks/bundle/run.mjs \
+node benchmarks/bundle/run.ts \
   --write-baseline benchmarks/bundle/baseline.json
 ```
 
@@ -55,14 +55,14 @@ Compare against that baseline. This exits non-zero if any measured byte or
 module count grows:
 
 ```sh
-node benchmarks/bundle/run.mjs \
+node benchmarks/bundle/run.ts \
   --baseline benchmarks/bundle/baseline.json
 ```
 
 CI can allow a small byte tolerance while keeping module counts exact:
 
 ```sh
-node benchmarks/bundle/run.mjs \
+node benchmarks/bundle/run.ts \
   --baseline benchmarks/bundle/baseline.json \
   --byte-tolerance-percent 1
 ```
@@ -72,7 +72,7 @@ independently. This is useful when an optimization makes every consumer entry
 smaller but adds a small amount of shipped source or source-map metadata:
 
 ```sh
-node benchmarks/bundle/run.mjs \
+node benchmarks/bundle/run.ts \
   --baseline benchmarks/bundle/baseline.json \
   --package-byte-tolerance-percent 2
 ```
@@ -92,7 +92,7 @@ side-effect metadata, direct subpath entries, type-only React cleanup, and two
 Lucide-loading designs against the checked-in baseline:
 
 ```sh
-node benchmarks/bundle/evaluate-candidates.mjs
+node benchmarks/bundle/evaluate-candidates.ts
 ```
 
 It does not edit package source or published metadata. The component-only icon
@@ -109,8 +109,8 @@ reviewed source/source-map metadata tradeoff in this optimization PR:
 
 ```json
 {
-  "bench:bundle": "node benchmarks/bundle/run.mjs",
-  "bench:bundle:compare": "node benchmarks/bundle/run.mjs --baseline benchmarks/bundle/baseline.json --package-byte-tolerance-percent 2"
+  "bench:bundle": "node benchmarks/bundle/run.ts",
+  "bench:bundle:compare": "node benchmarks/bundle/run.ts --baseline benchmarks/bundle/baseline.json --package-byte-tolerance-percent 2"
 }
 ```
 

@@ -8,7 +8,7 @@ import {
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { rolldown } from "rolldown";
+import { rolldown, type OutputChunk, type Plugin } from "rolldown";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const REPOSITORY_ROOT = path.resolve(SCRIPT_DIR, "../..");
@@ -18,8 +18,8 @@ const BASELINE = JSON.parse(
 );
 
 const PEERS = ["framer-motion", "react", "react-dom"];
-const MODES = ["externalPeers", "bundled"];
-const ROOT_ENTRIES = {
+const MODES = ["externalPeers", "bundled"] as const;
+const ROOT_ENTRIES: Record<string, string> = {
   Canvas: 'export { Canvas as benchmark } from "@hunterchen/canvas";',
   CanvasComponent:
     'export { CanvasComponent as benchmark } from "@hunterchen/canvas";',
@@ -32,7 +32,7 @@ const ROOT_ENTRIES = {
   cn: 'export { cn as benchmark } from "@hunterchen/canvas";',
 };
 
-const DIRECT_ENTRIES = {
+const DIRECT_ENTRIES: Record<string, string> = {
   Canvas: directDefault("components/canvas/canvas.js"),
   CanvasComponent: directNamed(
     "components/canvas/component.js",
@@ -119,7 +119,7 @@ function moduleMetrics(chunks) {
   };
 }
 
-function partitionDelivery(chunks) {
+function partitionDelivery(chunks: OutputChunk[]) {
   const byFileName = new Map(chunks.map((chunk) => [chunk.fileName, chunk]));
   const initialNames = new Set(
     chunks.filter((chunk) => chunk.isEntry).map((chunk) => chunk.fileName),
@@ -141,7 +141,7 @@ function partitionDelivery(chunks) {
   };
 }
 
-function iconTransform(mode) {
+function iconTransform(mode: "current" | "component-only" | "dynamic-legacy") {
   if (mode === "current") return undefined;
   return {
     name: `candidate-icons-${mode}`,
@@ -214,7 +214,14 @@ function typeOnlyReactTransform(enabled) {
   };
 }
 
-async function build(entrySource, options = {}) {
+type CandidateOptions = {
+  iconMode?: "current" | "component-only" | "dynamic-legacy";
+  mode?: "externalPeers" | "bundled";
+  sideEffectsFree?: boolean;
+  typeOnlyCleanup?: boolean;
+};
+
+async function build(entrySource: string, options: CandidateOptions = {}) {
   const virtualId = "\0canvas-candidate-entry";
   const plugins = [
     {
@@ -229,7 +236,7 @@ async function build(entrySource, options = {}) {
     iconTransform(options.iconMode ?? "current"),
     packageSideEffectsTransform(options.sideEffectsFree),
     typeOnlyReactTransform(options.typeOnlyCleanup),
-  ].filter(Boolean);
+  ].filter(Boolean) as Plugin[];
 
   const bundle = await rolldown({
     input: "canvas:candidate",
