@@ -1,11 +1,15 @@
 #!/usr/bin/env node
 import { spawn } from "node:child_process";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "@playwright/test";
 import { startDeepProfile } from "./deep-profile.mjs";
+import {
+  assertMatchingLibraryIdentity,
+  resolveLibraryTarget,
+} from "./library-target.mjs";
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const runtimeRoot = path.resolve(scriptDirectory, "..");
@@ -104,6 +108,18 @@ async function waitForServer(url, processHandle, timeoutMs) {
   throw new Error(`Vite did not become ready at ${url} within ${timeoutMs}ms`);
 }
 
+async function stopServer(processHandle) {
+  if (!processHandle || processHandle.exitCode != null) return;
+  const exited = new Promise((resolve) => {
+    processHandle.once("exit", resolve);
+  });
+  processHandle.kill("SIGTERM");
+  await Promise.race([
+    exited,
+    new Promise((resolve) => setTimeout(resolve, 2_000)),
+  ]);
+}
+
 async function phase(page, name, action, deepProfile) {
   await page.evaluate((phaseName) => {
     window.__CANVAS_BENCHMARK__.beginPhase(phaseName);
@@ -130,6 +146,22 @@ async function waitForMotion(page, timeoutMs = 7000) {
 
 async function main() {
   const values = parseArguments(process.argv.slice(2));
+  const suppliedUrl = values.get("url");
+  const requestedLibraryRoot = values.get("library-root");
+  const explicitLibrarySelection =
+    requestedLibraryRoot != null || values.has("library-label");
+  if (suppliedUrl && requestedLibraryRoot != null) {
+    throw new Error(
+      "--url and --library-root cannot be combined because an external server's source cannot be selected locally",
+    );
+  }
+  const libraryTarget = suppliedUrl
+    ? null
+    : await resolveLibraryTarget({
+        repositoryRoot,
+        libraryRoot: requestedLibraryRoot,
+        libraryLabel: values.get("library-label"),
+      });
   const mode = values.get("mode") ?? "high";
   if (!["auto", "high", "medium", "low"].includes(mode)) {
     throw new Error(`Invalid --mode ${mode}; use auto, high, medium, or low`);
@@ -175,7 +207,6 @@ async function main() {
   });
 
   let server = null;
-  const suppliedUrl = values.get("url");
   const baseUrl = suppliedUrl ?? `http://127.0.0.1:${port}`;
   let browser = null;
   let page = null;
@@ -183,9 +214,16 @@ async function main() {
   let runnerError = null;
   let deepProfile = null;
   let deepProfileResult = null;
+  let viteCacheDirectory = null;
+  let observedLibraryIdentity = null;
 
   try {
     if (!suppliedUrl) {
+      if (explicitLibrarySelection) {
+        viteCacheDirectory = await mkdtemp(
+          path.join(os.tmpdir(), "canvas-runtime-vite-"),
+        );
+      }
       const viteBin = path.join(repositoryRoot, "node_modules/vite/bin/vite.js");
       server = spawn(
         process.execPath,
@@ -198,9 +236,20 @@ async function main() {
           "--port",
           String(port),
           "--strictPort",
+          ...(explicitLibrarySelection
+            ? ["--configLoader", "runner"]
+            : []),
         ],
         {
           cwd: repositoryRoot,
+          env: {
+            ...process.env,
+            CANVAS_BENCHMARK_LIBRARY_ROOT: libraryTarget.root,
+            CANVAS_BENCHMARK_LIBRARY_LABEL: libraryTarget.identity.label,
+            ...(viteCacheDirectory
+              ? { CANVAS_BENCHMARK_VITE_CACHE_DIR: viteCacheDirectory }
+              : {}),
+          },
           stdio: ["ignore", "pipe", "pipe"],
         },
       );
@@ -237,6 +286,11 @@ async function main() {
           seed,
           viewport,
           url: baseUrl,
+          library: libraryTarget?.identity ?? {
+            label: values.get("library-label") ?? "external-url",
+            externalUrl: baseUrl,
+            identityVerifiedAfterNavigation: true,
+          },
         },
       });
       await deepProfile.markOnNextDocument("canvas:phase:intro:start");
@@ -250,6 +304,16 @@ async function main() {
       () => Boolean(window.__CANVAS_BENCHMARK__),
       undefined,
       { timeout: timeoutMs },
+    );
+    observedLibraryIdentity = await page.evaluate(
+      () => window.__CANVAS_BENCHMARK_LIBRARY__,
+    );
+    assertMatchingLibraryIdentity(
+      libraryTarget?.identity ?? null,
+      observedLibraryIdentity,
+    );
+    process.stderr.write(
+      `[library] ${observedLibraryIdentity.label} ${observedLibraryIdentity.proof} (${observedLibraryIdentity.source.hash})\n`,
     );
     await page.evaluate(() => window.__CANVAS_BENCHMARK__.setRunner("playwright"));
     await page.evaluate(
@@ -370,7 +434,10 @@ async function main() {
       }
     }
     await browser?.close();
-    if (server && server.exitCode == null) server.kill("SIGTERM");
+    await stopServer(server);
+    if (viteCacheDirectory) {
+      await rm(viteCacheDirectory, { recursive: true, force: true });
+    }
   }
 
   const serialized = `${JSON.stringify(result, null, 2)}\n`;

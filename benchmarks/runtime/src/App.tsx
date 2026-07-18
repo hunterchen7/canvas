@@ -17,7 +17,7 @@ import {
   usePerformance,
   type NavItem,
   type SectionCoordinates,
-} from "../../../src/index";
+} from "virtual:canvas-benchmark-target";
 import type { BenchmarkConfig, BenchmarkResult } from "./schema";
 import {
   recordProfilerRender,
