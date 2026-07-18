@@ -23,7 +23,7 @@ Use **Run in page** to execute the synthetic browser scenario and download its J
 The runner starts and stops Vite itself, drives Chromium, prints one JSON result to stdout, and can also write a result file:
 
 ```sh
-node benchmarks/runtime/scripts/run.mjs \
+node benchmarks/runtime/scripts/run.ts \
   --sections 24 \
   --nav-items 8 \
   --complexity 24 \
@@ -156,6 +156,13 @@ noise, background work, or a fixture that does not represent the application.
 Treat `comparison.json` as diagnostic evidence, inspect raw samples and effect
 sizes, and repeat important findings. The paired runner deliberately has no
 performance exit gate.
+
+The report uses the in-process TypeScript statistics by default. To run the
+same metric comparisons through bounded Go subprocess batches, add
+`--analysis-engine go`. The Go path is opt-in, records its engine, metric count,
+and bounded batch count in `comparison.json`, and fails the capture if the
+native result cannot be produced or parsed. Browser capture and source-map
+processing remain in TypeScript.
 
 For a more extensive unprofiled runtime comparison, use at least two warmup
 pairs and ten measured pairs:

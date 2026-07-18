@@ -28,6 +28,11 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
 
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version-file: benchmarks/analyzer/go.mod
+          cache-dependency-path: benchmarks/analyzer/go.mod
+
       - run: npm ci
 
       - name: Install browser runtime
@@ -44,6 +49,11 @@ jobs:
 
       - name: Run tests
         run: npm test
+
+      - name: Verify native analyzer parity
+        run: >-
+          go -C benchmarks/analyzer test ./... &&
+          node --test benchmarks/analyzer/differential.ts
 
       - name: Build package
         run: npm run build
@@ -66,42 +76,35 @@ jobs:
 
       - run: npm ci
 
-      - name: Detect library source changes
-        id: source_changes
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        run: |
-          if git diff --quiet "$BASE_SHA" "$GITHUB_SHA" -- src; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Install browser runtime
-        if: steps.source_changes.outputs.changed == 'true'
         run: npm exec -- playwright install --with-deps chromium
 
       - name: Compare consumer bundles and package budget
         run: npm run bench:bundle:compare
 
       - name: Create untouched baseline worktree
-        if: steps.source_changes.outputs.changed == 'true'
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        run: git worktree add --detach "$RUNNER_TEMP/canvas-baseline" "$BASE_SHA"
+          BASELINE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: git worktree add --detach "$RUNNER_TEMP/canvas-baseline" "$BASELINE_SHA"
 
       - name: Run strict browser parity
         id: parity
-        if: steps.source_changes.outputs.changed == 'true'
-        run: >-
-          npm run bench:parity --
-          --baseline-root "$RUNNER_TEMP/canvas-baseline"
-          --candidate-root "$GITHUB_WORKSPACE"
-          --sections 100
-          --output "$RUNNER_TEMP/canvas-parity"
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          EXTRA_ARGS=()
+          if git diff --quiet "$BASE_SHA" "$GITHUB_SHA" -- src; then
+            EXTRA_ARGS+=(--allow-identical-sources)
+          fi
+          npm run bench:parity -- \
+            --baseline-root "$RUNNER_TEMP/canvas-baseline" \
+            --candidate-root "$GITHUB_WORKSPACE" \
+            --sections 100 \
+            --output "$RUNNER_TEMP/canvas-parity" \
+            "${EXTRA_ARGS[@]}"
 
       - name: Upload parity evidence
-        if: always() && steps.source_changes.outputs.changed == 'true'
+        if: always() && steps.parity.outcome != 'skipped'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: strict-parity-${{ github.sha }}

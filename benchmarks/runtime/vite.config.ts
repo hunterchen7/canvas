@@ -2,7 +2,7 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { defineConfig } from "vite";
 import tailwindcss from "tailwindcss";
-import { resolveLibraryTarget } from "./scripts/library-target.mjs";
+import { resolveLibraryTarget } from "./scripts/library-target.ts";
 
 const runtimeRoot = fileURLToPath(new URL(".", import.meta.url));
 const repositoryRoot = path.resolve(runtimeRoot, "../..");

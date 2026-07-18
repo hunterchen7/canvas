@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useState } from "react";
-// @ts-expect-error -- virtual module supplied by benchmarks/e2e/vite.config.mjs
+// @ts-expect-error -- virtual module supplied by benchmarks/e2e/vite.config.ts
 import libraryIdentity from "virtual:canvas-library-identity";
 import {
   Canvas,

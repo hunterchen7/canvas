@@ -7,7 +7,8 @@
     "moduleResolution": "Bundler",
     "strict": true,
     "noEmit": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "types": ["node"]
   },
-  "include": ["window-dimensions/*.tsx"]
+  "include": ["window-dimensions.test.ts", "window-dimensions/*.tsx"]
 }
