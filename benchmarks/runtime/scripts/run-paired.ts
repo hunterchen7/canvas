@@ -1358,7 +1358,11 @@ export async function runPairedCapture(
       await checkpoint(state);
     }
 
-    state.comparison = await buildComparison(state, abortSignal);
+    const comparison = await buildComparison(state, abortSignal);
+    if (abortSignal?.aborted) {
+      throw abortSignal.reason ?? new Error("Interrupted");
+    }
+    state.comparison = comparison;
     state.status = "complete";
     state.completedAtIso = new Date().toISOString();
     state.current = null;
