@@ -78,6 +78,10 @@ const edgeCases: AnalyzerRequest[] = [
   { baseline: [1, 2, 3], candidate: [1, 2, 3], options: { seed: "unchanged", minimumPairs: 1, zeroTolerance: 0.001 } },
   { baseline: [1, 2, 3, 4], candidate: [2, 1, 4, 3], options: { seed: "not-classified", lowerIsBetter: null, minimumPairs: 1 } },
   { baseline: ["missing", 5, null, 10], candidate: [1, 4, 3, 9, 11], options: { seed: "missing-🚀", bootstrapIterations: 333 } },
+  { baseline: [1, 2, 3, 4, 5], candidate: [2, 3, 4, 5, 6], options: { seed: 1e-7, bootstrapIterations: 257 } },
+  { baseline: [1, 2, 3, 4, 5], candidate: [2, 3, 4, 5, 6], options: { seed: 1e-6, bootstrapIterations: 257 } },
+  { baseline: [1, 2, 3, 4, 5], candidate: [2, 3, 4, 5, 6], options: { seed: 1e20, bootstrapIterations: 257 } },
+  { baseline: [1, 2, 3, 4, 5], candidate: [2, 3, 4, 5, 6], options: { seed: 1e21, bootstrapIterations: 257 } },
 ];
 
 for (const [index, request] of edgeCases.entries()) {

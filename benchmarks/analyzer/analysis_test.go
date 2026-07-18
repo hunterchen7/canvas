@@ -58,6 +58,23 @@ func TestComparePairedSamplesPreservesMissingAndZeroSemantics(t *testing.T) {
 	}
 }
 
+func TestHashSeedUsesJavaScriptNumberFormatting(t *testing.T) {
+	cases := []struct {
+		value any
+		want  uint32
+	}{
+		{value: number("0.0000001"), want: 1_378_411_983},
+		{value: number("0.000001"), want: 1_341_680_232},
+		{value: number("100000000000000000000"), want: 4_184_488_476},
+		{value: number("1e21"), want: 3_064_443_381},
+	}
+	for _, testCase := range cases {
+		if actual := hashSeed(testCase.value); actual != testCase.want {
+			t.Errorf("hashSeed(%v) = %d, want %d", testCase.value, actual, testCase.want)
+		}
+	}
+}
+
 func BenchmarkComparePairedSamples(b *testing.B) {
 	baseline := make([]any, 64)
 	candidate := make([]any, 64)

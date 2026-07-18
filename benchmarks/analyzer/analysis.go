@@ -195,12 +195,47 @@ func jsString(value any) string {
 	case bool:
 		return strconv.FormatBool(typed)
 	case json.Number:
+		number, err := typed.Float64()
+		if err == nil {
+			return jsNumberString(number)
+		}
 		return typed.String()
 	case float64:
-		return strconv.FormatFloat(typed, 'g', -1, 64)
+		return jsNumberString(typed)
 	default:
 		return fmt.Sprint(typed)
 	}
+}
+
+// JavaScript renders finite numbers in fixed notation for [1e-6, 1e21) and
+// otherwise uses an exponent without a zero-padded magnitude. Go and
+// JavaScript both use shortest-round-trip digits, but their notation cutoffs
+// and exponent spelling differ.
+func jsNumberString(value float64) string {
+	if value == 0 {
+		return "0"
+	}
+	absolute := math.Abs(value)
+	if absolute >= 1e-6 && absolute < 1e21 {
+		return strconv.FormatFloat(value, 'f', -1, 64)
+	}
+	formatted := strconv.FormatFloat(value, 'e', -1, 64)
+	exponentIndex := 0
+	for index, character := range formatted {
+		if character == 'e' {
+			exponentIndex = index
+			break
+		}
+	}
+	exponent, err := strconv.Atoi(formatted[exponentIndex+1:])
+	if err != nil {
+		return formatted
+	}
+	sign := ""
+	if exponent >= 0 {
+		sign = "+"
+	}
+	return formatted[:exponentIndex+1] + sign + strconv.Itoa(exponent)
 }
 
 func hashSeed(value any) uint32 {
