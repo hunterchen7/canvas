@@ -4,6 +4,8 @@ import path from "node:path";
 import { after, before, describe, test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { chromium } from "@playwright/test";
+import type { Browser, Page } from "@playwright/test";
+import type { ViteDevServer } from "vite";
 import { createServer } from "vite";
 
 const testRoot = path.join(
@@ -11,9 +13,9 @@ const testRoot = path.join(
   "window-dimensions",
 );
 
-let browser;
-let server;
-let baseUrl;
+let browser: Browser;
+let server: ViteDevServer;
+let baseUrl: string;
 
 async function launchBrowser() {
   try {
@@ -30,10 +32,10 @@ async function launchBrowser() {
   }
 }
 
-async function openHydratedPage(viewport) {
+async function openHydratedPage(viewport: { width: number; height: number }) {
   const context = await browser.newContext({ viewport });
   const page = await context.newPage();
-  const errors = [];
+  const errors: string[] = [];
   page.on("console", (message) => {
     if (message.type() === "error") errors.push(message.text());
   });
@@ -49,7 +51,7 @@ async function openHydratedPage(viewport) {
   return { context, errors, page };
 }
 
-const listenerStats = (page) =>
+const listenerStats = (page: Page) =>
   page.evaluate(() => window.__WINDOW_DIMENSIONS_LISTENERS__());
 
 describe("shared window dimensions store", { concurrency: false }, () => {
