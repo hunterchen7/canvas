@@ -989,6 +989,7 @@ export function buildPairedProfileReport({
   runs = [],
   settings = {},
   environment = null,
+  compareSamples = comparePairedSamples,
 }: any = {}) {
   const warnings = [MULTIPLE_COMPARISONS_WARNING];
   const normalizedTargets = targetEntries(targets, runs);
@@ -1068,7 +1069,7 @@ export function buildPairedProfileReport({
         const candidateValues = flattened.map(
           (pair) => pair.candidate.get(key)?.value,
         );
-        const comparison = comparePairedSamples(baselineValues, candidateValues, {
+        const comparison = compareSamples(baselineValues, candidateValues, {
           lowerIsBetter: descriptor?.lowerIsBetter,
           bootstrapIterations: settings.bootstrapIterations,
           seed: hashSeed(`${settings.bootstrapSeed ?? DEFAULT_BOOTSTRAP_SEED}:${caseName}:${key}`),

@@ -76,33 +76,38 @@ jobs:
 
       - run: npm ci
 
-      - name: Detect library source changes
-        id: source_changes
+      - name: Detect parity-relevant changes
+        id: parity_changes
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
-          if git diff --quiet "$BASE_SHA" "$GITHUB_SHA" -- src; then
+          if git diff --quiet "$BASE_SHA" "$GITHUB_SHA" -- src benchmarks/e2e benchmarks/runtime/scripts .github/workflows/ci.yml; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
+            if git diff --quiet "$BASE_SHA" "$GITHUB_SHA" -- src; then
+              echo "baseline=$(git rev-list -n 1 canvas-v0.12.0)" >> "$GITHUB_OUTPUT"
+            else
+              echo "baseline=$BASE_SHA" >> "$GITHUB_OUTPUT"
+            fi
           fi
 
       - name: Install browser runtime
-        if: steps.source_changes.outputs.changed == 'true'
+        if: steps.parity_changes.outputs.changed == 'true'
         run: npm exec -- playwright install --with-deps chromium
 
       - name: Compare consumer bundles and package budget
         run: npm run bench:bundle:compare
 
       - name: Create untouched baseline worktree
-        if: steps.source_changes.outputs.changed == 'true'
+        if: steps.parity_changes.outputs.changed == 'true'
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        run: git worktree add --detach "$RUNNER_TEMP/canvas-baseline" "$BASE_SHA"
+          BASELINE_SHA: ${{ steps.parity_changes.outputs.baseline }}
+        run: git worktree add --detach "$RUNNER_TEMP/canvas-baseline" "$BASELINE_SHA"
 
       - name: Run strict browser parity
         id: parity
-        if: steps.source_changes.outputs.changed == 'true'
+        if: steps.parity_changes.outputs.changed == 'true'
         run: >-
           npm run bench:parity --
           --baseline-root "$RUNNER_TEMP/canvas-baseline"
@@ -111,7 +116,7 @@ jobs:
           --output "$RUNNER_TEMP/canvas-parity"
 
       - name: Upload parity evidence
-        if: always() && steps.source_changes.outputs.changed == 'true'
+        if: always() && steps.parity_changes.outputs.changed == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: strict-parity-${{ github.sha }}

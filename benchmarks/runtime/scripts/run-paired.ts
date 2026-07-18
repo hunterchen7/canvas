@@ -17,6 +17,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { assertBrowserErrorFree } from "./browser-errors.ts";
 import { resolveLibraryTarget } from "./library-target.ts";
 import { buildPairedProfileReport } from "./profile-compare.ts";
+import { compareNativeBatch } from "../../analyzer/native.ts";
 import {
   allocateEphemeralPort,
   portIsAvailable,
@@ -36,6 +37,7 @@ export const PROFILE_KINDS = Object.freeze([
   "trace",
   "allocations",
 ]);
+export const ANALYSIS_ENGINES = Object.freeze(["typescript", "go"]);
 
 function printHelp() {
   process.stdout.write(`Canvas paired runtime capture runner
@@ -52,6 +54,7 @@ Sampling:
   --warmups NUMBER           Even count of unprofiled warmup pairs (default: 2)
   --repetitions NUMBER       Even count of measured pairs (default: 6)
   --profile-kind KIND        none, cpu, trace, or allocations (default: none)
+  --analysis-engine ENGINE   typescript or go (default: typescript)
   --port-base NUMBER         First port to probe (default: OS-assigned ports)
   --child-timeout-ms NUMBER  Per-invocation process timeout (default: 300000)
 
@@ -132,6 +135,7 @@ export function parseArguments(
     warmups: 2,
     repetitions: 6,
     profileKind: "none",
+    analysisEngine: "typescript",
     portBase: null,
     childTimeoutMs: 300_000,
     mode: "high",
@@ -158,6 +162,7 @@ export function parseArguments(
     "repetitions",
     "profile-kind",
     "profile",
+    "analysis-engine",
     "port-base",
     "child-timeout-ms",
     "mode",
@@ -187,6 +192,8 @@ export function parseArguments(
       options.repetitions = parseInteger(value, "--repetitions", 1, 1_000);
     } else if (key === "profile-kind" || key === "profile") {
       options.profileKind = value.trim().toLowerCase();
+    } else if (key === "analysis-engine") {
+      options.analysisEngine = value.trim().toLowerCase();
     } else if (key === "port-base") {
       options.portBase = parseInteger(value, "--port-base", 1_024, 65_535);
     } else if (key === "child-timeout-ms") {
@@ -248,6 +255,11 @@ export function parseArguments(
   if (!PROFILE_KINDS.includes(options.profileKind)) {
     throw new Error(
       `--profile-kind must be one of ${PROFILE_KINDS.join(", ")}; combined captures are intentionally unsupported`,
+    );
+  }
+  if (!ANALYSIS_ENGINES.includes(options.analysisEngine)) {
+    throw new Error(
+      `--analysis-engine must be one of ${ANALYSIS_ENGINES.join(", ")}`,
     );
   }
   if (!new Set(["auto", "high", "medium", "low"]).has(options.mode)) {
@@ -996,6 +1008,7 @@ function publicSettings(options) {
     warmupPairs: options.warmups,
     measuredPairs: options.repetitions,
     measuredProfileKind: options.profileKind,
+    analysisEngine: options.analysisEngine,
     warmupProfileKind: "none",
     childTimeoutMs: options.childTimeoutMs,
     mode: options.mode,
@@ -1119,6 +1132,8 @@ async function buildComparison(state) {
     }
   }
 
+  const nativeRequests = [];
+  const useNativeAnalyzer = state.settings.analysisEngine === "go";
   const comparison = buildPairedProfileReport({
     targets: {
       baseline: state.provenance.baseline,
@@ -1146,7 +1161,44 @@ async function buildComparison(state) {
       minimumPairs: 5,
     },
     environment: state.environment,
+    compareSamples: useNativeAnalyzer
+      ? (baseline, candidate, options) => {
+          nativeRequests.push({ baseline, candidate, options });
+          return { classification: "pending-native-analysis" };
+        }
+      : undefined,
   });
+  if (useNativeAnalyzer && nativeRequests.length > 0) {
+    const nativeResults: any = await compareNativeBatch(nativeRequests, {
+      timeoutMs: state.settings.childTimeoutMs,
+    });
+    let resultIndex = 0;
+    for (const caseReport of comparison.cases) {
+      for (const metric of caseReport.metrics) {
+        metric.comparison = nativeResults[resultIndex];
+        resultIndex += 1;
+      }
+      caseReport.classifications = caseReport.metrics.reduce((counts, metric) => {
+        const classification = metric.comparison.classification;
+        counts[classification] = (counts[classification] ?? 0) + 1;
+        return counts;
+      }, {});
+    }
+  }
+  comparison.settings.comparisonEngine = useNativeAnalyzer
+    ? {
+        implementation: "go",
+        transport: "single batched subprocess",
+        comparisonCount: nativeRequests.length,
+      }
+    : {
+        implementation: "typescript",
+        transport: "in-process",
+        comparisonCount: comparison.cases.reduce(
+          (count, entry) => count + entry.metrics.length,
+          0,
+        ),
+      };
   const artifact = path.join(state.output, "comparison.json");
   await writeJsonAtomic(artifact, comparison);
   return {

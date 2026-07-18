@@ -84,10 +84,36 @@ test("arguments resolve both sources and accept exactly one profile kind", () =>
   assert.equal(options.warmups, 2);
   assert.equal(options.repetitions, 10);
   assert.equal(options.profileKind, "cpu");
+  assert.equal(options.analysisEngine, "typescript");
   assert.equal(options.sections, 100);
   assert.equal(options.navItems, 12);
   assert.equal(options.intro, false);
   assert.equal(options.production, true);
+});
+
+test("arguments accept the opt-in Go analysis engine", () => {
+  const options = parseArguments(
+    [
+      "--baseline-root",
+      "baseline",
+      "--analysis-engine",
+      "go",
+      "--warmups",
+      "0",
+      "--repetitions",
+      "2",
+    ],
+    { repositoryRoot, cwd },
+  );
+  assert.equal(options.analysisEngine, "go");
+  assert.throws(
+    () =>
+      parseArguments(
+        ["--baseline-root", "baseline", "--analysis-engine", "rust"],
+        { repositoryRoot, cwd },
+      ),
+    /analysis-engine must be one of typescript, go/,
+  );
 });
 
 test("arguments reject missing baseline and combined profiler captures", () => {

@@ -157,6 +157,13 @@ Treat `comparison.json` as diagnostic evidence, inspect raw samples and effect
 sizes, and repeat important findings. The paired runner deliberately has no
 performance exit gate.
 
+The report uses the in-process TypeScript statistics by default. To run the
+same metric comparisons through one bounded Go subprocess, add
+`--analysis-engine go`. The Go path is opt-in, records its engine and batch size
+in `comparison.json`, and fails the capture if the native result cannot be
+produced or parsed. Browser capture and source-map processing remain in
+TypeScript.
+
 For a more extensive unprofiled runtime comparison, use at least two warmup
 pairs and ten measured pairs:
 
