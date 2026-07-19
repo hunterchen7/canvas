@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.13.0](https://github.com/hunterchen7/canvas/compare/canvas-v0.12.2...canvas-v0.13.0) (2026-07-19)
+
+
+### Features
+
+* **canvas:** configurable zoom bounds (maxZoom + per-input pinch/wheel) ([8d2c50d](https://github.com/hunterchen7/canvas/commit/8d2c50dc5368d15f4bcd4380ea707fa42f5f2a0b))
+* **canvas:** configurable zoom bounds via zoomConfig (maxZoom + per-input) ([5c922c5](https://github.com/hunterchen7/canvas/commit/5c922c5f71bc3b1f158d48482b11c5b7bbc582e8))
+* **perf:** capability-based performance tiers — assume capable by default ([c439c67](https://github.com/hunterchen7/canvas/commit/c439c67402e5e73a8146164e46bd3ef86623b907))
+* **perf:** capability-based performance tiers — assume capable by default ([e27d06c](https://github.com/hunterchen7/canvas/commit/e27d06cf2b0c5953ace9250cef3938446ea8cfae))
+
+
+### Bug Fixes
+
+* **canvas:** don't promote the scene layer on iOS (WebKit crash risk) ([46b50b6](https://github.com/hunterchen7/canvas/commit/46b50b6a92b315f00355f5e8e84ed74a7838c3e7))
+* **canvas:** don't promote the scene layer on iOS (WebKit crash risk) ([3dc0d5c](https://github.com/hunterchen7/canvas/commit/3dc0d5c98b0ffe17ef083122277608d2d8962f3b))
+* **canvas:** key stable will-change on isMobile, not performance tier ([d3ad76d](https://github.com/hunterchen7/canvas/commit/d3ad76d4b60fc7d58c8df36352e252327f501f44))
+* **canvas:** key stable will-change on isMobile, not performance tier ([1b5fb96](https://github.com/hunterchen7/canvas/commit/1b5fb9608b557e4f234cecc1b73a144010edbf0c))
+* **canvas:** stable will-change on mobile — stop gesture-toggled layer thrash (pan/zoom flashing) ([830c9c6](https://github.com/hunterchen7/canvas/commit/830c9c69a4b03c782c66bc9f2450adcd58171041))
+* **canvas:** stop toggling will-change per gesture on mobile ([24d9861](https://github.com/hunterchen7/canvas/commit/24d98619f2b4ad35c1d7885ddb221c531dfe4ee0))
+
 ## [0.12.2](https://github.com/hunterchen7/canvas/compare/canvas-v0.12.1...canvas-v0.12.2) (2026-07-19)
 
 
