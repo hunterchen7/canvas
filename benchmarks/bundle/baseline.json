@@ -20,14 +20,14 @@
     "Canvas": {
       "externalPeers": {
         "bytes": {
-          "raw": 584206,
-          "gzip": 147799,
-          "brotli": 118833
+          "raw": 578477,
+          "gzip": 145117,
+          "brotli": 119145
         },
-        "chunks": 1,
+        "chunks": 2,
         "modules": {
-          "total": 1588,
-          "workspace": 19,
+          "total": 1584,
+          "workspace": 15,
           "dependencies": 1569,
           "byPackage": {
             "clsx": 1,
@@ -38,52 +38,53 @@
         "delivery": {
           "initial": {
             "bytes": {
-              "raw": 584206,
-              "gzip": 147799,
-              "brotli": 118833
+              "raw": 45563,
+              "gzip": 16014,
+              "brotli": 14059
             },
             "chunks": 1,
             "modules": {
-              "total": 1588,
-              "workspace": 19,
-              "dependencies": 1569,
+              "total": 16,
+              "workspace": 14,
+              "dependencies": 2,
               "byPackage": {
                 "clsx": 1,
-                "lucide-react": 1567,
                 "tailwind-merge": 1
               }
             }
           },
           "async": {
             "bytes": {
-              "raw": 0,
-              "gzip": 0,
-              "brotli": 0
+              "raw": 532914,
+              "gzip": 129103,
+              "brotli": 105086
             },
-            "chunks": 0,
+            "chunks": 1,
             "modules": {
-              "total": 0,
-              "workspace": 0,
-              "dependencies": 0,
-              "byPackage": {}
+              "total": 1568,
+              "workspace": 1,
+              "dependencies": 1567,
+              "byPackage": {
+                "lucide-react": 1567
+              }
             }
           }
         }
       },
       "bundled": {
         "bytes": {
-          "raw": 716837,
-          "gzip": 190665,
-          "brotli": 156604
+          "raw": 710850,
+          "gzip": 187797,
+          "brotli": 157245
         },
-        "chunks": 1,
+        "chunks": 3,
         "modules": {
-          "total": 1877,
-          "workspace": 19,
-          "dependencies": 1858,
+          "total": 1871,
+          "workspace": 15,
+          "dependencies": 1856,
           "byPackage": {
             "clsx": 1,
-            "framer-motion": 80,
+            "framer-motion": 78,
             "lucide-react": 1567,
             "motion-dom": 179,
             "motion-utils": 26,
@@ -94,19 +95,18 @@
         "delivery": {
           "initial": {
             "bytes": {
-              "raw": 716837,
-              "gzip": 190665,
-              "brotli": 156604
+              "raw": 177995,
+              "gzip": 58779,
+              "brotli": 52118
             },
-            "chunks": 1,
+            "chunks": 2,
             "modules": {
-              "total": 1877,
-              "workspace": 19,
-              "dependencies": 1858,
+              "total": 304,
+              "workspace": 15,
+              "dependencies": 289,
               "byPackage": {
                 "clsx": 1,
-                "framer-motion": 80,
-                "lucide-react": 1567,
+                "framer-motion": 78,
                 "motion-dom": 179,
                 "motion-utils": 26,
                 "react": 4,
@@ -116,16 +116,18 @@
           },
           "async": {
             "bytes": {
-              "raw": 0,
-              "gzip": 0,
-              "brotli": 0
+              "raw": 532855,
+              "gzip": 129018,
+              "brotli": 105127
             },
-            "chunks": 0,
+            "chunks": 1,
             "modules": {
-              "total": 0,
+              "total": 1567,
               "workspace": 0,
-              "dependencies": 0,
-              "byPackage": {}
+              "dependencies": 1567,
+              "byPackage": {
+                "lucide-react": 1567
+              }
             }
           }
         }
@@ -134,28 +136,28 @@
     "CanvasComponent": {
       "externalPeers": {
         "bytes": {
-          "raw": 4272,
-          "gzip": 1962,
-          "brotli": 1725
+          "raw": 3401,
+          "gzip": 1601,
+          "brotli": 1409
         },
         "chunks": 1,
         "modules": {
-          "total": 17,
-          "workspace": 17,
+          "total": 7,
+          "workspace": 7,
           "dependencies": 0,
           "byPackage": {}
         },
         "delivery": {
           "initial": {
             "bytes": {
-              "raw": 4272,
-              "gzip": 1962,
-              "brotli": 1725
+              "raw": 3401,
+              "gzip": 1601,
+              "brotli": 1409
             },
             "chunks": 1,
             "modules": {
-              "total": 17,
-              "workspace": 17,
+              "total": 7,
+              "workspace": 7,
               "dependencies": 0,
               "byPackage": {}
             }
@@ -178,38 +180,38 @@
       },
       "bundled": {
         "bytes": {
-          "raw": 128096,
-          "gzip": 41806,
-          "brotli": 37324
+          "raw": 120897,
+          "gzip": 39273,
+          "brotli": 35171
         },
         "chunks": 1,
         "modules": {
-          "total": 297,
-          "workspace": 18,
-          "dependencies": 279,
+          "total": 267,
+          "workspace": 8,
+          "dependencies": 259,
           "byPackage": {
-            "framer-motion": 71,
-            "motion-dom": 178,
-            "motion-utils": 26,
+            "framer-motion": 56,
+            "motion-dom": 175,
+            "motion-utils": 24,
             "react": 4
           }
         },
         "delivery": {
           "initial": {
             "bytes": {
-              "raw": 128096,
-              "gzip": 41806,
-              "brotli": 37324
+              "raw": 120897,
+              "gzip": 39273,
+              "brotli": 35171
             },
             "chunks": 1,
             "modules": {
-              "total": 297,
-              "workspace": 18,
-              "dependencies": 279,
+              "total": 267,
+              "workspace": 8,
+              "dependencies": 259,
               "byPackage": {
-                "framer-motion": 71,
-                "motion-dom": 178,
-                "motion-utils": 26,
+                "framer-motion": 56,
+                "motion-dom": 175,
+                "motion-utils": 24,
                 "react": 4
               }
             }
@@ -234,9 +236,9 @@
     "DefaultIntroContent": {
       "externalPeers": {
         "bytes": {
-          "raw": 26204,
-          "gzip": 8538,
-          "brotli": 7453
+          "raw": 26181,
+          "gzip": 8529,
+          "brotli": 7423
         },
         "chunks": 1,
         "modules": {
@@ -251,9 +253,9 @@
         "delivery": {
           "initial": {
             "bytes": {
-              "raw": 26204,
-              "gzip": 8538,
-              "brotli": 7453
+              "raw": 26181,
+              "gzip": 8529,
+              "brotli": 7423
             },
             "chunks": 1,
             "modules": {
@@ -284,20 +286,17 @@
       },
       "bundled": {
         "bytes": {
-          "raw": 143592,
-          "gzip": 46166,
-          "brotli": 41068
+          "raw": 27561,
+          "gzip": 9060,
+          "brotli": 7868
         },
         "chunks": 1,
         "modules": {
-          "total": 267,
+          "total": 12,
           "workspace": 6,
-          "dependencies": 261,
+          "dependencies": 6,
           "byPackage": {
             "clsx": 1,
-            "framer-motion": 56,
-            "motion-dom": 175,
-            "motion-utils": 24,
             "react": 4,
             "tailwind-merge": 1
           }
@@ -305,20 +304,17 @@
         "delivery": {
           "initial": {
             "bytes": {
-              "raw": 143592,
-              "gzip": 46166,
-              "brotli": 41068
+              "raw": 27561,
+              "gzip": 9060,
+              "brotli": 7868
             },
             "chunks": 1,
             "modules": {
-              "total": 267,
+              "total": 12,
               "workspace": 6,
-              "dependencies": 261,
+              "dependencies": 6,
               "byPackage": {
                 "clsx": 1,
-                "framer-motion": 56,
-                "motion-dom": 175,
-                "motion-utils": 24,
                 "react": 4,
                 "tailwind-merge": 1
               }
@@ -344,14 +340,14 @@
     "Navbar": {
       "externalPeers": {
         "bytes": {
-          "raw": 572154,
-          "gzip": 143336,
-          "brotli": 114984
+          "raw": 566142,
+          "gzip": 140621,
+          "brotli": 115156
         },
-        "chunks": 1,
+        "chunks": 2,
         "modules": {
-          "total": 1588,
-          "workspace": 19,
+          "total": 1580,
+          "workspace": 11,
           "dependencies": 1569,
           "byPackage": {
             "clsx": 1,
@@ -362,55 +358,56 @@
         "delivery": {
           "initial": {
             "bytes": {
-              "raw": 572154,
-              "gzip": 143336,
-              "brotli": 114984
+              "raw": 33228,
+              "gzip": 11518,
+              "brotli": 10070
             },
             "chunks": 1,
             "modules": {
-              "total": 1588,
-              "workspace": 19,
-              "dependencies": 1569,
+              "total": 12,
+              "workspace": 10,
+              "dependencies": 2,
               "byPackage": {
                 "clsx": 1,
-                "lucide-react": 1567,
                 "tailwind-merge": 1
               }
             }
           },
           "async": {
             "bytes": {
-              "raw": 0,
-              "gzip": 0,
-              "brotli": 0
+              "raw": 532914,
+              "gzip": 129103,
+              "brotli": 105086
             },
-            "chunks": 0,
+            "chunks": 1,
             "modules": {
-              "total": 0,
-              "workspace": 0,
-              "dependencies": 0,
-              "byPackage": {}
+              "total": 1568,
+              "workspace": 1,
+              "dependencies": 1567,
+              "byPackage": {
+                "lucide-react": 1567
+              }
             }
           }
         }
       },
       "bundled": {
         "bytes": {
-          "raw": 702878,
-          "gzip": 185875,
-          "brotli": 152548
+          "raw": 690896,
+          "gzip": 181079,
+          "brotli": 151455
         },
-        "chunks": 1,
+        "chunks": 3,
         "modules": {
-          "total": 1873,
-          "workspace": 19,
-          "dependencies": 1854,
+          "total": 1845,
+          "workspace": 11,
+          "dependencies": 1834,
           "byPackage": {
             "clsx": 1,
-            "framer-motion": 77,
+            "framer-motion": 62,
             "lucide-react": 1567,
-            "motion-dom": 178,
-            "motion-utils": 26,
+            "motion-dom": 175,
+            "motion-utils": 24,
             "react": 4,
             "tailwind-merge": 1
           }
@@ -418,21 +415,20 @@
         "delivery": {
           "initial": {
             "bytes": {
-              "raw": 702878,
-              "gzip": 185875,
-              "brotli": 152548
+              "raw": 158041,
+              "gzip": 52061,
+              "brotli": 46328
             },
-            "chunks": 1,
+            "chunks": 2,
             "modules": {
-              "total": 1873,
-              "workspace": 19,
-              "dependencies": 1854,
+              "total": 278,
+              "workspace": 11,
+              "dependencies": 267,
               "byPackage": {
                 "clsx": 1,
-                "framer-motion": 77,
-                "lucide-react": 1567,
-                "motion-dom": 178,
-                "motion-utils": 26,
+                "framer-motion": 62,
+                "motion-dom": 175,
+                "motion-utils": 24,
                 "react": 4,
                 "tailwind-merge": 1
               }
@@ -440,16 +436,18 @@
           },
           "async": {
             "bytes": {
-              "raw": 0,
-              "gzip": 0,
-              "brotli": 0
+              "raw": 532855,
+              "gzip": 129018,
+              "brotli": 105127
             },
-            "chunks": 0,
+            "chunks": 1,
             "modules": {
-              "total": 0,
+              "total": 1567,
               "workspace": 0,
-              "dependencies": 0,
-              "byPackage": {}
+              "dependencies": 1567,
+              "byPackage": {
+                "lucide-react": 1567
+              }
             }
           }
         }
@@ -458,28 +456,28 @@
     "Draggable": {
       "externalPeers": {
         "bytes": {
-          "raw": 2099,
-          "gzip": 1053,
-          "brotli": 928
+          "raw": 1553,
+          "gzip": 829,
+          "brotli": 747
         },
         "chunks": 1,
         "modules": {
-          "total": 16,
-          "workspace": 16,
+          "total": 3,
+          "workspace": 3,
           "dependencies": 0,
           "byPackage": {}
         },
         "delivery": {
           "initial": {
             "bytes": {
-              "raw": 2099,
-              "gzip": 1053,
-              "brotli": 928
+              "raw": 1553,
+              "gzip": 829,
+              "brotli": 747
             },
             "chunks": 1,
             "modules": {
-              "total": 16,
-              "workspace": 16,
+              "total": 3,
+              "workspace": 3,
               "dependencies": 0,
               "byPackage": {}
             }
@@ -502,14 +500,14 @@
       },
       "bundled": {
         "bytes": {
-          "raw": 125757,
-          "gzip": 40905,
-          "brotli": 36573
+          "raw": 125179,
+          "gzip": 40672,
+          "brotli": 36329
         },
         "chunks": 1,
         "modules": {
-          "total": 296,
-          "workspace": 17,
+          "total": 283,
+          "workspace": 4,
           "dependencies": 279,
           "byPackage": {
             "framer-motion": 71,
@@ -521,14 +519,14 @@
         "delivery": {
           "initial": {
             "bytes": {
-              "raw": 125757,
-              "gzip": 40905,
-              "brotli": 36573
+              "raw": 125179,
+              "gzip": 40672,
+              "brotli": 36329
             },
             "chunks": 1,
             "modules": {
-              "total": 296,
-              "workspace": 17,
+              "total": 283,
+              "workspace": 4,
               "dependencies": 279,
               "byPackage": {
                 "framer-motion": 71,
@@ -558,28 +556,28 @@
     "isIOS": {
       "externalPeers": {
         "bytes": {
-          "raw": 2171,
-          "gzip": 1101,
-          "brotli": 966
+          "raw": 101,
+          "gzip": 116,
+          "brotli": 86
         },
         "chunks": 1,
         "modules": {
-          "total": 17,
-          "workspace": 17,
+          "total": 2,
+          "workspace": 2,
           "dependencies": 0,
           "byPackage": {}
         },
         "delivery": {
           "initial": {
             "bytes": {
-              "raw": 2171,
-              "gzip": 1101,
-              "brotli": 966
+              "raw": 101,
+              "gzip": 116,
+              "brotli": 86
             },
             "chunks": 1,
             "modules": {
-              "total": 17,
-              "workspace": 17,
+              "total": 2,
+              "workspace": 2,
               "dependencies": 0,
               "byPackage": {}
             }
@@ -602,40 +600,30 @@
       },
       "bundled": {
         "bytes": {
-          "raw": 125830,
-          "gzip": 40942,
-          "brotli": 36605
+          "raw": 101,
+          "gzip": 116,
+          "brotli": 86
         },
         "chunks": 1,
         "modules": {
-          "total": 297,
-          "workspace": 18,
-          "dependencies": 279,
-          "byPackage": {
-            "framer-motion": 71,
-            "motion-dom": 178,
-            "motion-utils": 26,
-            "react": 4
-          }
+          "total": 2,
+          "workspace": 2,
+          "dependencies": 0,
+          "byPackage": {}
         },
         "delivery": {
           "initial": {
             "bytes": {
-              "raw": 125830,
-              "gzip": 40942,
-              "brotli": 36605
+              "raw": 101,
+              "gzip": 116,
+              "brotli": 86
             },
             "chunks": 1,
             "modules": {
-              "total": 297,
-              "workspace": 18,
-              "dependencies": 279,
-              "byPackage": {
-                "framer-motion": 71,
-                "motion-dom": 178,
-                "motion-utils": 26,
-                "react": 4
-              }
+              "total": 2,
+              "workspace": 2,
+              "dependencies": 0,
+              "byPackage": {}
             }
           },
           "async": {
@@ -658,28 +646,28 @@
     "getDistance": {
       "externalPeers": {
         "bytes": {
-          "raw": 2186,
-          "gzip": 1096,
-          "brotli": 964
+          "raw": 152,
+          "gzip": 136,
+          "brotli": 110
         },
         "chunks": 1,
         "modules": {
-          "total": 16,
-          "workspace": 16,
+          "total": 2,
+          "workspace": 2,
           "dependencies": 0,
           "byPackage": {}
         },
         "delivery": {
           "initial": {
             "bytes": {
-              "raw": 2186,
-              "gzip": 1096,
-              "brotli": 964
+              "raw": 152,
+              "gzip": 136,
+              "brotli": 110
             },
             "chunks": 1,
             "modules": {
-              "total": 16,
-              "workspace": 16,
+              "total": 2,
+              "workspace": 2,
               "dependencies": 0,
               "byPackage": {}
             }
@@ -702,39 +690,33 @@
       },
       "bundled": {
         "bytes": {
-          "raw": 125845,
-          "gzip": 40932,
-          "brotli": 36538
+          "raw": 1206,
+          "gzip": 551,
+          "brotli": 474
         },
         "chunks": 1,
         "modules": {
-          "total": 296,
-          "workspace": 17,
-          "dependencies": 279,
+          "total": 5,
+          "workspace": 3,
+          "dependencies": 2,
           "byPackage": {
-            "framer-motion": 71,
-            "motion-dom": 178,
-            "motion-utils": 26,
-            "react": 4
+            "react": 2
           }
         },
         "delivery": {
           "initial": {
             "bytes": {
-              "raw": 125845,
-              "gzip": 40932,
-              "brotli": 36538
+              "raw": 1206,
+              "gzip": 551,
+              "brotli": 474
             },
             "chunks": 1,
             "modules": {
-              "total": 296,
-              "workspace": 17,
-              "dependencies": 279,
+              "total": 5,
+              "workspace": 3,
+              "dependencies": 2,
               "byPackage": {
-                "framer-motion": 71,
-                "motion-dom": 178,
-                "motion-utils": 26,
-                "react": 4
+                "react": 2
               }
             }
           },
@@ -758,14 +740,14 @@
     "cn": {
       "externalPeers": {
         "bytes": {
-          "raw": 27360,
-          "gzip": 9088,
-          "brotli": 7945
+          "raw": 25235,
+          "gzip": 8098,
+          "brotli": 7040
         },
         "chunks": 1,
         "modules": {
-          "total": 19,
-          "workspace": 17,
+          "total": 4,
+          "workspace": 2,
           "dependencies": 2,
           "byPackage": {
             "clsx": 1,
@@ -775,14 +757,14 @@
         "delivery": {
           "initial": {
             "bytes": {
-              "raw": 27360,
-              "gzip": 9088,
-              "brotli": 7945
+              "raw": 25235,
+              "gzip": 8098,
+              "brotli": 7040
             },
             "chunks": 1,
             "modules": {
-              "total": 19,
-              "workspace": 17,
+              "total": 4,
+              "workspace": 2,
               "dependencies": 2,
               "byPackage": {
                 "clsx": 1,
@@ -808,42 +790,34 @@
       },
       "bundled": {
         "bytes": {
-          "raw": 151226,
-          "gzip": 48869,
-          "brotli": 43358
+          "raw": 25235,
+          "gzip": 8098,
+          "brotli": 7040
         },
         "chunks": 1,
         "modules": {
-          "total": 299,
-          "workspace": 18,
-          "dependencies": 281,
+          "total": 4,
+          "workspace": 2,
+          "dependencies": 2,
           "byPackage": {
             "clsx": 1,
-            "framer-motion": 71,
-            "motion-dom": 178,
-            "motion-utils": 26,
-            "react": 4,
             "tailwind-merge": 1
           }
         },
         "delivery": {
           "initial": {
             "bytes": {
-              "raw": 151226,
-              "gzip": 48869,
-              "brotli": 43358
+              "raw": 25235,
+              "gzip": 8098,
+              "brotli": 7040
             },
             "chunks": 1,
             "modules": {
-              "total": 299,
-              "workspace": 18,
-              "dependencies": 281,
+              "total": 4,
+              "workspace": 2,
+              "dependencies": 2,
               "byPackage": {
                 "clsx": 1,
-                "framer-motion": 71,
-                "motion-dom": 178,
-                "motion-utils": 26,
-                "react": 4,
                 "tailwind-merge": 1
               }
             }
@@ -874,8 +848,8 @@
     }
   },
   "package": {
-    "packedBytes": 99302,
-    "unpackedBytes": 382417,
+    "packedBytes": 102258,
+    "unpackedBytes": 392249,
     "files": 95
   }
 }

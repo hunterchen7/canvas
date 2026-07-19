@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import * as LucideIcons from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import type {
   NavbarDisplayMode,
@@ -42,10 +41,34 @@ export default function SingleButton({
   const [showTag, setShowTag] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
 
-  const isLucideIconName = typeof icon === "string";
-  const IconComponent = isLucideIconName
-    ? (LucideIcons[icon as keyof typeof LucideIcons] as LucideIcons.LucideIcon | undefined)
-    : icon;
+  // Lazy-load lucide-react only when an icon *name* (string) is passed. A
+  // static namespace import (`import * as LucideIcons`) forces the entire icon
+  // set into the consumer's main bundle because it can't be tree-shaken; a
+  // dynamic import code-splits it into a separate chunk that loads on demand.
+  type IconComp = React.ComponentType<{
+    className?: string;
+    style?: React.CSSProperties;
+  }>;
+  const [IconComponent, setIconComponent] = useState<IconComp | undefined>(() =>
+    typeof icon === "string" ? undefined : (icon as IconComp),
+  );
+  useEffect(() => {
+    if (typeof icon !== "string") {
+      setIconComponent(() => icon as IconComp);
+      return;
+    }
+    let active = true;
+    void import("lucide-react").then((mod) => {
+      if (active) {
+        setIconComponent(
+          () => mod[icon as keyof typeof mod] as unknown as IconComp,
+        );
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, [icon]);
 
   // Extract config values
   const {
@@ -73,8 +96,10 @@ export default function SingleButton({
   const allowExpand = displayMode === "icons"; // Only expand on active in icons mode
   const showTooltip = (displayMode === "icons" || displayMode === "compact") && !tooltipDisabled;
 
-  // Validate icon component for modes that need it
-  if (showIcon && !IconComponent) {
+  // Validate icon component for modes that need it. A string icon name resolves
+  // asynchronously (lazy lucide import), so only throw for an invalid custom
+  // component — a still-loading name renders nothing until the chunk arrives.
+  if (showIcon && !IconComponent && typeof icon !== "string") {
     throw new Error(
       "A valid 'icon' prop is required (Lucide icon name or custom icon component).",
     );
