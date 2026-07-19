@@ -139,7 +139,7 @@ const Canvas: FC<Props> = ({
 }) => {
   const { height: windowHeight, width: windowWidth } = useWindowDimensions();
 
-  const { mode, isMobile } = usePerformanceModeForWidth(windowWidth);
+  const { mode, isMobile, isIOS } = usePerformanceModeForWidth(windowWidth);
 
   const hasNavbar = Boolean(navItems && navItems.length > 0);
 
@@ -790,16 +790,21 @@ const Canvas: FC<Props> = ({
               x,
               y,
               scale,
-              // Keep a STABLE compositing hint on MOBILE (touch) devices,
-              // keyed on isMobile — NOT the performance tier. The flash is a
-              // mobile-Chromium compositor artifact: without a promoted layer,
-              // pinch-zoom re-rasterizes the whole scene per scale change and
-              // flickers (Brave/Chrome; Firefox layerizes differently and
-              // never showed it). Desktop composites fine un-promoted, so it
-              // stays "auto" (and avoids the extra layer memory). Tier is
-              // orthogonal — a flagship phone is "high" but still needs the
-              // promotion, which keying on mode !== "high" wrongly dropped.
-              willChange: isMobile ? "transform" : "auto",
+              // Promote the scene to a stable compositor layer on ANDROID
+              // mobile only. The flash is a mobile-Chromium artifact: without a
+              // promoted layer, pinch-zoom re-rasterizes the whole scene per
+              // scale change and flickers (Brave/Chrome; Firefox layerizes
+              // differently and never showed it). Desktop composites fine
+              // un-promoted (and avoids the layer memory), so it stays "auto".
+              //
+              // iOS is EXCLUDED on purpose: the scene is ~6000x4000, and a
+              // permanent GPU-backed layer that large trips WebKit's
+              // composited-layer size / memory limits — the class of
+              // hard-to-diagnose iOS crash the original transient-promotion
+              // optimization (hackwestern #461) was avoiding. iOS falls back to
+              // the safe never-promoted path; being WebKit like Firefox, it
+              // most likely doesn't flash anyway.
+              willChange: isMobile && !isIOS ? "transform" : "auto",
             }}
           >
             {/* Canvas Background - customizable or default */}
