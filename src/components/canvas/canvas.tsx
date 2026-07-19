@@ -139,7 +139,7 @@ const Canvas: FC<Props> = ({
 }) => {
   const { height: windowHeight, width: windowWidth } = useWindowDimensions();
 
-  const { mode } = usePerformanceModeForWidth(windowWidth);
+  const { mode, isMobile } = usePerformanceModeForWidth(windowWidth);
 
   const hasNavbar = Boolean(navItems && navItems.length > 0);
 
@@ -784,17 +784,16 @@ const Canvas: FC<Props> = ({
               x,
               y,
               scale,
-              // Keep the compositing hint STABLE on non-desktop modes. This
-              // used to toggle per gesture (set on drag start, dropped on drag
-              // end — and dropped at pinch start, since the two-pointer branch
-              // clears isPanning), which forced Chromium to promote/demote the
-              // whole scene layer and re-rasterize it on every flip: visible
-              // flashing while dragging/zooming on mobile Chromium (Brave/
-              // Chrome; Firefox layerizes differently and never showed it).
-              // A pinch also ran entirely un-promoted, re-rasterizing the full
-              // scene on every scale change. One persistent layer costs some
-              // GPU memory but never thrashes.
-              willChange: mode !== "high" ? "transform" : "auto",
+              // Keep a STABLE compositing hint on MOBILE (touch) devices,
+              // keyed on isMobile — NOT the performance tier. The flash is a
+              // mobile-Chromium compositor artifact: without a promoted layer,
+              // pinch-zoom re-rasterizes the whole scene per scale change and
+              // flickers (Brave/Chrome; Firefox layerizes differently and
+              // never showed it). Desktop composites fine un-promoted, so it
+              // stays "auto" (and avoids the extra layer memory). Tier is
+              // orthogonal — a flagship phone is "high" but still needs the
+              // promotion, which keying on mode !== "high" wrongly dropped.
+              willChange: isMobile ? "transform" : "auto",
             }}
           >
             {/* Canvas Background - customizable or default */}
