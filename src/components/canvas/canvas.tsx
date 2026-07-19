@@ -154,8 +154,14 @@ const Canvas: FC<Props> = ({
     () => zoomConfig?.responsiveZoomMap ? { ...RESPONSIVE_ZOOM_MAP, ...zoomConfig.responsiveZoomMap } : RESPONSIVE_ZOOM_MAP,
     [zoomConfig?.responsiveZoomMap]
   );
+  const resolvedMaxZoom = zoomConfig?.maxZoom ?? MAX_ZOOM;
 
   const MIN_ZOOM = resolvedMinZooms[getScreenSizeEnum(windowWidth)];
+  // Per-input zoom bounds fall back to the shared maxZoom / per-screen MIN_ZOOM.
+  const pinchMaxZoom = zoomConfig?.pinch?.maxZoom ?? resolvedMaxZoom;
+  const pinchMinZoom = zoomConfig?.pinch?.minZoom ?? MIN_ZOOM;
+  const wheelMaxZoom = zoomConfig?.wheel?.maxZoom ?? resolvedMaxZoom;
+  const wheelMinZoom = zoomConfig?.wheel?.minZoom ?? MIN_ZOOM;
 
   // tracks if user is panning the screen
   const [isPanning, setIsPanning] = useState<boolean>(false);
@@ -466,8 +472,8 @@ const Canvas: FC<Props> = ({
         newZoom = Math.max(
           (window.innerWidth / sceneWidth) * ZOOM_BOUND, // Ensure zoom is at least the width of the canvas
           (window.innerHeight / sceneHeight) * ZOOM_BOUND, // Ensure zoom is at least the height of the canvas
-          Math.min(newZoom, 10),
-          MIN_ZOOM // Ensure zoom is not less than MIN_ZOOM
+          Math.min(newZoom, pinchMaxZoom), // Pinch ceiling (zoomConfig.pinch.maxZoom / maxZoom)
+          pinchMinZoom // Pinch floor (zoomConfig.pinch.minZoom / MIN_ZOOM)
         );
 
         const minPanX = windowWidth - sceneWidth * newZoom;
@@ -568,9 +574,9 @@ const Canvas: FC<Props> = ({
         const nextZoom = Math.max(
           Math.min(
             currentZoom * (1 - deltaY * zoomSensitivity),
-            MAX_ZOOM
+            wheelMaxZoom
           ),
-          MIN_ZOOM,
+          wheelMinZoom,
           (window.innerWidth / sceneWidth) * ZOOM_BOUND, // Ensure zoom is at least the width of the canvas
           (window.innerHeight / sceneHeight) * ZOOM_BOUND // Ensure zoom is at least the height of the canvas
         );
