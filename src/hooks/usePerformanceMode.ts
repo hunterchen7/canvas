@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
-import { isIOS, isMobile, prefersReducedMotion } from "../utils/performance";
+import {
+  detectPerformanceMode,
+  isIOS,
+  isMobile,
+  prefersReducedMotion,
+} from "../utils/performance";
 import useWindowDimensions from "./useWindowDimensions";
 
 export type PerformanceMode = "high" | "medium" | "low";
@@ -20,17 +25,15 @@ const createDefaultConfig = (): PerformanceConfig => ({
   enableComplexShadows: true,
 });
 
-const detectPerformanceConfig = (width: number): PerformanceConfig => {
+// Tiering is capability-based (see detectPerformanceMode): device memory and
+// core count, assuming "high" when the signals are absent. The width argument
+// is kept for API compatibility but no longer influences the tier — a narrow
+// window is not a slow device.
+const detectPerformanceConfig = (_width: number): PerformanceConfig => {
   const isIOSDevice = isIOS();
   const isMobileDevice = isMobile();
   const reducedMotion = prefersReducedMotion();
-
-  let mode: PerformanceMode = "high";
-  if (isIOSDevice || reducedMotion || width < 768) {
-    mode = "low";
-  } else if (isMobileDevice || width < 1024) {
-    mode = "medium";
-  }
+  const mode = detectPerformanceMode();
 
   return {
     mode,
