@@ -1,5 +1,55 @@
 # Changelog
 
+## [0.12.2](https://github.com/hunterchen7/canvas/compare/canvas-v0.12.1...canvas-v0.12.2) (2026-07-19)
+
+
+### Performance Improvements
+
+* **navbar:** lazy-load lucide-react icons to fix consumer bundle bloat ([1536851](https://github.com/hunterchen7/canvas/commit/1536851463d72d4ba247c70769469d24b7397eb4))
+* **navbar:** lazy-load lucide-react icons to fix consumer bundle bloat ([e36058e](https://github.com/hunterchen7/canvas/commit/e36058e55d9cfac39c2071c7b8e673483c25bea8))
+
+
+### Miscellaneous Chores
+
+* **bench:** add native Go profile analyzer ([341229e](https://github.com/hunterchen7/canvas/commit/341229e01c1be8f46190a1de6a0d594dbdfc530b))
+* **bench:** enforce native batch ceilings ([2acacda](https://github.com/hunterchen7/canvas/commit/2acacdae217228aba5834fdb9fdf1956727bfd62))
+* **bench:** harden and batch native analysis ([0c760fd](https://github.com/hunterchen7/canvas/commit/0c760fdde9f915db9d3c8758303ddd79d961601e))
+* **bench:** harden native profiling workflow ([f017f2a](https://github.com/hunterchen7/canvas/commit/f017f2ac7a15e7bf9e44fc6a2d9bc0545879df2b))
+* **bench:** match JavaScript numeric seed formatting ([b2cd95d](https://github.com/hunterchen7/canvas/commit/b2cd95db285028c8e5594e8b7ade0dd3e926e394))
+* **bench:** migrate profiling tools to TypeScript and Go ([f8f868e](https://github.com/hunterchen7/canvas/commit/f8f868ea98dfb72d9a40e3a70f2965dd47629dc1))
+* **bench:** preserve interrupted report state ([399e65e](https://github.com/hunterchen7/canvas/commit/399e65ee7eb29aebf8ce669aca8b0bdcb894492c))
+* **bench:** reject nonportable analyzer options ([e80797a](https://github.com/hunterchen7/canvas/commit/e80797a17eb496c2705600472ce04dce3f22044f))
+* **bench:** spawn converted runtime entry point ([133d18e](https://github.com/hunterchen7/canvas/commit/133d18e6d018c563309d3a2a69e82f395d5834cf))
+* **bench:** update bundle baseline for lucide code-split ([9c4ff1d](https://github.com/hunterchen7/canvas/commit/9c4ff1db2e96fdd8bd68e9920ef02c0a9b25f95c))
+
+
+### Code Refactoring
+
+* **bench:** convert bundle tooling to TypeScript ([256cb7b](https://github.com/hunterchen7/canvas/commit/256cb7bbb1223bb8d04092a8ee8082b2ee4e2c1b))
+* **bench:** convert e2e tooling to TypeScript ([e4dc1c2](https://github.com/hunterchen7/canvas/commit/e4dc1c2523dfdc11fc4bc7f1668ad35c2d30c44c))
+* **bench:** convert runtime tooling to TypeScript ([aeaf6f2](https://github.com/hunterchen7/canvas/commit/aeaf6f245b85d37aaccb4c97766cc4292798dbaf))
+* **test:** convert browser test to TypeScript ([138c7cb](https://github.com/hunterchen7/canvas/commit/138c7cb54564e9627fa34627c2e5b69ca6564312))
+
+
+### Tests
+
+* **bench:** exercise native analysis end to end ([d2d923b](https://github.com/hunterchen7/canvas/commit/d2d923b86a89fc553a4e0e80cc3ebc9b31be2db1))
+* **bench:** exercise parity harness on every PR ([5fce5a4](https://github.com/hunterchen7/canvas/commit/5fce5a4c94366a799ef11eceb6ece34169346403))
+
+
+### Build System
+
+* **bench:** preserve package size budget ([dca3f77](https://github.com/hunterchen7/canvas/commit/dca3f771bfa9bdd3d4807c8849028f3a161245d1))
+
+
+### Continuous Integration
+
+* **bench:** keep the bundle report free of build-tool noise ([d6f783c](https://github.com/hunterchen7/canvas/commit/d6f783cf3f7a38ec93b6b94991d92e3fd73a8204))
+* **bench:** make bundle budget informational, report deltas on the PR ([aa7e8b2](https://github.com/hunterchen7/canvas/commit/aa7e8b28b9f4ccc2f163531b4c04b954f63cdab1))
+* **bench:** make bundle budget informational, report deltas on the PR ([7c3a6eb](https://github.com/hunterchen7/canvas/commit/7c3a6eb4b25453ecd1b74b99321f6f52434a5992))
+* **bench:** render the bundle report as a Markdown table ([bec285e](https://github.com/hunterchen7/canvas/commit/bec285ec0913abd58f0a9588fda5ef0509b83775))
+* **bench:** show before/after deltas in the bundle report ([309ef80](https://github.com/hunterchen7/canvas/commit/309ef8022855fb042f9edab5cf66e853a27b0593))
+
 ## [0.12.1](https://github.com/hunterchen7/canvas/compare/canvas-v0.12.0...canvas-v0.12.1) (2026-07-18)
 
 This release reduces rendering, subscription, and interaction hot-path overhead while adding reproducible before/after performance and strict visual-parity tooling. The public API and import paths are unchanged, so no migration is required. The complete work landed in [PR #49](https://github.com/hunterchen7/canvas/pull/49).
