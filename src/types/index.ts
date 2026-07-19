@@ -218,9 +218,23 @@ export interface NavbarConfig {
  * Configuration for zoom behavior per screen size.
  * Partial overrides are merged with library defaults.
  */
+/** Zoom bounds for a single input method (pinch or wheel/trackpad). */
+export interface ZoomInputBounds {
+  /** Max zoom for this input. Falls back to zoomConfig.maxZoom, then MAX_ZOOM (3). */
+  maxZoom?: number;
+  /** Min zoom for this input. Falls back to the resolved per-screen-size MIN_ZOOM. */
+  minZoom?: number;
+}
+
 export interface ZoomConfig {
   /** Override minimum zoom levels per screen size. Merged with defaults from MIN_ZOOMS. */
   minZooms?: Partial<Record<ScreenSizeEnum, number>>;
   /** Override navigation zoom levels per screen size. Merged with defaults from RESPONSIVE_ZOOM_MAP. */
   responsiveZoomMap?: Partial<Record<ScreenSizeEnum, number>>;
+  /** Max zoom ceiling shared by wheel/trackpad and pinch. Default: MAX_ZOOM (3). */
+  maxZoom?: number;
+  /** Wheel/trackpad-specific zoom bounds (override maxZoom / MIN_ZOOM). */
+  wheel?: ZoomInputBounds;
+  /** Pinch-gesture-specific zoom bounds (override maxZoom / MIN_ZOOM). */
+  pinch?: ZoomInputBounds;
 }
