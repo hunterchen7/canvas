@@ -43,6 +43,7 @@ Options:
   --baseline <file>                 Compare results with a JSON baseline
   --write-baseline <file>           Write current results as a JSON baseline
   --output <file>                   Write current results to a JSON file
+  --markdown <file>                 Write a Markdown report of the results
   --byte-tolerance-percent <value>  Allowed byte growth (default: 0)
   --package-byte-tolerance-percent <value>
                                     Allowed npm package byte growth (default: byte tolerance)
@@ -70,6 +71,7 @@ function parseArguments(argv) {
     baseline: undefined,
     writeBaseline: undefined,
     output: undefined,
+    markdown: undefined,
     byteTolerancePercent: 0,
     packageByteTolerancePercent: undefined,
     moduleTolerance: 0,
@@ -98,6 +100,9 @@ function parseArguments(argv) {
         break;
       case "--output":
         options.output = nextValue();
+        break;
+      case "--markdown":
+        options.markdown = nextValue();
         break;
       case "--byte-tolerance-percent":
         options.byteTolerancePercent = parseNumberOption(
@@ -432,6 +437,47 @@ function printResults(results) {
   }
 }
 
+function formatMarkdown(results, regressions, compared: boolean): string {
+  const header =
+    "| Fixture | Mode | Raw | Gzip | Brotli | Init gzip | Async gzip | Modules | Lucide | Chunks |";
+  const alignment =
+    "| :-- | :-- | --: | --: | --: | --: | --: | --: | --: | --: |";
+  const rows: string[] = [];
+  for (const [fixtureName, modes] of Object.entries(results.bundles)) {
+    for (const [modeName, measurement] of Object.entries(modes)) {
+      rows.push(
+        `| ${fixtureName} | ${modeName} | ${formatBytes(measurement.bytes.raw)} | ${formatBytes(measurement.bytes.gzip)} | ${formatBytes(measurement.bytes.brotli)} | ${formatBytes(measurement.delivery.initial.bytes.gzip)} | ${formatBytes(measurement.delivery.async.bytes.gzip)} | ${measurement.modules.total} | ${measurement.modules.byPackage["lucide-react"] ?? 0} | ${measurement.chunks} |`,
+      );
+    }
+  }
+
+  const summary = [
+    `**CSS:** ${formatBytes(results.assets.styles.raw)} raw / ${formatBytes(results.assets.styles.gzip)} gzip / ${formatBytes(results.assets.styles.brotli)} brotli`,
+  ];
+  if (results.package) {
+    summary.push(
+      `**Package:** ${formatBytes(results.package.packedBytes)} packed / ${formatBytes(results.package.unpackedBytes)} unpacked / ${results.package.files} files`,
+    );
+  }
+
+  const sections = [header, alignment, ...rows, "", summary.join("  \n")];
+  if (compared && regressions.length > 0) {
+    sections.push(
+      "",
+      `**${regressions.length} metric(s) over the committed budget baseline:**`,
+      ...regressions.map((regression) => `- ${regression}`),
+    );
+  }
+  return `${sections.join("\n")}\n`;
+}
+
+function writeMarkdown(targetPath, results, regressions, compared) {
+  const resolvedPath = path.resolve(REPOSITORY_ROOT, targetPath);
+  mkdirSync(path.dirname(resolvedPath), { recursive: true });
+  writeFileSync(resolvedPath, formatMarkdown(results, regressions, compared));
+  console.log(`Wrote ${path.relative(REPOSITORY_ROOT, resolvedPath)}`);
+}
+
 function allowedByteValue(baseline, tolerancePercent) {
   return Math.floor(baseline * (1 + tolerancePercent / 100));
 }
@@ -678,9 +724,10 @@ async function main() {
   if (options.output) writeJson(options.output, results);
   if (options.writeBaseline) writeJson(options.writeBaseline, results);
 
+  let regressions: string[] = [];
   if (options.baseline) {
     const baseline = readJson(options.baseline);
-    const regressions = compareResults(results, baseline, options);
+    regressions = compareResults(results, baseline, options);
     if (regressions.length > 0) {
       console.error(`\n${regressions.length} bundle benchmark regression(s):`);
       for (const regression of regressions) console.error(`- ${regression}`);
@@ -688,6 +735,15 @@ async function main() {
     } else {
       console.log("\nBundle benchmark comparison passed.");
     }
+  }
+
+  if (options.markdown) {
+    writeMarkdown(
+      options.markdown,
+      results,
+      regressions,
+      Boolean(options.baseline),
+    );
   }
 }
 

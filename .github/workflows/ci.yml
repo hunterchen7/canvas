@@ -94,9 +94,11 @@ jobs:
         id: bundle
         run: |
           set +e
-          npm run --silent bench:bundle:compare -- --skip-build > "$RUNNER_TEMP/bundle-report.txt" 2>&1
+          npm run --silent bench:bundle:compare -- \
+            --skip-build --markdown "$RUNNER_TEMP/bundle-report.md" \
+            > "$RUNNER_TEMP/bundle-log.txt" 2>&1
           echo "status=$?" >> "$GITHUB_OUTPUT"
-          cat "$RUNNER_TEMP/bundle-report.txt"
+          cat "$RUNNER_TEMP/bundle-log.txt"
           exit 0
 
       - name: Report bundle budget on the PR
@@ -119,9 +121,7 @@ jobs:
               echo "ℹ️ Some metrics exceed the committed budget baseline. This is **informational only — it does not block CI.** Review the deltas below; if the change is intended, promote them with \`npm run bench:bundle -- --write-baseline benchmarks/bundle/baseline.json\` under the pinned toolchain (see \`benchmarks/bundle/README.md\`)."
             fi
             echo
-            echo '```'
-            cat "$RUNNER_TEMP/bundle-report.txt"
-            echo '```'
+            cat "$RUNNER_TEMP/bundle-report.md"
           } > "$RUNNER_TEMP/bundle-comment.md"
           existing=$(gh api "repos/$REPO/issues/$PR_NUMBER/comments" \
             --jq "map(select(.body | contains(\"$marker\"))) | .[0].id // empty")
