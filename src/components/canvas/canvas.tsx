@@ -784,10 +784,17 @@ const Canvas: FC<Props> = ({
               x,
               y,
               scale,
-              willChange:
-                mode !== "high" && (animationStage < 2 || isPanning)
-                  ? "transform"
-                  : "auto",
+              // Keep the compositing hint STABLE on non-desktop modes. This
+              // used to toggle per gesture (set on drag start, dropped on drag
+              // end — and dropped at pinch start, since the two-pointer branch
+              // clears isPanning), which forced Chromium to promote/demote the
+              // whole scene layer and re-rasterize it on every flip: visible
+              // flashing while dragging/zooming on mobile Chromium (Brave/
+              // Chrome; Firefox layerizes differently and never showed it).
+              // A pinch also ran entirely un-promoted, re-rasterizing the full
+              // scene on every scale change. One persistent layer costs some
+              // GPU memory but never thrashes.
+              willChange: mode !== "high" ? "transform" : "auto",
             }}
           >
             {/* Canvas Background - customizable or default */}
