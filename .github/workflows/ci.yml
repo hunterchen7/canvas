@@ -82,6 +82,11 @@ jobs:
       - name: Install browser runtime
         run: npm exec -- playwright install --with-deps chromium
 
+      # Build once here so the comparison output stays free of build-tool noise
+      # (the report is posted verbatim to the PR).
+      - name: Build package for bundle measurement
+        run: npm run build
+
       # Bundle/package budget is informational: it reports deltas as a PR
       # comment but never blocks CI. Intentional changes (e.g. code-splitting)
       # are reviewed from the comment, then promoted via --write-baseline.
@@ -89,7 +94,7 @@ jobs:
         id: bundle
         run: |
           set +e
-          npm run bench:bundle:compare > "$RUNNER_TEMP/bundle-report.txt" 2>&1
+          npm run --silent bench:bundle:compare -- --skip-build > "$RUNNER_TEMP/bundle-report.txt" 2>&1
           echo "status=$?" >> "$GITHUB_OUTPUT"
           cat "$RUNNER_TEMP/bundle-report.txt"
           exit 0
