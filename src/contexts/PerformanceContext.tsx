@@ -1,6 +1,11 @@
 import React, { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import useWindowDimensions from "../hooks/useWindowDimensions";
-import { isIOS, isMobile, prefersReducedMotion } from "../utils/performance";
+import {
+    detectPerformanceMode,
+    isIOS,
+    isMobile,
+    prefersReducedMotion,
+} from "../utils/performance";
 
 export type PerformanceMode = "high" | "medium" | "low";
 
@@ -54,21 +59,17 @@ export const PerformanceProvider: React.FC<PerformanceProviderProps> = ({ childr
         const isMobileDevice = isMobile();
         const reducedMotion = prefersReducedMotion();
 
-        let mode: PerformanceMode = "high";
-
-        // Determine performance mode based on device and screen size
-        if (isIOSDevice || reducedMotion || width < 768) {
-            mode = "low";
-        } else if (isMobileDevice || width < 1024) {
-            mode = "medium";
-        }
+        // Capability-based tier (see detectPerformanceMode): device memory /
+        // core count, assuming "high" when signals are absent. Form factor is
+        // not capability — width and mobile user agents no longer downgrade.
+        const mode = detectPerformanceMode();
 
         setConfig({
             mode,
             isIOS: isIOSDevice,
             isMobile: isMobileDevice,
             prefersReducedMotion: reducedMotion,
-            // Use simpler shadows on iOS and low-end devices for better performance
+            // Use simpler shadows on low-end devices for better performance
             enableComplexShadows: mode !== "low",
         });
     }, [width]);
