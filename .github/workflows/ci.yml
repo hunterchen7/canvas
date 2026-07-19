@@ -63,6 +63,9 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
@@ -79,8 +82,58 @@ jobs:
       - name: Install browser runtime
         run: npm exec -- playwright install --with-deps chromium
 
+      # Build once here so the comparison output stays free of build-tool noise
+      # (the report is posted verbatim to the PR).
+      - name: Build package for bundle measurement
+        run: npm run build
+
+      # Bundle/package budget is informational: it reports deltas as a PR
+      # comment but never blocks CI. Intentional changes (e.g. code-splitting)
+      # are reviewed from the comment, then promoted via --write-baseline.
       - name: Compare consumer bundles and package budget
-        run: npm run bench:bundle:compare
+        id: bundle
+        run: |
+          set +e
+          npm run --silent bench:bundle:compare -- \
+            --skip-build --markdown "$RUNNER_TEMP/bundle-report.md" \
+            > "$RUNNER_TEMP/bundle-log.txt" 2>&1
+          echo "status=$?" >> "$GITHUB_OUTPUT"
+          cat "$RUNNER_TEMP/bundle-log.txt"
+          exit 0
+
+      - name: Report bundle budget on the PR
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+          STATUS: ${{ steps.bundle.outputs.status }}
+        run: |
+          marker="<!-- bundle-budget-report -->"
+          {
+            echo "$marker"
+            echo "## 📦 Bundle budget report"
+            echo
+            if [ "$STATUS" = "0" ]; then
+              echo "✅ No consumer bundle or package metric exceeds the committed budget baseline."
+            else
+              echo "ℹ️ Some metrics exceed the committed budget baseline. This is **informational only — it does not block CI.** Review the deltas below; if the change is intended, promote them with \`npm run bench:bundle -- --write-baseline benchmarks/bundle/baseline.json\` under the pinned toolchain (see \`benchmarks/bundle/README.md\`)."
+            fi
+            echo
+            cat "$RUNNER_TEMP/bundle-report.md"
+          } > "$RUNNER_TEMP/bundle-comment.md"
+          existing=$(gh api "repos/$REPO/issues/$PR_NUMBER/comments" \
+            --jq "map(select(.body | contains(\"$marker\"))) | .[0].id // empty")
+          if [ -n "$existing" ]; then
+            jq -Rs '{body: .}' < "$RUNNER_TEMP/bundle-comment.md" \
+              | gh api -X PATCH "repos/$REPO/issues/comments/$existing" --input - >/dev/null
+            echo "Updated existing bundle budget comment ($existing)."
+          else
+            jq -Rs '{body: .}' < "$RUNNER_TEMP/bundle-comment.md" \
+              | gh api -X POST "repos/$REPO/issues/$PR_NUMBER/comments" --input - >/dev/null
+            echo "Created bundle budget comment."
+          fi
 
       - name: Create untouched baseline worktree
         env:

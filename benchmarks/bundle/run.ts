@@ -43,6 +43,7 @@ Options:
   --baseline <file>                 Compare results with a JSON baseline
   --write-baseline <file>           Write current results as a JSON baseline
   --output <file>                   Write current results to a JSON file
+  --markdown <file>                 Write a Markdown report of the results
   --byte-tolerance-percent <value>  Allowed byte growth (default: 0)
   --package-byte-tolerance-percent <value>
                                     Allowed npm package byte growth (default: byte tolerance)
@@ -70,6 +71,7 @@ function parseArguments(argv) {
     baseline: undefined,
     writeBaseline: undefined,
     output: undefined,
+    markdown: undefined,
     byteTolerancePercent: 0,
     packageByteTolerancePercent: undefined,
     moduleTolerance: 0,
@@ -98,6 +100,9 @@ function parseArguments(argv) {
         break;
       case "--output":
         options.output = nextValue();
+        break;
+      case "--markdown":
+        options.markdown = nextValue();
         break;
       case "--byte-tolerance-percent":
         options.byteTolerancePercent = parseNumberOption(
@@ -432,6 +437,126 @@ function printResults(results) {
   }
 }
 
+// Metrics tracked in the "Changes vs baseline" section, evaluated per fixture x mode.
+// Total gzip is intentionally omitted: it equals init gzip + async gzip, so tracking
+// the eager/deferred split instead avoids a redundant (always-identical) row.
+const TRACKED_METRICS = [
+  { label: "init gzip", unit: "bytes", get: (m) => m.delivery.initial.bytes.gzip },
+  { label: "async gzip", unit: "bytes", get: (m) => m.delivery.async.bytes.gzip },
+  { label: "chunks", unit: "count", get: (m) => m.chunks },
+  { label: "lucide modules", unit: "count", get: (m) => m.modules.byPackage["lucide-react"] ?? 0 },
+];
+
+// Byte deltas below this are immaterial (compression jitter / trivial drift) and are
+// suppressed so the report highlights real movement. Count deltas are always shown.
+const MATERIAL_BYTE_DELTA = 256;
+
+function formatMetricValue(value, unit) {
+  return unit === "count" ? String(value) : formatBytes(value);
+}
+
+// A colored delta cell: 🔴 for a metric that grew, 🟢 for one that shrank. Returns null
+// when unchanged, or when a byte delta is below the materiality floor.
+function formatDelta(before, after, unit) {
+  const diff = after - before;
+  if (diff === 0) return null;
+  if (unit === "bytes" && Math.abs(diff) < MATERIAL_BYTE_DELTA) return null;
+  const magnitude = formatMetricValue(Math.abs(diff), unit);
+  return diff > 0 ? `🔴 +${magnitude}` : `🟢 -${magnitude}`;
+}
+
+function changeRows(results, baseline): string[] {
+  const rows: string[] = [];
+  for (const [fixtureName, modes] of Object.entries(results.bundles)) {
+    for (const [modeName, measurement] of Object.entries(modes)) {
+      const baselineMeasurement = baseline.bundles?.[fixtureName]?.[modeName];
+      for (const metric of TRACKED_METRICS) {
+        const after = metric.get(measurement);
+        const before = baselineMeasurement ? metric.get(baselineMeasurement) : 0;
+        const delta = formatDelta(before, after, metric.unit);
+        if (delta) {
+          rows.push(
+            `| ${fixtureName} | ${modeName} | ${metric.label} | ${formatMetricValue(before, metric.unit)} | ${formatMetricValue(after, metric.unit)} | ${delta} |`,
+          );
+        }
+      }
+    }
+  }
+
+  // Package + CSS live outside the per-fixture bundles.
+  const extras: Array<[string, string, number, number]> = [];
+  if (results.package && baseline.package) {
+    extras.push(["Package", "packed", baseline.package.packedBytes, results.package.packedBytes]);
+  }
+  extras.push(["CSS", "gzip", baseline.assets?.styles?.gzip ?? 0, results.assets.styles.gzip]);
+  for (const [name, label, before, after] of extras) {
+    const delta = formatDelta(before, after, "bytes");
+    if (delta) {
+      rows.push(`| ${name} | — | ${label} | ${formatBytes(before)} | ${formatBytes(after)} | ${delta} |`);
+    }
+  }
+  return rows;
+}
+
+function formatMarkdown(results, baseline): string {
+  const parts: string[] = [];
+
+  if (baseline) {
+    const rows = changeRows(results, baseline);
+    parts.push("### Changes vs baseline", "");
+    if (rows.length > 0) {
+      parts.push(
+        `_🔴 grew · 🟢 shrank — measured against the committed \`baseline.json\`. Byte deltas under ${formatBytes(MATERIAL_BYTE_DELTA)} B are hidden._`,
+        "",
+        "| Fixture | Mode | Metric | Before | After | Δ |",
+        "| :-- | :-- | :-- | --: | --: | :-- |",
+        ...rows,
+      );
+    } else {
+      parts.push("No tracked metric changed versus the committed `baseline.json`.");
+    }
+    parts.push("");
+  }
+
+  const snapshotRows: string[] = [];
+  for (const [fixtureName, modes] of Object.entries(results.bundles)) {
+    for (const [modeName, measurement] of Object.entries(modes)) {
+      snapshotRows.push(
+        `| ${fixtureName} | ${modeName} | ${formatBytes(measurement.bytes.raw)} | ${formatBytes(measurement.bytes.gzip)} | ${formatBytes(measurement.bytes.brotli)} | ${formatBytes(measurement.delivery.initial.bytes.gzip)} | ${formatBytes(measurement.delivery.async.bytes.gzip)} | ${measurement.modules.total} | ${measurement.modules.byPackage["lucide-react"] ?? 0} | ${measurement.chunks} |`,
+      );
+    }
+  }
+
+  const summary = [
+    `**CSS:** ${formatBytes(results.assets.styles.raw)} raw / ${formatBytes(results.assets.styles.gzip)} gzip / ${formatBytes(results.assets.styles.brotli)} brotli`,
+  ];
+  if (results.package) {
+    summary.push(
+      `**Package:** ${formatBytes(results.package.packedBytes)} packed / ${formatBytes(results.package.unpackedBytes)} unpacked / ${results.package.files} files`,
+    );
+  }
+
+  parts.push(
+    "<details>",
+    `<summary>Full snapshot (${snapshotRows.length} measurements)</summary>`,
+    "",
+    "| Fixture | Mode | Raw | Gzip | Brotli | Init gzip | Async gzip | Modules | Lucide | Chunks |",
+    "| :-- | :-- | --: | --: | --: | --: | --: | --: | --: | --: |",
+    ...snapshotRows,
+    "",
+    summary.join("  \n"),
+    "</details>",
+  );
+  return `${parts.join("\n")}\n`;
+}
+
+function writeMarkdown(targetPath, results, baseline) {
+  const resolvedPath = path.resolve(REPOSITORY_ROOT, targetPath);
+  mkdirSync(path.dirname(resolvedPath), { recursive: true });
+  writeFileSync(resolvedPath, formatMarkdown(results, baseline));
+  console.log(`Wrote ${path.relative(REPOSITORY_ROOT, resolvedPath)}`);
+}
+
 function allowedByteValue(baseline, tolerancePercent) {
   return Math.floor(baseline * (1 + tolerancePercent / 100));
 }
@@ -678,8 +803,9 @@ async function main() {
   if (options.output) writeJson(options.output, results);
   if (options.writeBaseline) writeJson(options.writeBaseline, results);
 
+  let baseline;
   if (options.baseline) {
-    const baseline = readJson(options.baseline);
+    baseline = readJson(options.baseline);
     const regressions = compareResults(results, baseline, options);
     if (regressions.length > 0) {
       console.error(`\n${regressions.length} bundle benchmark regression(s):`);
@@ -688,6 +814,10 @@ async function main() {
     } else {
       console.log("\nBundle benchmark comparison passed.");
     }
+  }
+
+  if (options.markdown) {
+    writeMarkdown(options.markdown, results, baseline);
   }
 }
 
