@@ -46,23 +46,28 @@ const readPerformanceOverride = (): PerformanceModeValue | null => {
 };
 
 /**
- * Capability-based performance tier detection.
+ * Performance tier detection.
  *
- * Philosophy: assume a device is CAPABLE unless it presents hard evidence of
- * being low-end. Modern phones (recent iPhones, flagship Androids) run the
- * full experience at 60fps; only genuinely memory/CPU-starved devices need
- * the reduced tiers. Form factor is not capability: screen width and mobile
- * user agents say nothing about GPU/CPU power and are deliberately NOT used.
+ * Philosophy: assume a device is CAPABLE. Modern phones (recent iPhones,
+ * flagship Androids) and any desktop run the full experience at 60fps; the
+ * reduced tiers exist for genuinely constrained devices and for users who ask
+ * for a calmer presentation.
  *
- * Signals, strongest first:
- * - navigator.deviceMemory (Chromium only; GiB, capped at 8): <=2 GiB is a
- *   budget device (low), <=4 GiB is older mid-range (medium).
- * - navigator.hardwareConcurrency: weak on Android (budget chips still report
- *   8 cores), but <=3 cores is credible low-end evidence anywhere.
- * - Safari/Firefox expose neither meaningfully -> assume high. iPhones in
- *   particular are uniformly capable; the old iOS->low rule punished the
- *   best devices.
- * - prefers-reduced-motion -> low (most conservative presentation).
+ * Why not sniff hardware? There is no RELIABLE static signal for device power:
+ * - navigator.deviceMemory is Chromium-only (Safari/Firefox omit it) AND is
+ *   FARBLED downward by privacy browsers (Brave) for fingerprint resistance —
+ *   so a flagship on Brave reports <=4 GiB and gets misclassified as mid-range.
+ * - navigator.hardwareConcurrency is likewise farbled (Brave caps it) and
+ *   meaningless on Android (budget chips report 8 cores).
+ * Because a capable device cannot be told apart from a weak one at page load,
+ * we assume capable rather than punish the majority for an unmeasurable
+ * minority. (Genuinely low-end tiers stay reachable via the explicit override
+ * below, and prefers-reduced-motion.)
+ *
+ * Signals used, strongest first:
+ * - ?canvasPerf=high|medium|low or localStorage["canvas-perf-mode"] override.
+ * - prefers-reduced-motion -> low (the one reliable "give me less" signal).
+ * - otherwise -> high.
  */
 export const detectPerformanceMode = (): PerformanceModeValue => {
   if (typeof window === "undefined") return "high";
@@ -71,17 +76,6 @@ export const detectPerformanceMode = (): PerformanceModeValue => {
   if (override) return override;
 
   if (prefersReducedMotion()) return "low";
-
-  const memory = (navigator as Navigator & { deviceMemory?: number })
-    .deviceMemory;
-  if (memory !== undefined) {
-    if (memory <= 2) return "low";
-    if (memory <= 4) return "medium";
-    return "high";
-  }
-
-  const cores = navigator.hardwareConcurrency;
-  if (typeof cores === "number" && cores > 0 && cores <= 3) return "medium";
 
   return "high";
 };
