@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.13.1](https://github.com/hunterchen7/canvas/compare/canvas-v0.13.0...canvas-v0.13.1) (2026-07-20)
+
+
+### Bug Fixes
+
+* **perf:** stop hardware sniffing that misclassified capable devices ([f8131eb](https://github.com/hunterchen7/canvas/commit/f8131eb43f9ae73776bb0d6af2b26f34ae673fff))
+* **perf:** stop hardware sniffing that misclassified capable devices ([d52e959](https://github.com/hunterchen7/canvas/commit/d52e959e3da316a3973d3910d442ec453fb58f98))
+
 ## [0.13.0](https://github.com/hunterchen7/canvas/compare/canvas-v0.12.2...canvas-v0.13.0) (2026-07-19)
 
 
