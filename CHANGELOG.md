@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.2](https://github.com/hunterchen7/canvas/compare/canvas-v0.13.1...canvas-v0.13.2) (2026-07-23)
+
+
+### Bug Fixes
+
+* update Hack Western URL in README ([#63](https://github.com/hunterchen7/canvas/issues/63)) ([4393288](https://github.com/hunterchen7/canvas/commit/43932888b3aebe82dd518e53d34ba17c5b4f9c4f))
+
 ## [0.13.1](https://github.com/hunterchen7/canvas/compare/canvas-v0.13.0...canvas-v0.13.1) (2026-07-20)
 
 
