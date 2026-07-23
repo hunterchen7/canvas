@@ -291,7 +291,7 @@ import { Canvas, DefaultIntroContent } from '@hunterchen/canvas';
 
 #### Complete Theming Example (Hack Western Style)
 
-Here's a complete example showing how to apply a custom theme with warm coral/lilac colors (used by [Hack Western](https://hackwestern.com)):
+Here's a complete example showing how to apply a custom theme with warm coral/lilac colors (used by [Hack Western](https://2025.hackwestern.com)):
 
 ```tsx
 import {
