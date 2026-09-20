@@ -104,12 +104,13 @@ The `navItems` prop is optional and defines sections that appear in the canvas n
 
 ```tsx
 import type { NavItem } from '@hunterchen/canvas';
+import { Home, Info } from 'lucide-react';
 
 const navItems: NavItem[] = [
   {
     id: "home",
     label: "Home",
-    icon: "Home",           // Lucide icon name or custom component
+    icon: Home,             // Icon component (see "Using Icons" below)
     x: 2867,
     y: 1200,
     width: 264,
@@ -119,7 +120,7 @@ const navItems: NavItem[] = [
   {
     id: "about",
     label: "About",
-    icon: "Info",
+    icon: Info,
     x: 1400,
     y: 400,
     width: 1013,
@@ -137,18 +138,18 @@ When `navItems` is provided, the canvas will render a navbar with buttons to nav
 
 #### Using Icons
 
-The `icon` property accepts either a Lucide icon name (string) or a custom React component:
+The `icon` property accepts an icon component or a Lucide icon name (string). **Pass a component.** Your bundler then ships exactly the icons you use, about 0.5 kB each:
 
 ```tsx
-import { Heart } from 'lucide-react';
+import { Heart, Info } from 'lucide-react';
 
-// Using Lucide icon names (strings)
+// Lucide icon components (recommended)
 const navItems: NavItem[] = [
-  { id: "home", label: "Home", icon: "Home", ...coordinates.home, isHome: true },
-  { id: "about", label: "About", icon: "Info", ...coordinates.about },
+  { id: "home", label: "Home", icon: Heart, ...coordinates.home, isHome: true },
+  { id: "about", label: "About", icon: Info, ...coordinates.about },
 ];
 
-// Using custom icon components
+// Any component that accepts a className works too
 const CustomIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="currentColor">
     <circle cx="12" cy="12" r="10" />
@@ -156,12 +157,20 @@ const CustomIcon = ({ className }: { className?: string }) => (
 );
 
 const navItems: NavItem[] = [
-  { id: "home", label: "Home", icon: Heart, ...coordinates.home, isHome: true },
   { id: "custom", label: "Custom", icon: CustomIcon, ...coordinates.custom },
 ];
 ```
 
-For Lucide icons, use the icon name as a string in either PascalCase (e.g., `"Home"`, `"Settings"`, `"ChevronRight"`) or kebab-case (e.g., `"chevron-right"`). See the [Lucide icons list](https://lucide.dev/icons) for available icons. Named icons are loaded on demand as individual chunks, so only the icons you reference are downloaded.
+Lucide icon names are also accepted as strings, in PascalCase (`"Home"`, `"ChevronRight"`) or kebab-case (`"chevron-right"`); see the [Lucide icons list](https://lucide.dev/icons):
+
+```tsx
+const navItems: NavItem[] = [
+  { id: "home", label: "Home", icon: "Home", ...coordinates.home, isHome: true },
+  { id: "about", label: "About", icon: "Info", ...coordinates.about },
+];
+```
+
+Names are resolved at runtime, so the library cannot know at build time which icons you use. Each icon is loaded on demand as its own small chunk, but the first named icon on a page also loads Lucide's icon index, roughly 25 to 50 kB gzipped depending on your bundler. Component icons have no such cost.
 
 ### Canvas Dimensions
 
@@ -711,7 +720,7 @@ Each item in the `navItems` array has the following properties:
 |------|------|----------|-------------|
 | `id` | `string` | Yes | Unique identifier for this section |
 | `label` | `string` | Yes | Display label shown in the navbar |
-| `icon` | `string \| React.ComponentType` | Yes | Lucide icon name or custom component |
+| `icon` | `React.ComponentType \| string` | Yes | Icon component (recommended) or Lucide icon name |
 | `x` | `number` | Yes | X coordinate on the canvas |
 | `y` | `number` | Yes | Y coordinate on the canvas |
 | `width` | `number` | Yes | Section viewport width |

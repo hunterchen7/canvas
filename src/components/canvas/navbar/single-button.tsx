@@ -10,7 +10,11 @@ import { loadLucideIcon } from "../../../lib/lucide-icon";
 
 interface SingleButtonProps {
   label: string;
-  /** Lucide icon name (`"ChevronRight"` or `"chevron-right"`) or a custom icon component */
+  /**
+   * Icon component (recommended: your bundler ships only the icons you use)
+   * or a Lucide icon name (`"ChevronRight"` or `"chevron-right"`), which is
+   * resolved at runtime and also loads Lucide's icon index once per page.
+   */
   icon: string | React.ComponentType<{ className?: string }>;
   onClick?: () => void;
   isPushed: boolean;
