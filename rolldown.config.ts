@@ -18,7 +18,8 @@ export default defineConfig({
     "framer-motion",
     // Dependencies that consumers should install
     "clsx",
-    "lucide-react",
+    // Includes subpaths such as "lucide-react/dynamicIconImports.mjs"
+    /^lucide-react(?:\/|$)/,
     "tailwind-merge",
   ],
   resolve: {
