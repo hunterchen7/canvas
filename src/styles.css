@@ -1,6 +1,213 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/*
+  Tailwind CSS v4 entry point for the published stylesheet.
+
+  `source("../src")` restricts utility detection to the library source so the
+  shipped CSS never picks up classes from examples, benchmarks or docs.
+*/
+@import "tailwindcss" source("../src");
+
+@custom-variant dark (&:is(.dark *));
+
+@utility container {
+  margin-inline: auto;
+  padding-inline: 2rem;
+}
+
+/* Formerly added through a Tailwind v3 plugin. */
+@utility canvas-backface-hidden {
+  backface-visibility: hidden;
+}
+@utility canvas-preserve-3d {
+  transform-style: preserve-3d;
+}
+
+@theme {
+  --breakpoint-*: initial;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1600px;
+  --breakpoint-3xl: 2000px;
+  --breakpoint-4xl: 3000px;
+
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-githubbg: #1b1f23;
+  --color-canvas-beige: var(--canvas-beige);
+  --color-canvas-coral: var(--canvas-coral);
+  --color-canvas-lilac: var(--canvas-lilac);
+  --color-canvas-salmon: var(--canvas-salmon);
+  --color-canvas-heavy: var(--canvas-heavy);
+  --color-canvas-emphasis: var(--canvas-emphasis);
+  --color-canvas-active: var(--canvas-active);
+  --color-canvas-tinted: var(--canvas-tinted);
+  --color-canvas-medium: var(--canvas-medium);
+  --color-canvas-light: var(--canvas-light);
+  --color-canvas-faint-lilac: var(--canvas-faint-lilac);
+  --color-canvas-offwhite: var(--canvas-offwhite);
+  --color-canvas-highlight: var(--canvas-highlight);
+  --color-canvas-pushed: var(--canvas-pushed);
+  --color-canvas-border-light: hsl(var(--canvas-border-light));
+
+  --color-primary-50: hsl(var(--primary-50));
+  --color-primary-100: hsl(var(--primary-100));
+  --color-primary-200: hsl(var(--primary-200));
+  --color-primary-300: hsl(var(--primary-300));
+  --color-primary-400: hsl(var(--primary-400));
+  --color-primary-500: hsl(var(--primary-500));
+  --color-primary-600: hsl(var(--primary-600));
+  --color-primary-700: hsl(var(--primary-700));
+  --color-primary-800: hsl(var(--primary-800));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-button-secondary: rgb(244, 242, 247);
+  --color-button-secondary-hover: rgb(248, 247, 249);
+  --color-button-secondary-active: rgb(253, 252, 253);
+
+  --color-violet-100: hsl(var(--violet-100));
+  --color-violet-200: hsl(var(--violet-200));
+  --color-violet-300: hsl(var(--violet-300));
+  --color-violet-400: hsl(var(--violet-400));
+  --color-violet-500: hsl(var(--violet-500));
+  --color-violet-600: hsl(var(--violet-600));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-dark: hsl(var(--destructive-dark));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-sidebar: hsl(var(--sidebar-background));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+
+  /*
+    Tailwind v4 changed the default `font-sans` stack and re-expresses its
+    default palette in oklch, which can round a step away from the v3 hex
+    values in sRGB. The stack and the shades this library uses are pinned to
+    their v3 values so the shipped stylesheet renders identically.
+  */
+  --font-sans:
+    ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol", "Noto Color Emoji";
+  --color-neutral-50: #fafafa;
+  --color-neutral-100: #f5f5f5;
+  --color-neutral-200: #e5e5e5;
+  --color-neutral-500: #737373;
+  --color-neutral-600: #525252;
+  --color-neutral-700: #404040;
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-hw-gradient-radius: 60vw;
+
+  --background-image-button-primary: linear-gradient(#d19aee 0%, #8f57ad 100%);
+  --background-image-button-primary-hover:
+    linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1)),
+    linear-gradient(#d19aee 0%, #8f57ad 100%);
+  --background-image-button-primary-active:
+    linear-gradient(rgba(100, 100, 100, 0.1), rgba(100, 100, 100, 0.1)),
+    linear-gradient(#d19aee 0%, #8f57ad 100%);
+  --background-image-button-primary-back:
+    linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),
+    linear-gradient(#d19aee 0%, #8f57ad 100%);
+  --background-image-button-secondary-back:
+    linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4)),
+    linear-gradient(#ffffff 0%, #a893b0 100%);
+
+  --shadow-button-primary: 0px 2px 4px rgba(60, 32, 76, 0.2);
+  --shadow-button-secondary: 0px 2px 4px 0px rgba(60, 32, 76, 0.2);
+
+  --font-canvas-figtree: var(--font-figtree);
+  --font-canvas-dico: var(--font-dico);
+  --font-canvas-jetbrains-mono: var(--font-jetbrainsmono);
+
+  --text-main-display: 4rem;
+  --text-md-display: 3rem;
+  --text-sm-display: 2rem;
+  --text-lg-sub: 1.5rem;
+  --text-sm-sub: 1rem;
+  --text-lg-p: 1.5rem;
+  --text-md-p: 1rem;
+  --text-sm-p: 0.875rem;
+
+  --width-3xs: 16rem;
+  --width-2xs: 18rem;
+  --width-xs: 20rem;
+  --width-sm: 24rem;
+  --width-md: 28rem;
+  --width-lg: 32rem;
+  --width-xl: 36rem;
+  --width-2xl: 42rem;
+  --width-3xl: 48rem;
+  --width-4xl: 56rem;
+  --width-5xl: 64rem;
+  --width-6xl: 72rem;
+  --width-7xl: 80rem;
+
+  --height-3xs: 16rem;
+  --height-2xs: 18rem;
+  --height-xs: 20rem;
+  --height-sm: 24rem;
+  --height-md: 28rem;
+  --height-lg: 32rem;
+  --height-xl: 36rem;
+  --height-2xl: 42rem;
+  --height-3xl: 48rem;
+  --height-4xl: 56rem;
+  --height-5xl: 64rem;
+  --height-6xl: 72rem;
+  --height-7xl: 80rem;
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: #e5e7eb; /* Tailwind v3 `gray-200` */
+  }
+
+  /*
+    Tailwind v4's preflight sets `cursor: default` on buttons; v3 used
+    `pointer`. Keep the v3 behaviour for the navbar buttons.
+  */
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
 
 @layer base {
   :root {

@@ -25,6 +25,8 @@ npm install react react-dom framer-motion
 
 **You must import the compiled CSS file in your application's entry point.** The library uses pre-compiled Tailwind CSS, so you don't need to install or configure Tailwind yourself.
 
+The compiled stylesheet is built with Tailwind CSS v4 and targets the browsers it supports: Safari 16.4+, Chrome 111+ and Firefox 128+.
+
 > **Note:** The library uses the `canvas-` prefix for all custom CSS classes and variables to minimize conflicts with your project. Custom colors like `canvas-heavy`, `canvas-medium`, `canvas-offwhite`, fonts like `canvas-figtree`, and utilities like `canvas-backface-hidden` are scoped to avoid naming collisions. You can safely use Tailwind CSS in your own project alongside this library.
 
 In your main application file (e.g., `App.tsx`, `_app.tsx`, `main.tsx`, or `index.tsx`):

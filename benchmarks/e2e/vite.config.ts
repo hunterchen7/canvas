@@ -2,7 +2,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
-import tailwindcss from "tailwindcss";
+import { tailwindTarget } from "../tailwind-target.ts";
 
 const e2eRoot = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(e2eRoot, "../..");
@@ -14,6 +14,40 @@ const serverId = process.env.CANVAS_E2E_SERVER_ID || "local";
 const libraryIdentity = JSON.parse(
   process.env.CANVAS_LIBRARY_IDENTITY_JSON || "null",
 );
+const tailwind = tailwindTarget({
+  libraryRoot,
+  stylesheet: path.join(fixtureRoot, "styles.css"),
+  sources: [fixtureRoot],
+  theme: {
+    colors: {
+      border: "hsl(var(--canvas-border-light))",
+      "canvas-heavy": "var(--canvas-heavy)",
+      "canvas-light": "var(--canvas-light)",
+      "canvas-offwhite": "var(--canvas-offwhite)",
+      // Tailwind v3 values for the palette shades the fixture uses, so a v4
+      // target (oklch palette) renders them identically to a v3 target.
+      white: "#fff",
+      zinc: {
+        50: "#fafafa",
+        100: "#f4f4f5",
+        200: "#e4e4e7",
+        300: "#d4d4d8",
+        500: "#71717a",
+        600: "#52525b",
+        800: "#27272a",
+        900: "#18181b",
+      },
+      orange: { 50: "#fff7ed", 300: "#fdba74" },
+      emerald: { 50: "#ecfdf5", 950: "#022c22" },
+    },
+    fontFamily: {
+      "canvas-figtree": ["Arial", "sans-serif"],
+    },
+    // Tailwind defaults, so a v4 target does not carry the library's
+    // `--radius`-based overrides that the v3 target never loads.
+    borderRadius: { sm: "0.125rem", md: "0.375rem", lg: "0.5rem" },
+  },
+});
 const virtualLibraryIdentityId = "virtual:canvas-library-identity";
 const resolvedVirtualLibraryIdentityId = `\0${virtualLibraryIdentityId}`;
 
@@ -25,6 +59,7 @@ export default defineConfig({
     jsx: "automatic",
   },
   plugins: [
+    tailwind.plugin,
     {
       name: "canvas-library-identity",
       resolveId(source) {
@@ -53,27 +88,7 @@ export default defineConfig({
   },
   css: {
     postcss: {
-      plugins: [
-        tailwindcss({
-          content: [
-            path.join(fixtureRoot, "**/*.{html,ts,tsx}"),
-            path.join(libraryRoot, "src/**/*.{ts,tsx}"),
-          ],
-          theme: {
-            extend: {
-              colors: {
-                border: "hsl(var(--canvas-border-light))",
-                "canvas-heavy": "var(--canvas-heavy)",
-                "canvas-light": "var(--canvas-light)",
-                "canvas-offwhite": "var(--canvas-offwhite)",
-              },
-              fontFamily: {
-                "canvas-figtree": ["Arial", "sans-serif"],
-              },
-            },
-          },
-        }),
-      ],
+      plugins: tailwind.postcssPlugins,
     },
   },
   server: {

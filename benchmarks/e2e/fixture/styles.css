@@ -1,6 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Replaced per library worktree by benchmarks/tailwind-target.ts. */
+@canvas-tailwind-target;
 
 :root {
   --canvas-heavy: #171717;

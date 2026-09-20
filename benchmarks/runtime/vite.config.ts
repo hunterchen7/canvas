@@ -1,7 +1,7 @@
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { defineConfig } from "vite";
-import tailwindcss from "tailwindcss";
+import { tailwindTarget } from "../tailwind-target.ts";
 import { resolveLibraryTarget } from "./scripts/library-target.ts";
 
 const runtimeRoot = fileURLToPath(new URL(".", import.meta.url));
@@ -32,6 +32,22 @@ const library = await resolveLibraryTarget({
   libraryRoot: process.env.CANVAS_BENCHMARK_LIBRARY_ROOT,
   libraryLabel: process.env.CANVAS_BENCHMARK_LIBRARY_LABEL,
 });
+const tailwind = tailwindTarget({
+  libraryRoot: library.root,
+  stylesheet: path.join(runtimeRoot, "src/styles.css"),
+  sources: [path.join(runtimeRoot, "src")],
+  theme: {
+    colors: {
+      border: "hsl(var(--border))",
+      "canvas-heavy": "var(--canvas-heavy)",
+      "canvas-light": "var(--canvas-light)",
+      "canvas-offwhite": "var(--canvas-offwhite)",
+    },
+    // Tailwind defaults, so a v4 target does not carry the library's
+    // `--radius`-based overrides that the v3 target never loads.
+    borderRadius: { sm: "0.125rem", md: "0.375rem", lg: "0.5rem" },
+  },
+});
 const dependencyAliases = [
   ...(productionReactProfiling
     ? [
@@ -54,6 +70,7 @@ export default defineConfig({
   root: runtimeRoot,
   cacheDir: process.env.CANVAS_BENCHMARK_VITE_CACHE_DIR || undefined,
   plugins: [
+    tailwind.plugin,
     {
       name: "canvas-benchmark-library-target",
       enforce: "pre",
@@ -82,24 +99,7 @@ export default defineConfig({
   },
   css: {
     postcss: {
-      plugins: [
-        tailwindcss({
-          content: [
-            path.join(library.sourceDirectory, "**/*.{ts,tsx}"),
-            path.join(runtimeRoot, "src/**/*.{ts,tsx}"),
-          ],
-          theme: {
-            extend: {
-              colors: {
-                border: "hsl(var(--border))",
-                "canvas-heavy": "var(--canvas-heavy)",
-                "canvas-light": "var(--canvas-light)",
-                "canvas-offwhite": "var(--canvas-offwhite)",
-              },
-            },
-          },
-        }),
-      ],
+      plugins: tailwind.postcssPlugins,
     },
   },
   server: {

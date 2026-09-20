@@ -175,7 +175,7 @@ function Panel({
     >
       <div className="mb-8 flex items-center gap-4">
         <span
-          className="h-5 w-5 rounded-full border-2 border-white shadow"
+          className="h-5 w-5 rounded-full border-2 border-white shadow-[0_1px_3px_0_rgb(0,0,0,0.1),0_1px_2px_-1px_rgb(0,0,0,0.1)]"
           style={{ backgroundColor: accent }}
         />
         <h1 className="text-3xl font-bold tracking-tight text-zinc-900">{title}</h1>
