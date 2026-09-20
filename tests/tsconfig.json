@@ -8,7 +8,12 @@
     "strict": true,
     "noEmit": true,
     "skipLibCheck": true,
-    "types": ["node"]
+    "types": ["node"],
+    "allowImportingTsExtensions": true
   },
-  "include": ["window-dimensions.test.ts", "window-dimensions/*.tsx"]
+  "include": [
+    "lucide-icon.test.ts",
+    "window-dimensions.test.ts",
+    "window-dimensions/*.tsx"
+  ]
 }

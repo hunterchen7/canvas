@@ -6,10 +6,11 @@ import type {
   NavbarTooltipConfig,
 } from "../../../types";
 import { cn } from "../../../lib/utils";
+import { loadLucideIcon } from "../../../lib/lucide-icon";
 
 interface SingleButtonProps {
   label: string;
-  /** Lucide icon name or a custom icon component */
+  /** Lucide icon name (`"ChevronRight"` or `"chevron-right"`) or a custom icon component */
   icon: string | React.ComponentType<{ className?: string }>;
   onClick?: () => void;
   isPushed: boolean;
@@ -41,10 +42,12 @@ export default function SingleButton({
   const [showTag, setShowTag] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
 
-  // Lazy-load lucide-react only when an icon *name* (string) is passed. A
-  // static namespace import (`import * as LucideIcons`) forces the entire icon
-  // set into the consumer's main bundle because it can't be tree-shaken; a
-  // dynamic import code-splits it into a separate chunk that loads on demand.
+  // Lazy-load only the requested icon when an icon *name* (string) is passed.
+  // Importing the `lucide-react` barrel (statically or dynamically) and
+  // indexing it with a runtime string can't be tree-shaken, so it ships every
+  // icon to the consumer; `loadLucideIcon` goes through
+  // `lucide-react/dynamicIconImports` instead, which yields one small chunk per
+  // icon that loads on demand.
   type IconComp = React.ComponentType<{
     className?: string;
     style?: React.CSSProperties;
@@ -58,13 +61,16 @@ export default function SingleButton({
       return;
     }
     let active = true;
-    void import("lucide-react").then((mod) => {
-      if (active) {
-        setIconComponent(
-          () => mod[icon as keyof typeof mod] as unknown as IconComp,
-        );
-      }
-    });
+    loadLucideIcon(icon).then(
+      (component) => {
+        if (active) {
+          setIconComponent(() => component);
+        }
+      },
+      (error: unknown) => {
+        console.error(`[@hunterchen/canvas] Failed to load icon "${icon}".`, error);
+      },
+    );
     return () => {
       active = false;
     };
@@ -97,7 +103,7 @@ export default function SingleButton({
   const showTooltip = (displayMode === "icons" || displayMode === "compact") && !tooltipDisabled;
 
   // Validate icon component for modes that need it. A string icon name resolves
-  // asynchronously (lazy lucide import), so only throw for an invalid custom
+  // asynchronously (lazy per-icon import), so only throw for an invalid custom
   // component — a still-loading name renders nothing until the chunk arrives.
   if (showIcon && !IconComponent && typeof icon !== "string") {
     throw new Error(

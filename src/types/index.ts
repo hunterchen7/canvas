@@ -28,7 +28,7 @@ export interface NavItem {
   id: string;
   /** Display label shown in the navbar */
   label: string;
-  /** Lucide icon name or a custom icon component */
+  /** Lucide icon name (`"ChevronRight"` or `"chevron-right"`) or a custom icon component */
   icon: string | React.ComponentType<{ className?: string }>;
   /** X coordinate on the canvas */
   x: number;

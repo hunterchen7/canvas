@@ -161,7 +161,7 @@ const navItems: NavItem[] = [
 ];
 ```
 
-For Lucide icons, use the PascalCase icon name as a string (e.g., `"Home"`, `"Settings"`, `"ChevronRight"`). See the [Lucide icons list](https://lucide.dev/icons) for available icons.
+For Lucide icons, use the icon name as a string in either PascalCase (e.g., `"Home"`, `"Settings"`, `"ChevronRight"`) or kebab-case (e.g., `"chevron-right"`). See the [Lucide icons list](https://lucide.dev/icons) for available icons. Named icons are loaded on demand as individual chunks, so only the icons you reference are downloaded.
 
 ### Canvas Dimensions
 
