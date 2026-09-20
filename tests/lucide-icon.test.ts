@@ -47,7 +47,7 @@ describe("normalizeLucideIconName", () => {
   });
 
   test("normalizes kebab-case names to the same key", () => {
-    assert.equal(normalizeLucideIconName("chess-knight"), "chevronright");
+    assert.equal(normalizeLucideIconName("chevron-right"), "chevronright");
     assert.equal(normalizeLucideIconName("grid-2x2"), "grid2x2");
     assert.equal(normalizeLucideIconName("  home "), "home");
   });
