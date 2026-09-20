@@ -21,8 +21,8 @@ export default defineConfig({
   root: fixtureRoot,
   publicDir: path.join(fixtureRoot, "public"),
   cacheDir: path.join(os.tmpdir(), `canvas-e2e-vite-${serverId}`),
-  esbuild: {
-    jsx: "automatic",
+  oxc: {
+    jsx: { runtime: "automatic" },
   },
   plugins: [
     {
