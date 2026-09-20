@@ -77,8 +77,8 @@ export default defineConfig({
     include: benchmarkOptimizedEntries,
     noDiscovery: true,
   },
-  esbuild: {
-    jsx: "automatic",
+  oxc: {
+    jsx: { runtime: "automatic" },
   },
   css: {
     postcss: {
