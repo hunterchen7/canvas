@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.13.2](https://github.com/hunterchen7/canvas/compare/canvas-v0.13.1...canvas-v0.13.2) (2026-09-20)
+
+
+### Bug Fixes
+
+* update Hack Western URL in README ([#63](https://github.com/hunterchen7/canvas/issues/63)) ([4393288](https://github.com/hunterchen7/canvas/commit/43932888b3aebe82dd518e53d34ba17c5b4f9c4f))
+
+
+### Miscellaneous Chores
+
+* **deps:** upgrade Vite to 8 ([#66](https://github.com/hunterchen7/canvas/issues/66)) ([4806571](https://github.com/hunterchen7/canvas/commit/48065719f16e08c0e90bf8cc5876a95730766abd))
+
 ## [0.13.1](https://github.com/hunterchen7/canvas/compare/canvas-v0.13.0...canvas-v0.13.1) (2026-07-20)
 
 
