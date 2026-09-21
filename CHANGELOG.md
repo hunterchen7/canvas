@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.3](https://github.com/hunterchen7/canvas/compare/canvas-v0.13.2...canvas-v0.13.3) (2026-09-20)
+
+
+### Bug Fixes
+
+* **navbar:** load named Lucide icons per icon instead of the whole barrel ([#65](https://github.com/hunterchen7/canvas/issues/65)) ([28733a4](https://github.com/hunterchen7/canvas/commit/28733a4d54da055badc593310906b7b978808d2b))
+
 ## [0.13.2](https://github.com/hunterchen7/canvas/compare/canvas-v0.13.1...canvas-v0.13.2) (2026-09-20)
 
 
