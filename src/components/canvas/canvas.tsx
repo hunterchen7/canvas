@@ -517,6 +517,9 @@ const Canvas: FC<Props> = ({
 
   const handlePointerUpOrCancel = useCallback(
     (event: PointerEvent<HTMLDivElement>): void => {
+      // Navbar expansion can move the viewport boundary under an idle pointer.
+      // Only a pointer that started a canvas gesture may end it or stop motion.
+      if (!activePointersRef.current.has(event.pointerId)) return;
       if (animationStage < 2) {
         event.preventDefault();
         return; // ignore pointer up during intro
