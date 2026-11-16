@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.4](https://github.com/hunterchen7/canvas/compare/canvas-v0.13.3...canvas-v0.13.4) (2026-11-16)
+
+
+### Bug Fixes
+
+* preserve navigation pans when idle pointers leave the canvas ([#69](https://github.com/hunterchen7/canvas/issues/69)) ([1ac8693](https://github.com/hunterchen7/canvas/commit/1ac8693a664e69955936d4920ebaf358eec6a684))
+
 ## [0.13.3](https://github.com/hunterchen7/canvas/compare/canvas-v0.13.2...canvas-v0.13.3) (2026-09-20)
 
 
